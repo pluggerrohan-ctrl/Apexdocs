@@ -2,19 +2,19 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ApexDoc — Bank Statement PDF to Excel Converter</title>
-    <meta name="description" content="The world's most trusted bank statement converter. Convert PDF bank statements from 1000+ banks worldwide into clean Excel (XLSX) format." />
-    <meta property="og:title" content="ApexDoc — Bank Statement PDF to Excel Converter" />
-    <meta property="og:description" content="Easily convert PDF bank statements from 1000+ banks worldwide into clean Excel (XLSX) format." />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://bolt.new/static/og_default.png">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content="https://bolt.new/static/og_default.png">
-</head>
+    <style>
+      :root{font-family:Inter,ui-sans-serif,system-ui,sans-serif;color:#0f172a;background:#f8fafc}*{box-sizing:border-box}body{margin:0}main{min-height:100vh;padding:40px 24px}.wrap{max-width:960px;margin:auto}.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:80px}.brand{display:flex;align-items:center;gap:12px;font-size:21px;font-weight:800}.mark{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:#2563eb;color:#fff}.muted{color:#64748b;font-size:14px}.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center}.eyebrow{color:#2563eb;font-weight:700}.hero h1{font-size:clamp(38px,6vw,64px);line-height:1.05;letter-spacing:-.04em;margin:16px 0}.hero p{font-size:18px;line-height:1.7;color:#64748b}.drop{cursor:pointer;text-align:center;border:2px dashed #bfdbfe;border-radius:24px;background:#fff;padding:40px 28px;box-shadow:0 18px 40px rgba(15,23,42,.08)}.drop:hover{border-color:#2563eb}.icon{font-size:36px;color:#2563eb}.drop h2{margin:18px 0 8px}.drop p{margin:0;color:#64748b;font-size:14px}.drop button{border:0;border-radius:12px;background:#2563eb;color:white;padding:13px 20px;margin-top:22px;font-weight:700;font-size:15px}.secure{margin-top:56px;color:#64748b;font-size:14px}@media(max-width:700px){main{padding:24px 18px}.header{margin-bottom:56px;align-items:flex-start;gap:12px}.header .muted{display:none}.grid{grid-template-columns:1fr;gap:36px}.hero h1{font-size:43px}.drop{padding:32px 20px}}
+    </style>
+  </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <main><div class="wrap">
+      <header class="header"><div class="brand"><span class="mark">✦</span><span>ApexDoc</span></div><span class="muted">Bank statement converter</span></header>
+      <section class="grid"><div class="hero"><div class="eyebrow">PDF to Excel, simplified</div><h1>Turn bank statements into clean spreadsheets.</h1><p>Upload a PDF and extract transactions into an organised Excel file in a few clicks.</p></div>
+      <label class="drop"><input id="file" type="file" accept="application/pdf" hidden><div class="icon">↑</div><h2>Drop your PDF here</h2><p>or click to browse your files</p><p id="filename" style="color:#1d4ed8;font-weight:600;margin-top:16px"></p><button type="button">Choose PDF</button></label></section>
+      <div class="secure">✓ Your files are processed securely.</div>
+    </div></main>
+    <script>document.getElementById('file').addEventListener('change',function(){document.getElementById('filename').textContent=this.files[0]?.name||''})</script>
   </body>
 </html>
