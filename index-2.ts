@@ -7,6 +7,11 @@ const corsHeaders = {
 };
 
 const PDFCO_API_KEY = Deno.env.get("PDFCO_API_KEY") ?? "";
+const PDFCO_TIMEOUT_MS = 100;
+
+function pdfCoFetch(input: RequestInfo | URL, init: RequestInit = {}): Promise<Response> {
+  return fetch(input, { ...init, signal: AbortSignal.timeout(PDFCO_TIMEOUT_MS) });
+}
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
@@ -165,7 +170,7 @@ async function uploadToPdfCo(
   const presignParams = new URLSearchParams();
   presignParams.append("name", fileName);
 
-  const presignResp = await fetch(
+  const presignResp = await pdfCoFetch(
     `${presignEndpoint}?${presignParams.toString()}`,
     {
       method: "GET",
@@ -205,7 +210,7 @@ async function uploadToPdfCo(
   }
 
   // Step 2: PUT the actual PDF bytes to the presigned URL
-  const putResp = await fetch(presignData.presignedUrl, {
+  const putResp = await pdfCoFetch(presignData.presignedUrl, {
     method: "PUT",
     headers: {
       "Content-Type": "application/pdf",
@@ -243,7 +248,7 @@ async function extractTablesFromPdf(
     params.append("ocrMode", "auto");
   }
 
-  const resp = await fetch(`${endpoint}?${params.toString()}`, {
+  const resp = await pdfCoFetch(`${endpoint}?${params.toString()}`, {
     method: "POST",
     headers: {
       "x-api-key": PDFCO_API_KEY,
@@ -263,7 +268,7 @@ async function extractTablesFromPdf(
     throw new Error("PDF.co CSV did not return a result URL");
   }
 
-  const csvResp = await fetch(data.url);
+  const csvResp = await pdfCoFetch(data.url);
   const csvText = await csvResp.text();
 
   debugLog("CSV result text", csvText);
@@ -289,7 +294,7 @@ async function extractJsonFromPdf(
     params.append("ocrMode", "auto");
   }
 
-  const resp = await fetch(`${endpoint}?${params.toString()}`, {
+  const resp = await pdfCoFetch(`${endpoint}?${params.toString()}`, {
     method: "POST",
     headers: {
       "x-api-key": PDFCO_API_KEY,
@@ -309,7 +314,7 @@ async function extractJsonFromPdf(
     throw new Error("PDF.co JSON did not return a result URL");
   }
 
-  const jsonResp = await fetch(data.url);
+  const jsonResp = await pdfCoFetch(data.url);
   const jsonText = await jsonResp.text();
 
   debugLog("JSON2 result text", jsonText);
@@ -1108,13 +1113,78 @@ function buildZip(files: Record<string, string | Uint8Array>): Uint8Array {
 // Main conversion pipeline
 // ─────────────────────────────────────────────
 
+function decodePdfLiteral(value: string): string {
+  return value
+    .replace(/\\([\\()])/g, "$1")
+    .replace(/\\n/g, "\n")
+    .replace(/\\r/g, "\r")
+    .replace(/\\t/g, "\t")
+    .replace(/\\[0-7]{1,3}/g, (octal) => String.fromCharCode(parseInt(octal.slice(1), 8)));
+}
+
+function extractNativePdfText(fileBuffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(fileBuffer);
+  const binary = new TextDecoder("latin1").decode(bytes);
+  const text: string[] = [];
+
+  // Extract visible PDF string operands. This intentionally avoids executing
+  // PDF content and keeps the fallback dependency-free inside the Edge Function.
+  for (const match of binary.matchAll(/\((?:\\.|[^\\)])*\)/g)) {
+    const value = decodePdfLiteral(match[0].slice(1, -1)).replace(/\s+/g, " ").trim();
+    if (value) text.push(value);
+  }
+
+  // Some producers use hexadecimal text operands instead of literal strings.
+  for (const match of binary.matchAll(/<([0-9A-Fa-f]{4,})>/g)) {
+    const hex = match[1];
+    let value = "";
+    for (let i = 0; i + 1 < hex.length; i += 2) value += String.fromCharCode(parseInt(hex.slice(i, i + 2), 16));
+    if (value.trim()) text.push(value.replace(/\s+/g, " ").trim());
+  }
+
+  return text.join("\n");
+}
+
+function parseNativeStatement(fileBuffer: ArrayBuffer): { headers: string[]; transactions: TransactionRow[] } | null {
+  const text = extractNativePdfText(fileBuffer);
+  if (!text) return null;
+
+  const headers = ["Date", "Description", "Debit", "Credit"];
+  const transactions: TransactionRow[] = [];
+  const datePattern = /^(\d{1,4}[\/\-.]\d{1,2}[\/\-.]\d{1,4}|\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{2,4})\b/i;
+  const amountPattern = /(?:[$£€]|AED|USD|GBP|\(?-?)[0-9][0-9,]*(?:\.[0-9]{2})?\)?(?:\s*(?:DR|CR))?/gi;
+
+  for (const rawLine of text.split(/\r?\n/)) {
+    const line = rawLine.replace(/\s+/g, " ").trim();
+    const date = line.match(datePattern)?.[1];
+    if (!date) continue;
+
+    const remainder = line.slice((line.indexOf(date) + date.length)).trim();
+    const amounts = [...remainder.matchAll(amountPattern)];
+    if (amounts.length === 0) continue;
+
+    const firstAmountIndex = amounts[0].index ?? remainder.length;
+    const description = remainder.slice(0, firstAmountIndex).replace(/[|\\t]+/g, " ").trim();
+    const values = amounts.map((match) => match[0].replace(/[,$£€]|USD|GBP|AED/gi, "").trim());
+    const debit = values.length > 1 ? values[0] : /\\bDR\\b|-/i.test(values[0]) ? values[0].replace(/[()]/g, "") : "";
+    const credit = values.length > 1 ? values[1] : /\\bCR\\b/i.test(amounts[0][0]) ? values[0].replace(/[()]/g, "") : debit ? "" : values[0];
+    transactions.push({ Date: date, Description: description || "Transaction", Debit: debit, Credit: credit });
+  }
+
+  return transactions.length ? { headers, transactions } : null;
+}
+
 async function processSinglePdf(
   fileBuffer: ArrayBuffer,
   fileName: string,
   bankSlug?: string,
 ): Promise<{ headers: string[]; transactions: TransactionRow[] } | null> {
-  // Step 1: Upload to PDF.co
-  const fileUrl = await uploadToPdfCo(fileBuffer, fileName);
+  // PDF.co is an optional fast path. A short deadline prevents a missing key,
+  // exhausted credits, or a network stall from delaying the native fallback.
+  if (!PDFCO_API_KEY) return parseNativeStatement(fileBuffer);
+
+  try {
+    const fileUrl = await uploadToPdfCo(fileBuffer, fileName);
   debugLog("Uploaded file URL", fileUrl);
 
   // Step 2: Try CSV extraction first (more direct for tabular data)
@@ -1146,7 +1216,7 @@ async function processSinglePdf(
 
   if (!rows || rows.length === 0) {
     debugLog("All extraction methods returned empty", "");
-    return null;
+    return parseNativeStatement(fileBuffer);
   }
 
   debugLog(`Using ${extractionMethod}, total rows extracted`, rows);
@@ -1217,6 +1287,11 @@ async function processSinglePdf(
   }
 
   return { headers: headerRow, transactions };
+  } catch (err) {
+    const reason = err instanceof Error ? err.message : String(err);
+    console.warn(`[ApexDoc] PDF.co unavailable; using native parser (${reason})`);
+    return parseNativeStatement(fileBuffer);
+  }
 }
 
 Deno.serve(async (req: Request) => {
@@ -1225,14 +1300,8 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    // Check API key configuration
-    if (!PDFCO_API_KEY) {
-      return jsonResponse({
-        error: "PDFCO_API_KEY is not configured on the server.",
-        code: "MISSING_API_KEY",
-      }, 500);
-    }
-
+    // PDF.co is optional; processSinglePdf automatically uses the native
+    // parser when the key is absent or the remote service is unavailable.
     // Parse multipart form data
     const formData = await req.formData();
     const files = formData.getAll("files") as File[];
@@ -1319,7 +1388,7 @@ Deno.serve(async (req: Request) => {
     if (allTransactions.length === 0) {
       return jsonResponse({
         error: "No transaction data could be extracted from the provided PDF(s). The file may not contain recognizable transaction tables, or the PDF might be corrupted or password-protected.",
-        details: "Extraction methods tried: CSV, JSON2, OCR. Check server logs for structural details.",
+        details: "Remote extraction was unavailable or returned no rows; the native parser also found no supported transaction lines.",
       }, 422);
     }
 
