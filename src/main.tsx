@@ -1,6 +1,6 @@
 import { StrictMode, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-import { FileUp, ShieldCheck, Sparkles, Twitter } from 'lucide-react'
+import { FileUp, Globe2, ShieldCheck, Sparkles } from 'lucide-react'
 import '../index.css'
 
 const steps = [
@@ -18,7 +18,7 @@ function App() {
       <header className="topbar">
         <a className="brand" href="#converter"><span className="brand-mark"><Sparkles size={19} /></span><span>ApexDoc</span></a>
         <nav aria-label="Main navigation"><a href="#converter">Converter</a><a href="#how-it-works">How it works</a><a href="#security">Security</a><a href="#feedback">Feedback</a></nav>
-        <a className="social-link" href="https://x.com" aria-label="ApexDoc on X (Twitter)"><Twitter size={17} /></a>
+        <a className="social-link" href="https://x.com" aria-label="ApexDoc on X (Twitter)"><Globe2 size={17} /></a>
       </header>
 
       <main>
