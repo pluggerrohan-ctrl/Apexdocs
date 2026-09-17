@@ -153,18 +153,13 @@ async function uploadToPdfCo(
 
 async function extractTablesFromPdf(
   fileUrl: string,
-  options: { ocrMode?: boolean } = {},
-): Promise<string[][]> {
+  ): Promise<string[][]> {
   const endpoint = "https://api.pdf.co/v1/pdf/convert/to/csv";
   const params = new URLSearchParams();
   params.append("url", fileUrl);
   params.append("inline", "false");
   params.append("name", "extracted_tables");
 
-  if (options.ocrMode) {
-    params.append("ocr", "true");
-    params.append("ocrMode", "auto");
-  }
 
   const resp = await fetch(`${endpoint}?${params.toString()}`, {
     method: "POST",
@@ -198,8 +193,7 @@ async function extractTablesFromPdf(
 
 async function extractJsonFromPdf(
   fileUrl: string,
-  options: { ocrMode?: boolean } = {},
-): Promise<string[][]> {
+  ): Promise<string[][]> {
   const endpoint = "https://api.pdf.co/v1/pdf/convert/to/json2";
   const params = new URLSearchParams();
   params.append("url", fileUrl);
@@ -207,10 +201,6 @@ async function extractJsonFromPdf(
   params.append("name", "extracted_json");
   params.append("tableDetection", "true");
 
-  if (options.ocrMode) {
-    params.append("ocr", "true");
-    params.append("ocrMode", "auto");
-  }
 
   const resp = await fetch(`${endpoint}?${params.toString()}`, {
     method: "POST",
@@ -1040,16 +1030,13 @@ async function processSinglePdf(
   const fileUrl = await uploadToPdfCo(fileBuffer, fileName);
   debugLog("Uploaded file URL", fileUrl);
 
-  // Step 2: Try CSV extraction first (more direct for tabular data)
-  // Then JSON2 with table detection, then OCR fallbacks
+  // Step 2: Extract the PDF's native text/table content only.
   let rows: string[][] = [];
   let extractionMethod = "";
 
   const attempts: { name: string; fn: () => Promise<string[][]> }[] = [
-    { name: "CSV", fn: () => extractTablesFromPdf(fileUrl, { ocrMode: false }) },
-    { name: "JSON2", fn: () => extractJsonFromPdf(fileUrl, { ocrMode: false }) },
-    { name: "CSV+OCR", fn: () => extractTablesFromPdf(fileUrl, { ocrMode: true }) },
-    { name: "JSON2+OCR", fn: () => extractJsonFromPdf(fileUrl, { ocrMode: true }) },
+  { name: "CSV", fn: () => extractTablesFromPdf(fileUrl) },
+  { name: "JSON2", fn: () => extractJsonFromPdf(fileUrl) },
   ];
 
   for (const attempt of attempts) {
@@ -1223,7 +1210,7 @@ Deno.serve(async (req: Request) => {
     if (allTransactions.length === 0) {
       return jsonResponse({
         error: "No transaction data could be extracted from the provided PDF(s). The file may not contain recognizable transaction tables, or the PDF might be corrupted or password-protected.",
-        details: "Extraction methods tried: CSV, JSON2, OCR. Check server logs for structural details.",
+        details: "Only native PDF text/table extraction is supported; the PDF contained no supported transaction lines.",
       }, 422);
     }
 
