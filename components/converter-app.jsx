@@ -8,15 +8,27 @@ const CREDIT_KEY = 'apexdoc_credits'
 
 function parseRows(raw) {
   const rows = []
-  const lines = raw.replace(/\r/g, '').split('\n').map((line) => line.trim()).filter(Boolean)
-  const date = /^(\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4}|\d{1,2}\s+[A-Za-z]{3,9}\s+\d{2,4}|\d{4}[\/-]\d{1,2}[\/-]\d{1,2})/
-  for (const line of lines) {
-    const match = line.match(date)
-    if (!match) continue
-    const numbers = line.match(/(?:[-+]?[\d,]+\.\d{2})/g) || []
-    const values = numbers.map((value) => Number(value.replace(/,/g, '')))
-    const description = line.slice(match[0].length).replace(/(?:[-+]?[\d,]+\.\d{2})/g, '').replace(/\s+/g, ' ').trim()
-    rows.push({ Date: match[0], Description: description || 'Bank transaction', Debit: values.length > 1 ? Math.abs(values[0]) : '', Credit: values.length > 1 ? Math.abs(values[1]) : '', Balance: values.at(-1) ?? '' })
+  const normalized = raw.replace(/\r/g, ' ').replace(/\s+/g, ' ').trim()
+  const datePattern = /\b(?:\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4}|\d{1,2}\s+[A-Za-z]{3,9}\s+\d{2,4}|\d{4}[\/-]\d{1,2}[\/-]\d{1,2})\b/g
+  const dates = [...normalized.matchAll(datePattern)]
+  const amountPattern = /[-+]?\(?\$?\s*\d[\d,]*\.\d{2}\)?/g
+
+  for (let index = 0; index < dates.length; index += 1) {
+    const start = dates[index].index
+    const end = dates[index + 1]?.index ?? normalized.length
+    const line = normalized.slice(start, end).trim()
+    const date = dates[index][0]
+    const body = line.slice(date.length).trim()
+    const amounts = [...body.matchAll(amountPattern)].map((match) => Number(match[0].replace(/[$,()\s]/g, '').replace(/^$/, ''))).filter(Number.isFinite)
+    const description = body.replace(amountPattern, '').replace(/\s+/g, ' ').trim()
+    if (!description && amounts.length === 0) continue
+    rows.push({
+      Date: date,
+      Description: description || 'Bank transaction',
+      Debit: amounts.length >= 3 ? Math.abs(amounts[0]) : '',
+      Credit: amounts.length >= 3 ? Math.abs(amounts[1]) : amounts.length === 2 ? Math.abs(amounts[0]) : '',
+      Balance: amounts.at(-1) ?? '',
+    })
   }
   return rows
 }
