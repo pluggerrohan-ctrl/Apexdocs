@@ -1,0 +1,33 @@
+This page is a sample bank statement showing account details, transaction history, and a summary of debits and credits for a specific period.
+
+Text:
+SAMPLE BANK STATEMENT
+FOR APEXDOC TESTING ONLY — NOT A REAL BANK DOCUMENT
+Account Holder Naman Test User
+Account Number XXXX XXXX 4821
+Statement Period 01 Sep 2026 – 10 Sep 2026
+Account Type Savings Account
+Currency INR
+
+TRANSACTION DETAILS
+Date Description Reference Debit Credit Balance
+01/09/2026 Opening Balance OPEN-001 — — 25,000.00
+02/09/2026 UPI - Grocery Store UPI240901 1,250.00 — 23,750.00
+03/09/2026 Salary Credit SAL0903 — 18,500.00 42,250.00
+04/09/2026 ATM Cash Withdrawal ATM9042 3,000.00 — 39,250.00
+05/09/2026 Online Shopping ECOM5518 2,499.00 — 36,751.00
+06/09/2026 UPI - Electricity Bill UPI0609 1,840.00 — 34,911.00
+07/09/2026 UPI - Friend Transfer UPI0711 750.00 — 34,161.00
+08/09/2026 Refund - Online Store REF8821 — 999.00 35,160.00
+09/09/2026 UPI - Restaurant UPI0909 1,175.00 — 33,985.00
+10/09/2026 Interest Credit INT0910 — 42.50 34,027.50
+
+Opening Balance 25,000.00
+Total Debits 10,514.00
+Total Credits ■19,541.50
+Closing Balance 34,027.50
+
+This document contains synthetic data created solely for testing the ApexDoc PDF-to-Excel conversion workflow.
+
+Images:
+There are no images on this page.
