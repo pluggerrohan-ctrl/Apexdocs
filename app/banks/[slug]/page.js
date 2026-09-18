@@ -12,8 +12,8 @@ export async function generateMetadata({ params }) {
     const bank = getBank(slug)
     if (!bank) return { title: 'ApexDoc | Bank Statement Converter' }
     return {
-      title: `Convert ${bank.name} PDF Bank Statement to Excel | ApexDoc`,
-      description: `Convert ${bank.name} PDF bank statements to Excel with a secure, browser-first workflow.`,
+      title: `${bank.name} PDF to Excel Converter | ApexDoc`,
+      description: `Turn a ${bank.name} statement PDF into an audit-ready Excel spreadsheet with ApexDoc's private, browser-first converter.`,
     }
   } catch {
     return { title: 'ApexDoc | Bank Statement Converter' }
