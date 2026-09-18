@@ -1,0 +1,72 @@
+import { NextResponse } from 'next/server'
+
+const PDFCO_API = 'https://api.pdf.co/v1'
+const HEADERS = ['Date', 'Description', 'Debit', 'Credit', 'Balance']
+
+function clean(value) {
+  return String(value ?? '').replace(/^['\"]|['\"]$/g, '').trim()
+}
+
+function parseCsv(csv) {
+  const lines = String(csv).split(/\r?\n/).filter((line) => line.trim())
+  if (lines.length < 2) return []
+  const cells = (line) => {
+    const output = []
+    let value = ''
+    let quoted = false
+    for (const char of line) {
+      if (char === '"') quoted = !quoted
+      else if (char === ',' && !quoted) { output.push(value); value = '' }
+      else value += char
+    }
+    output.push(value)
+    return output.map(clean)
+  }
+  const header = cells(lines[0]).map((cell) => cell.toLowerCase())
+  const find = (names) => header.findIndex((cell) => names.some((name) => cell.includes(name)))
+  const dateIndex = find(['date', 'posted', 'transaction'])
+  const descriptionIndex = find(['description', 'memo', 'details', 'narration'])
+  const debitIndex = find(['debit', 'withdrawal', 'charge'])
+  const creditIndex = find(['credit', 'deposit'])
+  const balanceIndex = find(['balance', 'running'])
+  return lines.slice(1).map((line) => {
+    const row = cells(line)
+    return { Date: row[dateIndex] || '', Description: row[descriptionIndex] || '', Debit: row[debitIndex] || '', Credit: row[creditIndex] || '', Balance: row[balanceIndex] || '' }
+  }).filter((row) => row.Date || row.Description || row.Balance)
+}
+
+async function convertWithKey(file, key) {
+  const upload = new FormData()
+  upload.append('file', new Blob([await file.arrayBuffer()], { type: 'application/pdf' }), file.name || 'statement.pdf')
+  const uploadResponse = await fetch(`${PDFCO_API}/file/upload`, { method: 'POST', headers: { 'x-api-key': key }, body: upload })
+  if (!uploadResponse.ok) throw new Error(`PDF.co upload failed (${uploadResponse.status})`)
+  const uploadResult = await uploadResponse.json()
+  if (!uploadResult.url) throw new Error('PDF.co did not return an upload URL.')
+
+  const conversionResponse = await fetch(`${PDFCO_API}/pdf/convert/to/csv`, {
+    method: 'POST',
+    headers: { 'x-api-key': key, 'content-type': 'application/json' },
+    body: JSON.stringify({ url: uploadResult.url, async: false, csvDelimiter: ',' }),
+  })
+  if (!conversionResponse.ok) throw new Error(`PDF.co conversion failed (${conversionResponse.status})`)
+  const conversionResult = await conversionResponse.json()
+  if (!conversionResult.body) throw new Error(conversionResult.message || 'PDF.co returned no CSV data.')
+  const rows = parseCsv(conversionResult.body)
+  if (!rows.length) throw new Error('PDF.co found no transaction rows.')
+  return rows
+}
+
+export async function POST(request) {
+  const form = await request.formData()
+  const file = form.get('file')
+  if (!(file instanceof File) || file.type !== 'application/pdf') return NextResponse.json({ ok: false, error: 'A PDF file is required.' }, { status: 400 })
+  const keys = [process.env.PDFCO_API_KEY_PRIMARY, process.env.PDFCO_API_KEY_BACKUP].filter(Boolean)
+  if (!keys.length) return NextResponse.json({ ok: false, error: 'PDF fallback is not configured.' }, { status: 503 })
+  let lastError = 'PDF fallback failed.'
+  for (const key of keys) {
+    try { return NextResponse.json({ ok: true, rows: await convertWithKey(file, key) }) } catch (error) { lastError = error instanceof Error ? error.message : lastError }
+  }
+  return NextResponse.json({ ok: false, error: lastError }, { status: 502 })
+}
+
+export const maxDuration = 120

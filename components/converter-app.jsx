@@ -218,7 +218,16 @@ export default function ConverterApp({ bank }) {
     setFileName(file.name)
     setStatus('Extracting text locally…')
     try {
-      const rows = parseRows(await extractPdf(file, setStatus))
+      const localRows = parseRows(await extractPdf(file, setStatus))
+      let rows = localRows
+      if (!rows.length) {
+        setStatus('Local extraction found no rows. Trying secure PDF backup…')
+        const form = new FormData()
+        form.append('file', file)
+        const fallbackResponse = await fetch('/api/pdfco', { method: 'POST', body: form })
+        const fallbackResult = await fallbackResponse.json()
+        if (fallbackResponse.ok && fallbackResult.ok && Array.isArray(fallbackResult.rows)) rows = fallbackResult.rows
+      }
       if (!rows.length) {
         setStatus('No readable transactions found. Your credit was not used.')
         return
