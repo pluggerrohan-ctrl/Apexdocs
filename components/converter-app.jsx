@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { FileUp, ShieldCheck, Sparkles, LoaderCircle, Download, RotateCcw, MoreVertical, X } from 'lucide-react'
 import * as XLSX from 'xlsx'
 
-const CREDIT_KEY = 'apexdoc_credits'
+const CREDIT_KEY = 'apexdoc_credits_v2'
 const FREE_CREDIT_LIMIT = 3
 
 function parseRows(raw) {

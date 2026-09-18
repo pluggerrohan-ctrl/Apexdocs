@@ -7,6 +7,7 @@ function jsonError(message, status = 400) {
 }
 
 const MAX_LICENSE_KEY_LENGTH = 256
+const DEFAULT_WORKER_URL = 'https://apexdocs.pluggerrohan.workers.dev'
 
 function getClientIp(request) {
   return request.headers.get('CF-Connecting-IP') || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
@@ -26,7 +27,7 @@ export async function POST(request) {
   if (!licenseKey || licenseKey.length > MAX_LICENSE_KEY_LENGTH) return jsonError('A valid license key is required.')
 
   // The Worker URL is the only app-facing integration point. Secrets stay in Vercel Vars.
-  const workerUrl = process.env.CREDITS_WORKER_URL || process.env.DODO_CREDITS_API_URL
+  const workerUrl = process.env.CREDITS_WORKER_URL || process.env.DODO_CREDITS_API_URL || DEFAULT_WORKER_URL
   if (!workerUrl) return NextResponse.json({ ok: false, error: 'Credit recovery is not configured yet.' }, { status: 503 })
 
   let target
