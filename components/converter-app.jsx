@@ -227,6 +227,7 @@ export default function ConverterApp({ bank }) {
         const fallbackResponse = await fetch('/api/pdfco', { method: 'POST', body: form })
         const fallbackResult = await fallbackResponse.json()
         if (fallbackResponse.ok && fallbackResult.ok && Array.isArray(fallbackResult.rows)) rows = fallbackResult.rows
+        else if (fallbackResult.error) setStatus(`Backup converter: ${fallbackResult.error}`)
       }
       if (!rows.length) {
         setStatus('No readable transactions found. Your credit was not used.')
