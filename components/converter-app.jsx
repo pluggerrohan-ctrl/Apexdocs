@@ -43,19 +43,28 @@ function parseRows(raw) {
   }
   if (rows.length) return rows
 
-  // PDF text layers often split columns into separate text items. Re-scan date-delimited blocks
-  // so a statement still converts when the visual line layout is not preserved by PDF.js.
-  const blocks = raw.replace(/\r/g, ' ').replace(/\n+/g, ' ').split(/(?=\b\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4}\b)/).map((block) => block.trim()).filter(Boolean)
-  for (const block of blocks) {
-    const dateMatch = block.match(/^(\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4})\s+/)
-    if (!dateMatch) continue
-    const tail = block.slice(dateMatch[0].length)
-    const values = [...tail.matchAll(/(?:—|–|[-+]?\(?\s*(?:[$€£₹]\s*)?\d[\d,]*(?:\.\d{2})?\)?)/g)].slice(-3)
-    if (values.length < 3) continue
-    const firstValue = values[0].index ?? tail.length
-    const description = tail.slice(0, firstValue).replace(/\s+(?:[A-Z]{2,}[A-Z0-9-]*|[A-Z0-9]{4,})$/, '').trim()
-    const value = (text) => /^[—–-]$/.test(text.trim()) ? '' : Math.abs(Number(text.replace(/[^\d.-]/g, '')) || 0)
-    rows.push({ Date: dateMatch[1], Description: description || 'Bank transaction', Debit: value(values[0][0]), Credit: value(values[1][0]), Balance: value(values[2][0]) })
+  // Some statements expose each table column as its own text layer. In that case,
+  // reconstruct date-delimited records and infer debit/credit from balance movement.
+  const datePattern = /\b\d{1,2}(?:[\/-]\d{1,2}[\/-]\d{2,4}|\s+[A-Za-z]{3,9}\s+\d{2,4})\b/g
+  const matches = [...raw.matchAll(datePattern)]
+  const numberPattern = /(?:[$€£₹]\s*)?\(?\d[\d,]*(?:\.\d{2})?\)?/g
+  let previousBalance = null
+  for (let index = 0; index < matches.length; index += 1) {
+    const start = matches[index].index ?? 0
+    const end = matches[index + 1]?.index ?? raw.length
+    const date = matches[index][0]
+    const block = raw.slice(start + date.length, end).replace(/\s+/g, ' ').trim()
+    const numbers = [...block.matchAll(numberPattern)]
+    if (!numbers.length) continue
+    const values = numbers.map((match) => Number(match[0].replace(/[^\d.]/g, ''))).filter(Number.isFinite)
+    const balance = values.at(-1)
+    if (!Number.isFinite(balance)) continue
+    const amount = values.length > 1 ? values.at(-2) : (previousBalance === null ? '' : Math.abs(balance - previousBalance))
+    const descriptionEnd = numbers[0].index ?? block.length
+    const description = block.slice(0, descriptionEnd).replace(/\s+/g, ' ').trim()
+    const delta = previousBalance === null ? 0 : balance - previousBalance
+    rows.push({ Date: date, Description: description || 'Bank transaction', Debit: delta < 0 ? amount : '', Credit: delta > 0 ? amount : '', Balance: balance })
+    previousBalance = balance
   }
   return rows
 }
