@@ -102,15 +102,31 @@ export default function ConverterApp({ bank }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [showExhausted, setShowExhausted] = useState(false)
   const [isConverting, setIsConverting] = useState(false)
+  const [quotaLocked, setQuotaLocked] = useState(false)
   const convertingRef = useRef(false)
 
   useEffect(() => {
-    const stored = window.localStorage.getItem(CREDIT_KEY)
-    if (stored === null) window.localStorage.setItem(CREDIT_KEY, String(FREE_CREDIT_LIMIT))
+    let active = true
     const sync = () => setCredits(Number(window.localStorage.getItem(CREDIT_KEY) || 0))
-    sync()
+    const initializeQuota = async () => {
+      const stored = window.localStorage.getItem(CREDIT_KEY)
+      if (stored === null) window.localStorage.setItem(CREDIT_KEY, String(FREE_CREDIT_LIMIT))
+      sync()
+      try {
+        const response = await fetch('/api/credits', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'quota' }) })
+        const result = await response.json()
+        if (!active || !response.ok || !result.ok) return
+        const remaining = Math.max(0, Number(result.remaining))
+        window.localStorage.setItem(CREDIT_KEY, String(remaining))
+        setCredits(remaining)
+        if (remaining === 0) setQuotaLocked(true)
+      } catch {
+        // Preserve the local free-tier experience when the optional quota worker is unavailable.
+      }
+    }
+    initializeQuota()
     window.addEventListener('storage', sync)
-    return () => window.removeEventListener('storage', sync)
+    return () => { active = false; window.removeEventListener('storage', sync) }
   }, [])
 
   const saveCredits = (value) => {
@@ -122,7 +138,7 @@ export default function ConverterApp({ bank }) {
   const convert = async (file) => {
     if (!file || file.type !== 'application/pdf') return setStatus('Please choose a PDF statement.')
     if (convertingRef.current) return
-    if (credits < 1) return setShowExhausted(true)
+    if (quotaLocked || credits < 1) return setShowExhausted(true)
 
     convertingRef.current = true
     setIsConverting(true)
@@ -135,6 +151,21 @@ export default function ConverterApp({ bank }) {
         return
       }
 
+      let serverRemaining = null
+      try {
+        const quotaResponse = await fetch('/api/credits', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'consume' }) })
+        const quotaResult = await quotaResponse.json()
+        if (quotaResponse.status === 429 || (quotaResponse.ok && quotaResult.ok && quotaResult.allowed === false)) {
+          saveCredits(0)
+          setQuotaLocked(true)
+          setShowExhausted(true)
+          return
+        }
+        if (quotaResponse.ok && quotaResult.ok) serverRemaining = Number(quotaResult.remaining)
+      } catch {
+        // Use local credits only if the optional worker is unavailable.
+      }
+
       const sheet = XLSX.utils.json_to_sheet(rows, {
         header: ['Date', 'Description', 'Debit', 'Credit', 'Balance'],
       })
@@ -142,7 +173,7 @@ export default function ConverterApp({ bank }) {
       const workbook = XLSX.utils.book_new()
       XLSX.utils.book_append_sheet(workbook, sheet, 'Transactions')
       XLSX.writeFile(workbook, `${bank.slug}-statement.xlsx`)
-      saveCredits(Math.max(0, Number(window.localStorage.getItem(CREDIT_KEY) || 0) - 1))
+      saveCredits(serverRemaining === null ? Math.max(0, Number(window.localStorage.getItem(CREDIT_KEY) || 0) - 1) : serverRemaining)
       setStatus(`Done — ${rows.length} transaction rows exported.`)
     } catch {
       setStatus('The file could not be converted locally. Your credit was not used.')
@@ -178,8 +209,8 @@ export default function ConverterApp({ bank }) {
     </header>
     <main>
       <div className="trust-banner"><ShieldCheck size={17} /> Secure Browser-Locked Session Active. Under strict privacy compliance, files are auto-wiped instantly after extraction and tokens stay tied to this browser.</div>
-      <section id="converter" className="hero content-width"><div className="hero-copy"><p className="eyebrow">{bank.country.toUpperCase()} · {bank.name.toUpperCase()}</p><h1>{bank.slug === 'bank' ? 'PDF bank statement to Excel converter' : `${bank.name} bank statement to Excel converter`}</h1><p className="hero-description">Convert your PDF statement into a clean, audit-ready spreadsheet privately in your browser. No paid APIs and no document uploads.</p><div className="feature-list"><span><b>Local parsing</b><small>Zero API cost</small></span><span><b>One clean sheet</b><small>Date, Description, Debit, Credit, Balance</small></span><span><b>Instant export</b><small>Excel-ready XLSX</small></span></div></div><label className="upload-card"><input ref={inputRef} className="sr-only" type="file" accept="application/pdf" disabled={isConverting || credits < 1} onChange={(event) => convert(event.target.files?.[0])} /><div className="upload-panel"><div className="upload-icon"><FileUp size={27} /></div><h2>Drop your {bank.slug === 'bank' ? 'PDF' : bank.name} statement</h2><p>PDF only · processed locally · never stored</p><span className="upload-button">{status.includes('Extracting') ? <LoaderCircle className="spin" size={16} /> : <Download size={16} />} Choose PDF</span><small>{fileName || status || '3 free Excel sheets included'}</small></div></label></section>
-      <section id="pricing" className="section content-width"><p className="eyebrow">PRICING</p><h2>Simple credits. Private conversions.</h2><div className="pricing-grid"><article><p className="plan">STARTER</p><strong>$10</strong><p>Convert 50 PDF Bank Statements to Excel. Perfect for small business billing.</p><a className="payment-button" href="https://checkout.dodopayments.com/buy/pdt_0NnVgAgVoDrlsxkmpv1JC?quantity=1" target="_blank" rel="noreferrer">Buy 50 credits</a></article><article className="featured"><p className="plan">PRO</p><strong>$39</strong><p>Convert 250 PDF Bank Statements to Excel. Best value for professional CPAs and accounting firms.</p><a className="payment-button" href="https://checkout.dodopayments.com/buy/pdt_0NnVoDX9vsN8YPPyBqB4R?quantity=1" target="_blank" rel="noreferrer">Buy 250 credits</a></article></div><div id="recovery" className="recovery"><h3>Recover your credits</h3><p>Bought credits before? Enter your unique License Key to sync your remaining balance on this browser session.</p><div className="recovery-row"><input aria-label="License Key" placeholder="License Key" value={licenseKey} onChange={(event) => setLicenseKey(event.target.value)} /><button onClick={restore}><RotateCcw size={15} /> Restore Balance</button></div></div></section>
+      <section id="converter" className="hero content-width"><div className="hero-copy"><p className="eyebrow">{bank.country.toUpperCase()} · {bank.name.toUpperCase()}</p><h1>{bank.slug === 'bank' ? 'PDF bank statement to Excel converter' : `${bank.name} bank statement to Excel converter`}</h1><p className="hero-description">Convert your PDF statement into a clean, audit-ready spreadsheet privately in your browser. No paid APIs and no document uploads.</p><div className="feature-list"><span><b>Local parsing</b><small>Zero API cost</small></span><span><b>One clean sheet</b><small>Date, Description, Debit, Credit, Balance</small></span><span><b>Instant export</b><small>Excel-ready XLSX</small></span></div></div><label className="upload-card"><input ref={inputRef} className="sr-only" type="file" accept="application/pdf" disabled={isConverting || quotaLocked || credits < 1} onChange={(event) => convert(event.target.files?.[0])} /><div className="upload-panel"><div className="upload-icon"><FileUp size={27} /></div><h2>Drop your {bank.slug === 'bank' ? 'PDF' : bank.name} statement</h2><p>PDF only · processed locally · never stored</p><span className="upload-button">{status.includes('Extracting') ? <LoaderCircle className="spin" size={16} /> : <Download size={16} />} Choose PDF</span><small>{fileName || status || '3 free Excel sheets included'}</small></div></label></section>
+      <section id="pricing" className="section content-width"><p className="eyebrow">PRICING</p><h2>Simple credits. Private conversions.</h2><div className="pricing-grid"><article><p className="plan">STARTER</p><strong>$10</strong><p>Convert 50 PDF Bank Statements to Excel. Perfect for small business billing.</p><p>🔒 100% Risk-Free Money-Back Guarantee: If you experience any parsing glitches, email us for an instant full refund.</p><a className="payment-button" href="https://checkout.dodopayments.com/buy/pdt_0NnVgAgVoDrlsxkmpv1JC?quantity=1" target="_blank" rel="noreferrer">Buy 50 credits</a></article><article className="featured"><p className="plan">PRO</p><strong>$39</strong><p>Convert 250 PDF Bank Statements to Excel. Best value for professional CPAs and accounting firms.</p><a className="payment-button" href="https://checkout.dodopayments.com/buy/pdt_0NnVoDX9vsN8YPPyBqB4R?quantity=1" target="_blank" rel="noreferrer">Buy 250 credits</a></article></div><div id="recovery" className="recovery"><h3>Recover your credits</h3><p>Bought credits before? Enter your unique License Key to sync your remaining balance on this browser session.</p><div className="recovery-row"><input aria-label="License Key" placeholder="License Key" value={licenseKey} onChange={(event) => setLicenseKey(event.target.value)} /><button onClick={restore}><RotateCcw size={15} /> Restore Balance</button></div></div></section>
       <section id="faq" className="section content-width"><p className="eyebrow">FAQ</p><h2>Private by default.</h2><div className="faq-grid"><article><h3>Does my PDF leave my device?</h3><p>No. Text extraction and XLSX generation happen inside this browser.</p></article><article><h3>What if my PDF is scanned?</h3><p>This zero-cost parser handles text PDFs. Scanned PDFs need OCR, which can be added as an optional backend later.</p></article></div></section>
     </main><footer id="support"><span>Need help? <a href="mailto:namanbilthariya@gmail.com">namanbilthariya@gmail.com</a></span><a href="https://x.com/namanbuildai" target="_blank" rel="noreferrer">@namanbuildai</a><small className="legal-copy">Terms &amp; Conditions: We respect your privacy and do not store, track, or save any of your uploaded bank statement documents or financial data; all parsing occurs locally within your browser sandbox. This tool parses native text-PDF structures via automated regex matching. While we strive for 100% extraction accuracy, all converted files are provided &apos;as-is&apos; without warranties. Users must cross-verify the output spreadsheet against the original PDF. We accept zero liability or financial responsibility for any formatting mismatches, parsing omissions, or mathematical errors in the generated sheets.</small></footer>
     {showExhausted && <div className="modal-backdrop" role="presentation" onClick={() => setShowExhausted(false)}><div className="credit-modal" role="dialog" aria-modal="true" aria-labelledby="credit-modal-title" onClick={(event) => event.stopPropagation()}><button className="modal-close" aria-label="Close" onClick={() => setShowExhausted(false)}><X size={18} /></button><h2 id="credit-modal-title">Free credit exhausted</h2><p>Please upgrade your pack below to continue converting statements.</p><button className="modal-action" onClick={() => { setShowExhausted(false); jumpTo('pricing') }}>View pricing</button></div></div>}
