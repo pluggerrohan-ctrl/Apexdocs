@@ -9,26 +9,27 @@ const FREE_CREDIT_LIMIT = 3
 
 function parseRows(raw) {
   const rows = []
-  const normalized = raw.replace(/\r/g, ' ').replace(/\s+/g, ' ').trim()
   const datePattern = /\b(?:\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4}|\d{1,2}\s+[A-Za-z]{3,9}\s+\d{2,4}|\d{4}[\/-]\d{1,2}[\/-]\d{1,2})\b/g
-  const dates = [...normalized.matchAll(datePattern)]
-  const amountPattern = /[-+]?\(?\$?\s*\d[\d,]*\.\d{2}\)?/g
+  const amountPattern = /[-+]?\(?\s*(?:[$€£₹]\s*)?\d[\d,]*(?:\.\d{2})?\)?/g
+  const lines = raw.replace(/\r/g, '').split(/\n+/).map((line) => line.replace(/\s+/g, ' ').trim()).filter(Boolean)
 
-  for (let index = 0; index < dates.length; index += 1) {
-    const start = dates[index].index
-    const end = dates[index + 1]?.index ?? normalized.length
-    const line = normalized.slice(start, end).trim()
-    const date = dates[index][0]
-    const body = line.slice(date.length).trim()
-    const amounts = [...body.matchAll(amountPattern)].map((match) => Number(match[0].replace(/[$,()\s]/g, '').replace(/^$/, ''))).filter(Number.isFinite)
-    const description = body.replace(amountPattern, '').replace(/\s+/g, ' ').trim()
+  for (const line of lines) {
+    const dateMatch = line.match(datePattern)
+    if (!dateMatch) continue
+    const date = dateMatch[0]
+    const body = line.slice((line.indexOf(date) + date.length)).trim()
+    const amounts = [...body.matchAll(amountPattern)].map((match) => {
+      const value = Number(match[0].replace(/[^\d.-]/g, ''))
+      return Number.isFinite(value) ? Math.abs(value) : null
+    }).filter((value) => value !== null)
+    const description = body.replace(amountPattern, ' ').replace(/\s+/g, ' ').trim()
     if (!description && amounts.length === 0) continue
     rows.push({
       Date: date,
       Description: description || 'Bank transaction',
-      Debit: amounts.length >= 3 ? Math.abs(amounts[0]) : '',
-      Credit: amounts.length >= 3 ? Math.abs(amounts[1]) : amounts.length === 2 ? Math.abs(amounts[0]) : '',
-      Balance: amounts.at(-1) ?? '',
+      Debit: amounts.length >= 3 ? amounts[0] : '',
+      Credit: amounts.length >= 3 ? amounts[1] : amounts.length === 2 ? amounts[0] : '',
+      Balance: amounts.length >= 2 ? amounts.at(-1) : amounts[0] ?? '',
     })
   }
   return rows
@@ -36,14 +37,22 @@ function parseRows(raw) {
 
 async function extractPdf(file) {
   try {
-    const pdfjs = await import('pdfjs-dist/build/pdf.mjs')
+    const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs')
     const buffer = await file.arrayBuffer()
-    const pdf = await pdfjs.getDocument({ data: buffer }).promise
+    const pdf = await pdfjs.getDocument({ data: new Uint8Array(buffer), useSystemFonts: true, isEvalSupported: false }).promise
     let raw = ''
     for (let index = 1; index <= pdf.numPages; index += 1) {
       const page = await pdf.getPage(index)
       const content = await page.getTextContent()
-      raw += `${content.items.map((item) => item.str).join(' ')}\n`
+      const items = content.items.filter((item) => 'str' in item)
+      const lines = []
+      for (const item of items) {
+        const y = Math.round(item.transform[5])
+        const line = lines.find((entry) => Math.abs(entry.y - y) <= 2)
+        if (line) line.parts.push(item.str)
+        else lines.push({ y, parts: [item.str] })
+      }
+      raw += `${lines.sort((a, b) => b.y - a.y).map((line) => line.parts.join(' ')).join('\n')}\n`
     }
     return raw
   } catch {
