@@ -22,14 +22,19 @@ function parseCsv(csv) {
     output.push(value)
     return output.map(clean)
   }
-  const header = cells(lines[0]).map((cell) => cell.toLowerCase())
+  const headerLineIndex = lines.findIndex((line) => {
+    const candidate = cells(line).map((cell) => cell.toLowerCase())
+    return candidate.some((cell) => cell === 'date' || cell.includes('transaction')) && candidate.some((cell) => cell.includes('description') || cell.includes('details'))
+  })
+  if (headerLineIndex < 0) return []
+  const header = cells(lines[headerLineIndex]).map((cell) => cell.toLowerCase())
   const find = (names) => header.findIndex((cell) => names.some((name) => cell.includes(name)))
   const dateIndex = find(['date', 'posted', 'transaction'])
   const descriptionIndex = find(['description', 'memo', 'details', 'narration'])
   const debitIndex = find(['debit', 'withdrawal', 'charge'])
   const creditIndex = find(['credit', 'deposit'])
   const balanceIndex = find(['balance', 'running'])
-  return lines.slice(1).map((line) => {
+  return lines.slice(headerLineIndex + 1).map((line) => {
     const row = cells(line)
     return { Date: row[dateIndex] || '', Description: row[descriptionIndex] || '', Debit: row[debitIndex] || '', Credit: row[creditIndex] || '', Balance: row[balanceIndex] || '' }
   }).filter((row) => row.Date || row.Description || row.Balance)
@@ -50,8 +55,14 @@ async function convertWithKey(file, key) {
   })
   if (!conversionResponse.ok) throw new Error(`PDF.co conversion failed (${conversionResponse.status})`)
   const conversionResult = await conversionResponse.json()
-  if (!conversionResult.body) throw new Error(conversionResult.message || 'PDF.co returned no CSV data.')
-  const rows = parseCsv(conversionResult.body)
+  let csv = conversionResult.body
+  if (!csv && conversionResult.url) {
+    const csvResponse = await fetch(conversionResult.url)
+    if (!csvResponse.ok) throw new Error(`PDF.co CSV download failed (${csvResponse.status})`)
+    csv = await csvResponse.text()
+  }
+  if (!csv) throw new Error(conversionResult.message || 'PDF.co returned no CSV data.')
+  const rows = parseCsv(csv)
   if (!rows.length) throw new Error('PDF.co found no transaction rows.')
   return rows
 }

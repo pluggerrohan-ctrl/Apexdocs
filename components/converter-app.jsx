@@ -255,11 +255,19 @@ export default function ConverterApp({ bank }) {
       sheet['!cols'] = [{ wch: 14 }, { wch: 42 }, { wch: 14 }, { wch: 14 }, { wch: 16 }]
       const workbook = XLSX.utils.book_new()
       XLSX.utils.book_append_sheet(workbook, sheet, 'Transactions')
-      XLSX.writeFile(workbook, `${bank.slug}-statement.xlsx`)
+      const workbookBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
+      const downloadUrl = URL.createObjectURL(new Blob([workbookBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }))
+      const downloadLink = document.createElement('a')
+      downloadLink.href = downloadUrl
+      downloadLink.download = `${bank.slug}-statement.xlsx`
+      document.body.appendChild(downloadLink)
+      downloadLink.click()
+      downloadLink.remove()
+      setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000)
       saveCredits(serverRemaining === null ? Math.max(0, Number(window.localStorage.getItem(CREDIT_KEY) || 0) - 1) : serverRemaining)
       setStatus(`Done — ${rows.length} transaction rows exported.`)
     } catch {
-      setStatus('The file could not be converted locally. Your credit was not used.')
+      setStatus('Conversion service was unreachable. Please retry; your credit was not used.')
     } finally {
       convertingRef.current = false
       setIsConverting(false)
