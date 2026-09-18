@@ -46,7 +46,7 @@ async function convertWithKey(file, key) {
   const conversionResponse = await fetch(`${PDFCO_API}/pdf/convert/to/csv`, {
     method: 'POST',
     headers: { 'x-api-key': key, 'content-type': 'application/json' },
-    body: JSON.stringify({ url: uploadResult.url, async: false, csvDelimiter: ',' }),
+    body: JSON.stringify({ url: uploadResult.url, async: false, csvDelimiter: ',', inline: true, unwrap: true }),
   })
   if (!conversionResponse.ok) throw new Error(`PDF.co conversion failed (${conversionResponse.status})`)
   const conversionResult = await conversionResponse.json()
