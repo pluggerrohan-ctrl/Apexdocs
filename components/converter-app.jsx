@@ -9,27 +9,36 @@ const FREE_CREDIT_LIMIT = 3
 
 function parseRows(raw) {
   const rows = []
-  const datePattern = /\b(?:\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4}|\d{1,2}\s+[A-Za-z]{3,9}\s+\d{2,4}|\d{4}[\/-]\d{1,2}[\/-]\d{1,2})\b/g
-  const amountPattern = /[-+]?\(?\s*(?:[$€£₹]\s*)?\d[\d,]*(?:\.\d{2})?\)?/g
+  const dateAtStart = /^(\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4}|\d{1,2}\s+[A-Za-z]{3,9}\s+\d{2,4}|\d{4}[\/-]\d{1,2}[\/-]\d{1,2})\s+/i
+  const columnPattern = /(?:—|–|(?<![A-Za-z])[-+]?\(?\s*(?:[$€£₹]\s*)?\d[\d,]*(?:\.\d{2})?\)?)/g
   const lines = raw.replace(/\r/g, '').split(/\n+/).map((line) => line.replace(/\s+/g, ' ').trim()).filter(Boolean)
 
   for (const line of lines) {
-    const dateMatch = line.match(datePattern)
+    const dateMatch = line.match(dateAtStart)
     if (!dateMatch) continue
-    const date = dateMatch[0]
-    const body = line.slice((line.indexOf(date) + date.length)).trim()
-    const amounts = [...body.matchAll(amountPattern)].map((match) => {
-      const value = Number(match[0].replace(/[^\d.-]/g, ''))
-      return Number.isFinite(value) ? Math.abs(value) : null
-    }).filter((value) => value !== null)
-    const description = body.replace(amountPattern, ' ').replace(/\s+/g, ' ').trim()
-    if (!description && amounts.length === 0) continue
+    const date = dateMatch[1]
+    const body = line.slice(dateMatch[0].length).trim()
+    const columns = [...body.matchAll(columnPattern)]
+    if (columns.length < 3) continue
+
+    // The final three columns are always Debit, Credit, and Balance. This
+    // deliberately ignores digits in transaction references such as UPI0609.
+    const transactionColumns = columns.slice(-3)
+    const firstColumnIndex = transactionColumns[0].index ?? 0
+    const leftSide = body.slice(0, firstColumnIndex).trim()
+    const description = leftSide.replace(/\s+(?:[A-Z]{2,}[A-Z0-9-]*|[A-Z0-9]{4,})$/, '').trim()
+    const value = (text) => {
+      if (!text || /^[—–-]$/.test(text.trim())) return ''
+      const number = Number(text.replace(/[^\d.-]/g, ''))
+      return Number.isFinite(number) ? Math.abs(number) : ''
+    }
+
     rows.push({
       Date: date,
       Description: description || 'Bank transaction',
-      Debit: amounts.length >= 3 ? amounts[0] : '',
-      Credit: amounts.length >= 3 ? amounts[1] : amounts.length === 2 ? amounts[0] : '',
-      Balance: amounts.length >= 2 ? amounts.at(-1) : amounts[0] ?? '',
+      Debit: value(transactionColumns[0][0]),
+      Credit: value(transactionColumns[1][0]),
+      Balance: value(transactionColumns[2][0]),
     })
   }
   return rows
