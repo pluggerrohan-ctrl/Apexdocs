@@ -44,16 +44,17 @@ function parseRows(raw) {
   return rows
 }
 
-async function extractPdf(file) {
+async function extractPdf(file, onProgress) {
   try {
     const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs')
     const buffer = await file.arrayBuffer()
     const pdf = await pdfjs.getDocument({ data: new Uint8Array(buffer), useSystemFonts: true, isEvalSupported: false }).promise
     let raw = ''
+    let hasText = false
     for (let index = 1; index <= pdf.numPages; index += 1) {
       const page = await pdf.getPage(index)
       const content = await page.getTextContent()
-      const items = content.items.filter((item) => 'str' in item)
+      const items = content.items.filter((item) => 'str' in item && item.str.trim())
       const lines = []
       for (const item of items) {
         const y = Math.round(item.transform[5])
@@ -61,7 +62,30 @@ async function extractPdf(file) {
         if (line) line.parts.push(item.str)
         else lines.push({ y, parts: [item.str] })
       }
-      raw += `${lines.sort((a, b) => b.y - a.y).map((line) => line.parts.join(' ')).join('\n')}\n`
+      const pageText = lines.sort((a, b) => b.y - a.y).map((line) => line.parts.join(' ')).join('\n')
+      if (pageText.trim()) hasText = true
+      raw += `${pageText}\n`
+    }
+
+    if (hasText) return raw
+
+    onProgress?.('Scanning pages locally…')
+    const { createWorker } = await import('tesseract.js')
+    const worker = await createWorker('eng')
+    try {
+      for (let index = 1; index <= pdf.numPages; index += 1) {
+        const page = await pdf.getPage(index)
+        const viewport = page.getViewport({ scale: 2 })
+        const canvas = document.createElement('canvas')
+        canvas.width = viewport.width
+        canvas.height = viewport.height
+        await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise
+        const result = await worker.recognize(canvas)
+        raw += `${result.data.text}\n`
+        onProgress?.(`Scanning page ${index} of ${pdf.numPages}…`)
+      }
+    } finally {
+      await worker.terminate()
     }
     return raw
   } catch {
@@ -96,9 +120,9 @@ export default function ConverterApp({ bank }) {
   const convert = async (file) => {
     if (!file || file.type !== 'application/pdf') return setStatus('Please choose a PDF statement.')
     if (credits < 1) return setShowExhausted(true)
-    setFileName(file.name); setStatus('Extracting locally…')
+    setFileName(file.name); setStatus('Extracting text locally…')
     try {
-      const rows = parseRows(await extractPdf(file))
+      const rows = parseRows(await extractPdf(file, setStatus))
       const sheet = XLSX.utils.json_to_sheet(rows.length ? rows : [{ Date: '', Description: 'No text transactions found', Debit: '', Credit: '', Balance: '' }])
       const workbook = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(workbook, sheet, 'Transactions')
       XLSX.writeFile(workbook, `${bank.slug}-statement.xlsx`)
