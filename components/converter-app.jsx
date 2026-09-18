@@ -45,7 +45,7 @@ function parseRows(raw) {
 
   // Some statements expose each table column as its own text layer. In that case,
   // reconstruct date-delimited records and infer debit/credit from balance movement.
-  const datePattern = /\b\d{1,2}(?:[\/-]\d{1,2}[\/-]\d{2,4}|\s+[A-Za-z]{3,9}\s+\d{2,4})\b/g
+  const datePattern = /\b(?:\d{4}[\/-]\d{1,2}[\/-]\d{1,2}|\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4}|\d{1,2}\s+[A-Za-z]{3,9}\s+\d{2,4})\b/g
   const matches = [...raw.matchAll(datePattern)]
   const numberPattern = /(?:[$€£₹]\s*)?\(?\d[\d,]*(?:\.\d{2})?\)?/g
   let previousBalance = null
@@ -66,6 +66,30 @@ function parseRows(raw) {
     rows.push({ Date: date, Description: description || 'Bank transaction', Debit: delta < 0 ? amount : '', Credit: delta > 0 ? amount : '', Balance: balance })
     previousBalance = balance
   }
+  if (rows.length) return rows
+
+  // Final fallback for PDFs whose text layer places every cell on its own line.
+  const statementLines = raw.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
+  let current = null
+  let pendingText = []
+  let pendingNumbers = []
+  const flush = () => {
+    if (!current || !pendingNumbers.length) return
+    const balance = pendingNumbers.at(-1)
+    const amount = pendingNumbers.length > 1 ? pendingNumbers.at(-2) : ''
+    const delta = rows.length ? balance - rows.at(-1).Balance : 0
+    rows.push({ Date: current, Description: pendingText.filter((text) => !/^[A-Z0-9-]{4,}$/.test(text)).join(' ') || 'Bank transaction', Debit: delta < 0 ? amount : '', Credit: delta > 0 ? amount : '', Balance: balance })
+    pendingText = []
+    pendingNumbers = []
+  }
+  for (const line of statementLines) {
+    const date = line.match(/^(\d{1,2}\s+[A-Za-z]{3,9}\s+\d{2,4}|\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4}|\d{4}[\/-]\d{1,2}[\/-]\d{1,2})$/)
+    if (date) { flush(); current = date[1]; continue }
+    const number = line.match(/^(?:[$€£₹]\s*)?\(?\d[\d,]*(?:\.\d{2})?\)?$/)
+    if (number) pendingNumbers.push(Number(line.replace(/[^\d.]/g, '')))
+    else if (current && !/^(Date|Description|Reference|Debit|Credit|Balance|Currency)$/i.test(line)) pendingText.push(line)
+  }
+  flush()
   return rows
 }
 
