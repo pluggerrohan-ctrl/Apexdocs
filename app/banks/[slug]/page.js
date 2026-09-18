@@ -3,7 +3,7 @@ import ConverterApp from '../../../components/converter-app'
 import { getBank, bankSlugs } from '../../../lib/banks'
 
 export function generateStaticParams() {
-  return bankSlugs.slice(0, 100).map((slug) => ({ slug }))
+  return bankSlugs.map((slug) => ({ slug }))
 }
 
 export async function generateMetadata({ params }) {
@@ -12,8 +12,8 @@ export async function generateMetadata({ params }) {
     const bank = getBank(slug)
     if (!bank) return { title: 'ApexDoc | Bank Statement Converter' }
     return {
-      title: `${bank.name} PDF to Excel Converter | ApexDoc`,
-      description: `Turn a ${bank.name} statement PDF into an audit-ready Excel spreadsheet with ApexDoc's private, browser-first converter.`,
+      title: `${bank.name} Bank Statement to Excel Converter | ApexDoc`,
+      description: `Convert a ${bank.name} bank statement PDF into an audit-ready Excel spreadsheet with ApexDoc's private, browser-first converter.`,
     }
   } catch {
     return { title: 'ApexDoc | Bank Statement Converter' }
