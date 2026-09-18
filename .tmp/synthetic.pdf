@@ -1,0 +1,73 @@
+- Context: This is page 1 of a synthetic bank statement from Northstar Community Bank for the period of June 1 to June 30, 2026. The statement details transactions, including opening balance, deposits, purchases, payments, refunds, fees, and interest credit, culminating in the closing balance.
+- Text: SYNTHETIC BANK STATEMENT — TEST DATA ONLY
+Bank: Northstar Community Bank (Fictional)
+Account holder: Alex Morgan (Fictional)
+Account: ****4821
+Statement period: 01 June 2026 – 30 June 2026
+Currency: USD
+Date
+Description
+Reference
+Debit
+Credit
+Balance
+01 Jun 2026
+Opening Balance
+5000.00
+03 Jun 2026
+ACME Office Supplies
+REF-1001
+125.50
+4874.50
+05 Jun 2026
+Payroll Deposit
+PAY-2048
+3200.00
+8074.50
+08 Jun 2026
+Electricity Bill
+ELEC-7742
+185.75
+7888.75
+11 Jun 2026
+Coffee Shop Purchase
+CARD-4419
+18.25
+7870.50
+15 Jun 2026
+Client Payment
+INV-2031
+1450.00
+9320.50
+18 Jun 2026
+Online Transfer
+TRF-5520
+600.00
+8720.50
+21 Jun 2026
+Refund
+Office Supplies
+REF-1001-R
+45.50
+8766.00
+24 Jun 2026
+Monthly Service Fee
+FEE-0626
+25.00
+8741.00
+27 Jun 2026
+Insurance Payment
+INS-8821
+310.00
+8431.00
+30 Jun 2026
+Interest Credit
+INT-0626
+12.35
+8443.35
+30 Jun 2026
+Closing Balance
+8443.35
+TEST NOTICE: Entirely synthetic data for PDF-to-Excel testing. No real bank, customer, account, or transaction data is
+used.
+- Images: None

@@ -45,7 +45,7 @@ function parseRows(raw) {
 
   // Some statements expose each table column as its own text layer. In that case,
   // reconstruct date-delimited records and infer debit/credit from balance movement.
-  const datePattern = /\b\d{1,2}(?:[\/-]\d{1,2}[\/-]\d{2,4}|\s+[A-Za-z]{3,9}\s+\d{2,4})\b/g
+  const datePattern = /\b(?:\d{4}[\/-]\d{1,2}[\/-]\d{1,2}|\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4}|\d{1,2}\s+[A-Za-z]{3,9}\s+\d{2,4})\b/g
   const matches = [...raw.matchAll(datePattern)]
   const numberPattern = /(?:[$€£₹]\s*)?\(?\d[\d,]*(?:\.\d{2})?\)?/g
   let previousBalance = null
@@ -65,6 +65,51 @@ function parseRows(raw) {
     const delta = previousBalance === null ? 0 : balance - previousBalance
     rows.push({ Date: date, Description: description || 'Bank transaction', Debit: delta < 0 ? amount : '', Credit: delta > 0 ? amount : '', Balance: balance })
     previousBalance = balance
+  }
+  if (rows.length) return rows
+
+  // Final fallback for PDFs whose text layer places every cell on its own line.
+  const statementLines = raw.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
+  let current = null
+  let pendingText = []
+  let pendingNumbers = []
+  const flush = () => {
+    if (!current || !pendingNumbers.length) return
+    const balance = pendingNumbers.at(-1)
+    const amount = pendingNumbers.length > 1 ? pendingNumbers.at(-2) : ''
+    const delta = rows.length ? balance - rows.at(-1).Balance : 0
+    rows.push({ Date: current, Description: pendingText.filter((text) => !/^[A-Z0-9-]{4,}$/.test(text)).join(' ') || 'Bank transaction', Debit: delta < 0 ? amount : '', Credit: delta > 0 ? amount : '', Balance: balance })
+    pendingText = []
+    pendingNumbers = []
+  }
+  for (const line of statementLines) {
+    const date = line.match(/^(\d{1,2}\s+[A-Za-z]{3,9}\s+\d{2,4}|\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4}|\d{4}[\/-]\d{1,2}[\/-]\d{1,2})$/)
+    if (date) { flush(); current = date[1]; continue }
+    const number = line.match(/^(?:[$€£₹]\s*)?\(?\d[\d,]*(?:\.\d{2})?\)?$/)
+    if (number) pendingNumbers.push(Number(line.replace(/[^\d.]/g, '')))
+    else if (current && !/^(Date|Description|Reference|Debit|Credit|Balance|Currency)$/i.test(line)) pendingText.push(line)
+  }
+  flush()
+  if (rows.length) return rows
+
+  // Normalized text fallback: PDF.js may insert newlines between every cell.
+  const normalized = raw.replace(/[|\u00a0]+/g, ' ').replace(/\s+/g, ' ').trim()
+  const recordPattern = /(?:^|\s)(\d{1,2}\s+[A-Za-z]{3,9}\s+\d{2,4}|\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4}|\d{4}[\/-]\d{1,2}[\/-]\d{1,2})(.*?)(?=\s+(?:\d{1,2}\s+[A-Za-z]{3,9}\s+\d{2,4}|\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4}|\d{4}[\/-]\d{1,2}[\/-]\d{1,2})|$)/g
+  let priorBalance = null
+  for (const match of normalized.matchAll(recordPattern)) {
+    const date = match[1]
+    const body = match[2].trim()
+    const numbers = [...body.matchAll(/(?:[$€£₹]\s*)?\(?\d[\d,]*(?:\.\d{2})?\)?/g)]
+    if (numbers.length < 2) continue
+    const values = numbers.map((item) => Number(item[0].replace(/[^\d.]/g, ''))).filter(Number.isFinite)
+    const balance = values.at(-1)
+    const amount = values.at(-2)
+    if (!Number.isFinite(balance)) continue
+    const firstNumber = numbers[0].index ?? body.length
+    const description = body.slice(0, firstNumber).replace(/\s+(?:REF|PAY|ELEC|CARD|INV|TRF|FEE|INS|INT)[-\w]+$/i, '').trim()
+    const delta = priorBalance === null ? 0 : balance - priorBalance
+    rows.push({ Date: date, Description: description || 'Bank transaction', Debit: delta < 0 ? amount : '', Credit: delta > 0 ? amount : '', Balance: balance })
+    priorBalance = balance
   }
   return rows
 }
@@ -92,8 +137,11 @@ async function extractPdf(file, onProgress) {
       raw += `${pageText}\n`
     }
 
-    if (hasText) return raw
+    if (hasText && parseRows(raw).length) return raw
 
+    // A PDF can contain decorative text without usable transaction rows. Run local OCR
+    // instead of stopping early so scanned and flattened bank statements still convert.
+    raw = hasText ? '' : raw
     onProgress?.('Scanning pages locally…')
     const { createWorker } = await import('tesseract.js')
     const worker = await createWorker('eng')
