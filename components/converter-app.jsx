@@ -41,6 +41,22 @@ function parseRows(raw) {
       Balance: value(transactionColumns[2][0]),
     })
   }
+  if (rows.length) return rows
+
+  // PDF text layers often split columns into separate text items. Re-scan date-delimited blocks
+  // so a statement still converts when the visual line layout is not preserved by PDF.js.
+  const blocks = raw.replace(/\r/g, ' ').replace(/\n+/g, ' ').split(/(?=\b\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4}\b)/).map((block) => block.trim()).filter(Boolean)
+  for (const block of blocks) {
+    const dateMatch = block.match(/^(\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4})\s+/)
+    if (!dateMatch) continue
+    const tail = block.slice(dateMatch[0].length)
+    const values = [...tail.matchAll(/(?:—|–|[-+]?\(?\s*(?:[$€£₹]\s*)?\d[\d,]*(?:\.\d{2})?\)?)/g)].slice(-3)
+    if (values.length < 3) continue
+    const firstValue = values[0].index ?? tail.length
+    const description = tail.slice(0, firstValue).replace(/\s+(?:[A-Z]{2,}[A-Z0-9-]*|[A-Z0-9]{4,})$/, '').trim()
+    const value = (text) => /^[—–-]$/.test(text.trim()) ? '' : Math.abs(Number(text.replace(/[^\d.-]/g, '')) || 0)
+    rows.push({ Date: dateMatch[1], Description: description || 'Bank transaction', Debit: value(values[0][0]), Credit: value(values[1][0]), Balance: value(values[2][0]) })
+  }
   return rows
 }
 
