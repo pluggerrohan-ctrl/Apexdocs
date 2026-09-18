@@ -88,7 +88,23 @@ export default function ConverterApp({ bank }) {
     } catch { setStatus('The file could not be converted locally. Please try another PDF.') }
   }
 
-  const restore = async () => setStatus(licenseKey.trim() ? 'License recovery is ready for your connected payment registry.' : 'Enter your License Key to restore credits.')
+  const restore = async () => {
+    if (!licenseKey.trim()) return setStatus('Enter your License Key to restore credits.')
+    setStatus('Checking your license securely…')
+    try {
+      const response = await fetch('/api/credits', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'restore', licenseKey: licenseKey.trim() }),
+      })
+      const result = await response.json()
+      if (!response.ok || !result.ok) return setStatus(result.error || 'License recovery is unavailable.')
+      saveCredits(Number(result.credits) || 0)
+      setStatus('Balance restored successfully.')
+    } catch {
+      setStatus('License recovery is unavailable right now.')
+    }
+  }
   const jumpTo = (id) => { setMenuOpen(false); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }) }
 
   return <div className="site-shell">
