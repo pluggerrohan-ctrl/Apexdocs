@@ -20,7 +20,18 @@ function getCredentials() {
   const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON
   if (!raw) throw new Error('GOOGLE_SERVICE_ACCOUNT_JSON is not configured')
 
-  const credentials = JSON.parse(raw)
+  let credentials
+  try {
+    credentials = JSON.parse(raw)
+    if (typeof credentials === 'string') credentials = JSON.parse(credentials)
+  } catch {
+    throw new Error('GOOGLE_SERVICE_ACCOUNT_JSON must contain valid service-account JSON')
+  }
+
+  if (typeof credentials.private_key === 'string') {
+    credentials.private_key = credentials.private_key.replace(/\\\\n/g, '\\n')
+  }
+
   if (!credentials.client_email || !credentials.private_key) {
     throw new Error('Service account JSON is missing client_email or private_key')
   }
