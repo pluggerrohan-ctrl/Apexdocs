@@ -41,6 +41,7 @@ function getCredentialSets() {
   const candidates = [
     { name: 'GOOGLE_SERVICE_ACCOUNT_JSON', raw: process.env.GOOGLE_SERVICE_ACCOUNT_JSON },
     { name: 'GOOGLE_SERVICE_ACCOUNT_JSON_2', raw: process.env.GOOGLE_SERVICE_ACCOUNT_JSON_2 },
+    { name: 'GOOGLE_SERVICE_ACCOUNT_JSON_3', raw: process.env.GOOGLE_SERVICE_ACCOUNT_JSON_3 },
   ]
 
   const sets = []
