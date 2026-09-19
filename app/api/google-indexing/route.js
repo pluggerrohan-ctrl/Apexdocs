@@ -40,7 +40,8 @@ export async function POST(request) {
       scopes: ['https://www.googleapis.com/auth/indexing'],
     })
     const indexing = google.indexing({ version: 'v3', auth })
-    const urls = getUrls()
+    // Google Indexing API requests are intentionally capped at 200 per run.
+    const urls = getUrls().slice(0, 200)
     const results = []
 
     for (const url of urls) {
