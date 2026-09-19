@@ -6,6 +6,7 @@ export default function sitemap() {
   const routes = [
     { path: '/', priority: 1, changeFrequency: 'weekly' },
     { path: '/pdfconverter', priority: 0.9, changeFrequency: 'weekly' },
+    { path: '/all-banks', priority: 0.7, changeFrequency: 'weekly' },
     { path: '/payment/success', priority: 0.3, changeFrequency: 'monthly' },
   ]
 

@@ -2303,5 +2303,1745 @@
     "name": "National Bank of Bahrain UAE",
     "country": "UAE",
     "slug": "national-bank-of-bahrain-uae"
+  },
+  {
+    "name": "American National Bank of Minnesota",
+    "country": "USA",
+    "slug": "american-national-bank-of-minnesota"
+  },
+  {
+    "name": "American National Bank and Trust",
+    "country": "USA",
+    "slug": "american-national-bank-and-trust"
+  },
+  {
+    "name": "American National Bank",
+    "country": "USA",
+    "slug": "american-national-bank"
+  },
+  {
+    "name": "American Riviera Bank",
+    "country": "USA",
+    "slug": "american-riviera-bank"
+  },
+  {
+    "name": "American River Bank",
+    "country": "USA",
+    "slug": "american-river-bank"
+  },
+  {
+    "name": "American State Bank",
+    "country": "USA",
+    "slug": "american-state-bank"
+  },
+  {
+    "name": "American Trust Bank",
+    "country": "USA",
+    "slug": "american-trust-bank"
+  },
+  {
+    "name": "Anb Bank",
+    "country": "USA",
+    "slug": "anb-bank"
+  },
+  {
+    "name": "Anderson Brothers Bank",
+    "country": "USA",
+    "slug": "anderson-brothers-bank"
+  },
+  {
+    "name": "Bank of Ann Arbor",
+    "country": "USA",
+    "slug": "bank-of-ann-arbor"
+  },
+  {
+    "name": "Bank of Blue Valley",
+    "country": "USA",
+    "slug": "bank-of-blue-valley"
+  },
+  {
+    "name": "Bank of Bird-in-Hand",
+    "country": "USA",
+    "slug": "bank-of-bird-in-hand"
+  },
+  {
+    "name": "Bank of Canton",
+    "country": "USA",
+    "slug": "bank-of-canton"
+  },
+  {
+    "name": "Bank of Central Florida",
+    "country": "USA",
+    "slug": "bank-of-central-florida"
+  },
+  {
+    "name": "Bank of Clarke County",
+    "country": "USA",
+    "slug": "bank-of-clarke-county"
+  },
+  {
+    "name": "Bank of Commerce",
+    "country": "USA",
+    "slug": "bank-of-commerce"
+  },
+  {
+    "name": "Bank of Colorado",
+    "country": "USA",
+    "slug": "bank-of-colorado"
+  },
+  {
+    "name": "Bank of Crockett",
+    "country": "USA",
+    "slug": "bank-of-crockett"
+  },
+  {
+    "name": "Bank of Cyprus",
+    "country": "USA",
+    "slug": "bank-of-cyprus"
+  },
+  {
+    "name": "Bank of Dade",
+    "country": "USA",
+    "slug": "bank-of-dade"
+  },
+  {
+    "name": "Bank of Eastman",
+    "country": "USA",
+    "slug": "bank-of-eastman"
+  },
+  {
+    "name": "Bank of Elk River",
+    "country": "USA",
+    "slug": "bank-of-elk-river"
+  },
+  {
+    "name": "Bank of England",
+    "country": "USA",
+    "slug": "bank-of-england"
+  },
+  {
+    "name": "Bank of Essex",
+    "country": "USA",
+    "slug": "bank-of-essex"
+  },
+  {
+    "name": "Bank of Franklin County",
+    "country": "USA",
+    "slug": "bank-of-franklin-county"
+  },
+  {
+    "name": "Bank of Georgetown",
+    "country": "USA",
+    "slug": "bank-of-georgetown"
+  },
+  {
+    "name": "Bank of Greeleyville",
+    "country": "USA",
+    "slug": "bank-of-greeleyville"
+  },
+  {
+    "name": "Bank of Hays",
+    "country": "USA",
+    "slug": "bank-of-hays"
+  },
+  {
+    "name": "Bank of Hillsboro",
+    "country": "USA",
+    "slug": "bank-of-hillsboro"
+  },
+  {
+    "name": "Bank of Jackson",
+    "country": "USA",
+    "slug": "bank-of-jackson"
+  },
+  {
+    "name": "Bank of Labor",
+    "country": "USA",
+    "slug": "bank-of-labor"
+  },
+  {
+    "name": "Bank of Louisiana",
+    "country": "USA",
+    "slug": "bank-of-louisiana"
+  },
+  {
+    "name": "Bank of McKenney",
+    "country": "USA",
+    "slug": "bank-of-mckenney"
+  },
+  {
+    "name": "Bank of Missouri",
+    "country": "USA",
+    "slug": "bank-of-missouri"
+  },
+  {
+    "name": "Bank of New Hampshire",
+    "country": "USA",
+    "slug": "bank-of-new-hampshire"
+  },
+  {
+    "name": "Bank of Newington",
+    "country": "USA",
+    "slug": "bank-of-newington"
+  },
+  {
+    "name": "Bank of New York Mellon",
+    "country": "USA",
+    "slug": "bank-of-new-york-mellon"
+  },
+  {
+    "name": "Bank of Ocean City",
+    "country": "USA",
+    "slug": "bank-of-ocean-city"
+  },
+  {
+    "name": "Bank of Prairie Village",
+    "country": "USA",
+    "slug": "bank-of-prairie-village"
+  },
+  {
+    "name": "Bank of Richmond",
+    "country": "USA",
+    "slug": "bank-of-richmond"
+  },
+  {
+    "name": "Bank of San Francisco",
+    "country": "USA",
+    "slug": "bank-of-san-francisco"
+  },
+  {
+    "name": "Bank of Southside Virginia",
+    "country": "USA",
+    "slug": "bank-of-southside-virginia"
+  },
+  {
+    "name": "Bank of St. Francisville",
+    "country": "USA",
+    "slug": "bank-of-st-francisville"
+  },
+  {
+    "name": "Bank of Tampa",
+    "country": "USA",
+    "slug": "bank-of-tampa"
+  },
+  {
+    "name": "Bank of Tennessee",
+    "country": "USA",
+    "slug": "bank-of-tennessee"
+  },
+  {
+    "name": "Bank of the James",
+    "country": "USA",
+    "slug": "bank-of-the-james"
+  },
+  {
+    "name": "Bank of the Lakes",
+    "country": "USA",
+    "slug": "bank-of-the-lakes"
+  },
+  {
+    "name": "Bank of the Pacific",
+    "country": "USA",
+    "slug": "bank-of-the-pacific"
+  },
+  {
+    "name": "Bank of Travelers Rest",
+    "country": "USA",
+    "slug": "bank-of-travelers-rest"
+  },
+  {
+    "name": "Bank of Vernon",
+    "country": "USA",
+    "slug": "bank-of-vernon"
+  },
+  {
+    "name": "Bank of Walker County",
+    "country": "USA",
+    "slug": "bank-of-walker-county"
+  },
+  {
+    "name": "Bank of Zachary",
+    "country": "USA",
+    "slug": "bank-of-zachary"
+  },
+  {
+    "name": "Bank of America Private Bank",
+    "country": "USA",
+    "slug": "bank-of-america-private-bank"
+  },
+  {
+    "name": "BankFirst Financial Services",
+    "country": "USA",
+    "slug": "bankfirst-financial-services"
+  },
+  {
+    "name": "BankFive",
+    "country": "USA",
+    "slug": "bankfive"
+  },
+  {
+    "name": "Bank7",
+    "country": "USA",
+    "slug": "bank7"
+  },
+  {
+    "name": "Bankers Trust Company",
+    "country": "USA",
+    "slug": "bankers-trust-company"
+  },
+  {
+    "name": "BankVista",
+    "country": "USA",
+    "slug": "bankvista"
+  },
+  {
+    "name": "Banterra Bank",
+    "country": "USA",
+    "slug": "banterra-bank"
+  },
+  {
+    "name": "Bar Harbor Bank & Trust",
+    "country": "USA",
+    "slug": "bar-harbor-bank-and-trust"
+  },
+  {
+    "name": "BayVanguard Bank",
+    "country": "USA",
+    "slug": "bayvanguard-bank"
+  },
+  {
+    "name": "BCB Bank",
+    "country": "USA",
+    "slug": "bcb-bank"
+  },
+  {
+    "name": "BCB Community Bank",
+    "country": "USA",
+    "slug": "bcb-community-bank"
+  },
+  {
+    "name": "Beacon Community Bank",
+    "country": "USA",
+    "slug": "beacon-community-bank"
+  },
+  {
+    "name": "Beneficial State Bank",
+    "country": "USA",
+    "slug": "beneficial-state-bank"
+  },
+  {
+    "name": "Blue Ridge Bank",
+    "country": "USA",
+    "slug": "blue-ridge-bank"
+  },
+  {
+    "name": "Blue Ridge Bankshares",
+    "country": "USA",
+    "slug": "blue-ridge-bankshares"
+  },
+  {
+    "name": "Blue Ridge Bank and Trust",
+    "country": "USA",
+    "slug": "blue-ridge-bank-and-trust"
+  },
+  {
+    "name": "Blue Foundry Bank",
+    "country": "USA",
+    "slug": "blue-foundry-bank"
+  },
+  {
+    "name": "Bogota Savings Bank",
+    "country": "USA",
+    "slug": "bogota-savings-bank"
+  },
+  {
+    "name": "BancCentral",
+    "country": "USA",
+    "slug": "banccentral"
+  },
+  {
+    "name": "BankFirst",
+    "country": "USA",
+    "slug": "bankfirst"
+  },
+  {
+    "name": "Banesco USA",
+    "country": "USA",
+    "slug": "banesco-usa"
+  },
+  {
+    "name": "BayFirst Financial",
+    "country": "USA",
+    "slug": "bayfirst-financial"
+  },
+  {
+    "name": "Bendena State Bank",
+    "country": "USA",
+    "slug": "bendena-state-bank"
+  },
+  {
+    "name": "Blackhawk Bank",
+    "country": "USA",
+    "slug": "blackhawk-bank"
+  },
+  {
+    "name": "Bravera Bank",
+    "country": "USA",
+    "slug": "bravera-bank"
+  },
+  {
+    "name": "Bridgewater Bank",
+    "country": "USA",
+    "slug": "bridgewater-bank"
+  },
+  {
+    "name": "Brunswick Bank & Trust",
+    "country": "USA",
+    "slug": "brunswick-bank-and-trust"
+  },
+  {
+    "name": "Buckeye Community Bank",
+    "country": "USA",
+    "slug": "buckeye-community-bank"
+  },
+  {
+    "name": "C&N Bank",
+    "country": "USA",
+    "slug": "candn-bank"
+  },
+  {
+    "name": "C&N",
+    "country": "USA",
+    "slug": "candn"
+  },
+  {
+    "name": "Caldwell Bank & Trust",
+    "country": "USA",
+    "slug": "caldwell-bank-and-trust"
+  },
+  {
+    "name": "Camden National Bank",
+    "country": "USA",
+    "slug": "camden-national-bank"
+  },
+  {
+    "name": "Capital Community Bank",
+    "country": "USA",
+    "slug": "capital-community-bank"
+  },
+  {
+    "name": "Capital Bank",
+    "country": "USA",
+    "slug": "capital-bank"
+  },
+  {
+    "name": "Capital City Bank",
+    "country": "USA",
+    "slug": "capital-city-bank"
+  },
+  {
+    "name": "Carolina Bank",
+    "country": "USA",
+    "slug": "carolina-bank"
+  },
+  {
+    "name": "Carrollton Bank",
+    "country": "USA",
+    "slug": "carrollton-bank"
+  },
+  {
+    "name": "CB&S Bank",
+    "country": "USA",
+    "slug": "cbands-bank"
+  },
+  {
+    "name": "CBI Bank & Trust",
+    "country": "USA",
+    "slug": "cbi-bank-and-trust"
+  },
+  {
+    "name": "Central Bank & Trust",
+    "country": "USA",
+    "slug": "central-bank-and-trust"
+  },
+  {
+    "name": "Central Bank of the Midwest",
+    "country": "USA",
+    "slug": "central-bank-of-the-midwest"
+  },
+  {
+    "name": "Century Bank",
+    "country": "USA",
+    "slug": "century-bank"
+  },
+  {
+    "name": "Century Bank and Trust",
+    "country": "USA",
+    "slug": "century-bank-and-trust"
+  },
+  {
+    "name": "Charter Bank",
+    "country": "USA",
+    "slug": "charter-bank"
+  },
+  {
+    "name": "Chase Bank",
+    "country": "USA",
+    "slug": "chase-bank"
+  },
+  {
+    "name": "Chelsea Groton Bank",
+    "country": "USA",
+    "slug": "chelsea-groton-bank"
+  },
+  {
+    "name": "Citizens Bank of Edmond",
+    "country": "USA",
+    "slug": "citizens-bank-of-edmond"
+  },
+  {
+    "name": "Citizens Bank of Kansas",
+    "country": "USA",
+    "slug": "citizens-bank-of-kansas"
+  },
+  {
+    "name": "Citizens Bank of Las Cruces",
+    "country": "USA",
+    "slug": "citizens-bank-of-las-cruces"
+  },
+  {
+    "name": "Citizens Bank of Mukwonago",
+    "country": "USA",
+    "slug": "citizens-bank-of-mukwonago"
+  },
+  {
+    "name": "Citizens Bank of Rogersville",
+    "country": "USA",
+    "slug": "citizens-bank-of-rogersville"
+  },
+  {
+    "name": "Citizens Bank of the South",
+    "country": "USA",
+    "slug": "citizens-bank-of-the-south"
+  },
+  {
+    "name": "Citizens Bank & Trust",
+    "country": "USA",
+    "slug": "citizens-bank-and-trust"
+  },
+  {
+    "name": "Citizens Business Bank",
+    "country": "USA",
+    "slug": "citizens-business-bank"
+  },
+  {
+    "name": "Citizens Independent Bank",
+    "country": "USA",
+    "slug": "citizens-independent-bank"
+  },
+  {
+    "name": "Citizens State Bank",
+    "country": "USA",
+    "slug": "citizens-state-bank"
+  },
+  {
+    "name": "Citizens Tri-County Bank",
+    "country": "USA",
+    "slug": "citizens-tri-county-bank"
+  },
+  {
+    "name": "City Bank & Trust",
+    "country": "USA",
+    "slug": "city-bank-and-trust"
+  },
+  {
+    "name": "Clackamas County Bank",
+    "country": "USA",
+    "slug": "clackamas-county-bank"
+  },
+  {
+    "name": "Classic Bank",
+    "country": "USA",
+    "slug": "classic-bank"
+  },
+  {
+    "name": "Coastal Bank & Trust",
+    "country": "USA",
+    "slug": "coastal-bank-and-trust"
+  },
+  {
+    "name": "Coastal Carolina National Bank",
+    "country": "USA",
+    "slug": "coastal-carolina-national-bank"
+  },
+  {
+    "name": "CoastalStates Bank",
+    "country": "USA",
+    "slug": "coastalstates-bank"
+  },
+  {
+    "name": "Colonial Savings",
+    "country": "USA",
+    "slug": "colonial-savings"
+  },
+  {
+    "name": "Colorado Business Bank",
+    "country": "USA",
+    "slug": "colorado-business-bank"
+  },
+  {
+    "name": "Community Bank & Trust",
+    "country": "USA",
+    "slug": "community-bank-and-trust"
+  },
+  {
+    "name": "Community Bank of Mississippi",
+    "country": "USA",
+    "slug": "community-bank-of-mississippi"
+  },
+  {
+    "name": "Community Bank of Louisiana",
+    "country": "USA",
+    "slug": "community-bank-of-louisiana"
+  },
+  {
+    "name": "Community Bank of the Chesapeake",
+    "country": "USA",
+    "slug": "community-bank-of-the-chesapeake"
+  },
+  {
+    "name": "Community First Bank",
+    "country": "USA",
+    "slug": "community-first-bank"
+  },
+  {
+    "name": "Community National Bank",
+    "country": "USA",
+    "slug": "community-national-bank"
+  },
+  {
+    "name": "Community National Bank & Trust",
+    "country": "USA",
+    "slug": "community-national-bank-and-trust"
+  },
+  {
+    "name": "Community Savings Bank",
+    "country": "USA",
+    "slug": "community-savings-bank"
+  },
+  {
+    "name": "Community State Bank",
+    "country": "USA",
+    "slug": "community-state-bank"
+  },
+  {
+    "name": "Community Trust Bank",
+    "country": "USA",
+    "slug": "community-trust-bank"
+  },
+  {
+    "name": "Community West Bank",
+    "country": "USA",
+    "slug": "community-west-bank"
+  },
+  {
+    "name": "Cornerstone Bank",
+    "country": "USA",
+    "slug": "cornerstone-bank"
+  },
+  {
+    "name": "Cornerstone Community Bank",
+    "country": "USA",
+    "slug": "cornerstone-community-bank"
+  },
+  {
+    "name": "Crescent Bank",
+    "country": "USA",
+    "slug": "crescent-bank"
+  },
+  {
+    "name": "Cross River Bank",
+    "country": "USA",
+    "slug": "cross-river-bank"
+  },
+  {
+    "name": "Cumberland County Bank",
+    "country": "USA",
+    "slug": "cumberland-county-bank"
+  },
+  {
+    "name": "Cumberland Security Bank",
+    "country": "USA",
+    "slug": "cumberland-security-bank"
+  },
+  {
+    "name": "Dart Bank",
+    "country": "USA",
+    "slug": "dart-bank"
+  },
+  {
+    "name": "Davenport Bank & Trust",
+    "country": "USA",
+    "slug": "davenport-bank-and-trust"
+  },
+  {
+    "name": "Dawson Bank",
+    "country": "USA",
+    "slug": "dawson-bank"
+  },
+  {
+    "name": "Deutsche Bank Trust Company Americas",
+    "country": "USA",
+    "slug": "deutsche-bank-trust-company-americas"
+  },
+  {
+    "name": "Diamond Bank",
+    "country": "USA",
+    "slug": "diamond-bank"
+  },
+  {
+    "name": "DNB First",
+    "country": "USA",
+    "slug": "dnb-first"
+  },
+  {
+    "name": "Eastern Colorado Bank",
+    "country": "USA",
+    "slug": "eastern-colorado-bank"
+  },
+  {
+    "name": "Eastern National Bank",
+    "country": "USA",
+    "slug": "eastern-national-bank"
+  },
+  {
+    "name": "Essex Bank",
+    "country": "USA",
+    "slug": "essex-bank"
+  },
+  {
+    "name": "EverBank",
+    "country": "USA",
+    "slug": "everbank"
+  },
+  {
+    "name": "Everett Bank",
+    "country": "USA",
+    "slug": "everett-bank"
+  },
+  {
+    "name": "Farmers & Merchants Bank",
+    "country": "USA",
+    "slug": "farmers-and-merchants-bank"
+  },
+  {
+    "name": "Farmers and Merchants Bank",
+    "country": "USA",
+    "slug": "farmers-and-merchants-bank-2"
+  },
+  {
+    "name": "Farmers State Bank",
+    "country": "USA",
+    "slug": "farmers-state-bank"
+  },
+  {
+    "name": "Farmers State Bank of Alto Pass",
+    "country": "USA",
+    "slug": "farmers-state-bank-of-alto-pass"
+  },
+  {
+    "name": "Farmers State Bank of Hartland",
+    "country": "USA",
+    "slug": "farmers-state-bank-of-hartland"
+  },
+  {
+    "name": "Farmers State Bank of Waterloo",
+    "country": "USA",
+    "slug": "farmers-state-bank-of-waterloo"
+  },
+  {
+    "name": "Farmers-Merchants National Bank",
+    "country": "USA",
+    "slug": "farmers-merchants-national-bank"
+  },
+  {
+    "name": "F&M Bank",
+    "country": "USA",
+    "slug": "fandm-bank"
+  },
+  {
+    "name": "F&M Bank and Trust",
+    "country": "USA",
+    "slug": "fandm-bank-and-trust"
+  },
+  {
+    "name": "F&M Bank & Trust",
+    "country": "USA",
+    "slug": "fandm-bank-and-trust-2"
+  },
+  {
+    "name": "F&M Trust",
+    "country": "USA",
+    "slug": "fandm-trust"
+  },
+  {
+    "name": "First American Bank",
+    "country": "USA",
+    "slug": "first-american-bank"
+  },
+  {
+    "name": "First Bank & Trust",
+    "country": "USA",
+    "slug": "first-bank-and-trust"
+  },
+  {
+    "name": "First Bank of Alabama",
+    "country": "USA",
+    "slug": "first-bank-of-alabama"
+  },
+  {
+    "name": "First Bank of Boaz",
+    "country": "USA",
+    "slug": "first-bank-of-boaz"
+  },
+  {
+    "name": "First Bank of the Lake",
+    "country": "USA",
+    "slug": "first-bank-of-the-lake"
+  },
+  {
+    "name": "First Bank of Wyoming",
+    "country": "USA",
+    "slug": "first-bank-of-wyoming"
+  },
+  {
+    "name": "First Bank Texas",
+    "country": "USA",
+    "slug": "first-bank-texas"
+  },
+  {
+    "name": "First Bank Virginia",
+    "country": "USA",
+    "slug": "first-bank-virginia"
+  },
+  {
+    "name": "First Bankers Trust Services",
+    "country": "USA",
+    "slug": "first-bankers-trust-services"
+  },
+  {
+    "name": "First Capital Bank",
+    "country": "USA",
+    "slug": "first-capital-bank"
+  },
+  {
+    "name": "First Central Bank",
+    "country": "USA",
+    "slug": "first-central-bank"
+  },
+  {
+    "name": "First Citizens Community Bank",
+    "country": "USA",
+    "slug": "first-citizens-community-bank"
+  },
+  {
+    "name": "First Citizens National Bank",
+    "country": "USA",
+    "slug": "first-citizens-national-bank"
+  },
+  {
+    "name": "First City Bank of Florida",
+    "country": "USA",
+    "slug": "first-city-bank-of-florida"
+  },
+  {
+    "name": "First Community Bank of East Tennessee",
+    "country": "USA",
+    "slug": "first-community-bank-of-east-tennessee"
+  },
+  {
+    "name": "First Community Bank of Moultrie County",
+    "country": "USA",
+    "slug": "first-community-bank-of-moultrie-county"
+  },
+  {
+    "name": "First County Bank",
+    "country": "USA",
+    "slug": "first-county-bank"
+  },
+  {
+    "name": "First Federal Savings Bank",
+    "country": "USA",
+    "slug": "first-federal-savings-bank"
+  },
+  {
+    "name": "First Federal Bank of Kansas City",
+    "country": "USA",
+    "slug": "first-federal-bank-of-kansas-city"
+  },
+  {
+    "name": "First Financial Bankshares",
+    "country": "USA",
+    "slug": "first-financial-bankshares"
+  },
+  {
+    "name": "First Guaranty Bank",
+    "country": "USA",
+    "slug": "first-guaranty-bank"
+  },
+  {
+    "name": "First Harrison Bank",
+    "country": "USA",
+    "slug": "first-harrison-bank"
+  },
+  {
+    "name": "First Heritage Bank",
+    "country": "USA",
+    "slug": "first-heritage-bank"
+  },
+  {
+    "name": "First Hope Bank",
+    "country": "USA",
+    "slug": "first-hope-bank"
+  },
+  {
+    "name": "First Independent Bank",
+    "country": "USA",
+    "slug": "first-independent-bank"
+  },
+  {
+    "name": "First Interstate BancSystem",
+    "country": "USA",
+    "slug": "first-interstate-bancsystem"
+  },
+  {
+    "name": "First International Bank",
+    "country": "USA",
+    "slug": "first-international-bank"
+  },
+  {
+    "name": "First Liberty Bank",
+    "country": "USA",
+    "slug": "first-liberty-bank"
+  },
+  {
+    "name": "First National Bank in Sioux Falls",
+    "country": "USA",
+    "slug": "first-national-bank-in-sioux-falls"
+  },
+  {
+    "name": "First National Bank of America",
+    "country": "USA",
+    "slug": "first-national-bank-of-america"
+  },
+  {
+    "name": "First National Bank of Bastrop",
+    "country": "USA",
+    "slug": "first-national-bank-of-bastrop"
+  },
+  {
+    "name": "First National Bank of Hutchinson",
+    "country": "USA",
+    "slug": "first-national-bank-of-hutchinson"
+  },
+  {
+    "name": "First National Bank of Michigan",
+    "country": "USA",
+    "slug": "first-national-bank-of-michigan"
+  },
+  {
+    "name": "First National Bank of Scotia",
+    "country": "USA",
+    "slug": "first-national-bank-of-scotia"
+  },
+  {
+    "name": "First National Bank & Trust",
+    "country": "USA",
+    "slug": "first-national-bank-and-trust"
+  },
+  {
+    "name": "First National Community Bank",
+    "country": "USA",
+    "slug": "first-national-community-bank"
+  },
+  {
+    "name": "First Nebraska Bank",
+    "country": "USA",
+    "slug": "first-nebraska-bank"
+  },
+  {
+    "name": "First New Mexico Bank",
+    "country": "USA",
+    "slug": "first-new-mexico-bank"
+  },
+  {
+    "name": "First Northwest Bank",
+    "country": "USA",
+    "slug": "first-northwest-bank"
+  },
+  {
+    "name": "First Palmetto Bank",
+    "country": "USA",
+    "slug": "first-palmetto-bank"
+  },
+  {
+    "name": "First Piedmont Federal Savings Bank",
+    "country": "USA",
+    "slug": "first-piedmont-federal-savings-bank"
+  },
+  {
+    "name": "First State Bank",
+    "country": "USA",
+    "slug": "first-state-bank"
+  },
+  {
+    "name": "First State Bank of the Southeast",
+    "country": "USA",
+    "slug": "first-state-bank-of-the-southeast"
+  },
+  {
+    "name": "First State Bank of St. Charles",
+    "country": "USA",
+    "slug": "first-state-bank-of-st-charles"
+  },
+  {
+    "name": "First State Bank & Trust",
+    "country": "USA",
+    "slug": "first-state-bank-and-trust"
+  },
+  {
+    "name": "First Western Trust Bank",
+    "country": "USA",
+    "slug": "first-western-trust-bank"
+  },
+  {
+    "name": "Foothills Bank",
+    "country": "USA",
+    "slug": "foothills-bank"
+  },
+  {
+    "name": "Fortifi Bank",
+    "country": "USA",
+    "slug": "fortifi-bank"
+  },
+  {
+    "name": "Foundation Bank",
+    "country": "USA",
+    "slug": "foundation-bank"
+  },
+  {
+    "name": "Franklin Savings Bank",
+    "country": "USA",
+    "slug": "franklin-savings-bank"
+  },
+  {
+    "name": "Frontier Bank",
+    "country": "USA",
+    "slug": "frontier-bank"
+  },
+  {
+    "name": "GBC International Bank",
+    "country": "USA",
+    "slug": "gbc-international-bank"
+  },
+  {
+    "name": "Georgia Banking Company",
+    "country": "USA",
+    "slug": "georgia-banking-company"
+  },
+  {
+    "name": "Georgia's Own Credit Union Bank",
+    "country": "USA",
+    "slug": "georgia-s-own-credit-union-bank"
+  },
+  {
+    "name": "Glenview State Bank",
+    "country": "USA",
+    "slug": "glenview-state-bank"
+  },
+  {
+    "name": "Greenwoods State Bank",
+    "country": "USA",
+    "slug": "greenwoods-state-bank"
+  },
+  {
+    "name": "Guaranty Bank & Trust Company",
+    "country": "USA",
+    "slug": "guaranty-bank-and-trust-company"
+  },
+  {
+    "name": "Gulf Coast Community Bank",
+    "country": "USA",
+    "slug": "gulf-coast-community-bank"
+  },
+  {
+    "name": "HarborOne Bank",
+    "country": "USA",
+    "slug": "harborone-bank"
+  },
+  {
+    "name": "Heritage Bank of the South",
+    "country": "USA",
+    "slug": "heritage-bank-of-the-south"
+  },
+  {
+    "name": "Heritage First Bank",
+    "country": "USA",
+    "slug": "heritage-first-bank"
+  },
+  {
+    "name": "High Plains Bank",
+    "country": "USA",
+    "slug": "high-plains-bank"
+  },
+  {
+    "name": "Hilltop National Bank",
+    "country": "USA",
+    "slug": "hilltop-national-bank"
+  },
+  {
+    "name": "Home Bank",
+    "country": "USA",
+    "slug": "home-bank"
+  },
+  {
+    "name": "Home Federal Bank",
+    "country": "USA",
+    "slug": "home-federal-bank"
+  },
+  {
+    "name": "Home Loan Bank",
+    "country": "USA",
+    "slug": "home-loan-bank"
+  },
+  {
+    "name": "Home Savings Bank",
+    "country": "USA",
+    "slug": "home-savings-bank"
+  },
+  {
+    "name": "HomeTrust Bank",
+    "country": "USA",
+    "slug": "hometrust-bank"
+  },
+  {
+    "name": "Howard Bank",
+    "country": "USA",
+    "slug": "howard-bank"
+  },
+  {
+    "name": "Huron Community Bank",
+    "country": "USA",
+    "slug": "huron-community-bank"
+  },
+  {
+    "name": "Hyperion Bank",
+    "country": "USA",
+    "slug": "hyperion-bank"
+  },
+  {
+    "name": "Idaho First Bank",
+    "country": "USA",
+    "slug": "idaho-first-bank"
+  },
+  {
+    "name": "Illinois Bank & Trust",
+    "country": "USA",
+    "slug": "illinois-bank-and-trust"
+  },
+  {
+    "name": "InBank",
+    "country": "USA",
+    "slug": "inbank"
+  },
+  {
+    "name": "Independent Bank of Texas",
+    "country": "USA",
+    "slug": "independent-bank-of-texas"
+  },
+  {
+    "name": "Independent Bankers Bank",
+    "country": "USA",
+    "slug": "independent-bankers-bank"
+  },
+  {
+    "name": "Inland Bank",
+    "country": "USA",
+    "slug": "inland-bank"
+  },
+  {
+    "name": "InterBank",
+    "country": "USA",
+    "slug": "interbank"
+  },
+  {
+    "name": "International Bank of Chicago",
+    "country": "USA",
+    "slug": "international-bank-of-chicago"
+  },
+  {
+    "name": "Investar Bank",
+    "country": "USA",
+    "slug": "investar-bank"
+  },
+  {
+    "name": "Investors Community Bank",
+    "country": "USA",
+    "slug": "investors-community-bank"
+  },
+  {
+    "name": "Iowa State Bank",
+    "country": "USA",
+    "slug": "iowa-state-bank"
+  },
+  {
+    "name": "JCB Bank",
+    "country": "USA",
+    "slug": "jcb-bank"
+  },
+  {
+    "name": "John Marshall Bank",
+    "country": "USA",
+    "slug": "john-marshall-bank"
+  },
+  {
+    "name": "Jonestown Bank and Trust",
+    "country": "USA",
+    "slug": "jonestown-bank-and-trust"
+  },
+  {
+    "name": "Kearny Bank",
+    "country": "USA",
+    "slug": "kearny-bank"
+  },
+  {
+    "name": "Keystone Bank",
+    "country": "USA",
+    "slug": "keystone-bank"
+  },
+  {
+    "name": "Landmark National Bank",
+    "country": "USA",
+    "slug": "landmark-national-bank"
+  },
+  {
+    "name": "Legacy Bank",
+    "country": "USA",
+    "slug": "legacy-bank"
+  },
+  {
+    "name": "Legacy Bank & Trust",
+    "country": "USA",
+    "slug": "legacy-bank-and-trust"
+  },
+  {
+    "name": "LegacyTexas Bank",
+    "country": "USA",
+    "slug": "legacytexas-bank"
+  },
+  {
+    "name": "Liberty Bank",
+    "country": "USA",
+    "slug": "liberty-bank"
+  },
+  {
+    "name": "Liberty Bank and Trust",
+    "country": "USA",
+    "slug": "liberty-bank-and-trust"
+  },
+  {
+    "name": "Lowell Five Bank",
+    "country": "USA",
+    "slug": "lowell-five-bank"
+  },
+  {
+    "name": "Luther Burbank Savings",
+    "country": "USA",
+    "slug": "luther-burbank-savings"
+  },
+  {
+    "name": "Macatawa Bank",
+    "country": "USA",
+    "slug": "macatawa-bank"
+  },
+  {
+    "name": "Magnolia Bank",
+    "country": "USA",
+    "slug": "magnolia-bank"
+  },
+  {
+    "name": "MainStreet Bank",
+    "country": "USA",
+    "slug": "mainstreet-bank"
+  },
+  {
+    "name": "Marquette Bank",
+    "country": "USA",
+    "slug": "marquette-bank"
+  },
+  {
+    "name": "Maspeth Federal Savings Bank",
+    "country": "USA",
+    "slug": "maspeth-federal-savings-bank"
+  },
+  {
+    "name": "Merchants Bank",
+    "country": "USA",
+    "slug": "merchants-bank"
+  },
+  {
+    "name": "Merchants Bank of Indiana",
+    "country": "USA",
+    "slug": "merchants-bank-of-indiana"
+  },
+  {
+    "name": "Merchants National Bank",
+    "country": "USA",
+    "slug": "merchants-national-bank"
+  },
+  {
+    "name": "Metropolitan Bank",
+    "country": "USA",
+    "slug": "metropolitan-bank"
+  },
+  {
+    "name": "Mid Penn Bank",
+    "country": "USA",
+    "slug": "mid-penn-bank"
+  },
+  {
+    "name": "MidWest America Federal Credit Union Bank",
+    "country": "USA",
+    "slug": "midwest-america-federal-credit-union-bank"
+  },
+  {
+    "name": "Missouri Bank",
+    "country": "USA",
+    "slug": "missouri-bank"
+  },
+  {
+    "name": "MVB Bank",
+    "country": "USA",
+    "slug": "mvb-bank"
+  },
+  {
+    "name": "National Bank of Commerce",
+    "country": "USA",
+    "slug": "national-bank-of-commerce"
+  },
+  {
+    "name": "National Bank of Commerce of Birmingham",
+    "country": "USA",
+    "slug": "national-bank-of-commerce-of-birmingham"
+  },
+  {
+    "name": "National Bank of Indianapolis",
+    "country": "USA",
+    "slug": "national-bank-of-indianapolis"
+  },
+  {
+    "name": "National Bank of Kansas City",
+    "country": "USA",
+    "slug": "national-bank-of-kansas-city"
+  },
+  {
+    "name": "National Bank of Middlefield",
+    "country": "USA",
+    "slug": "national-bank-of-middlefield"
+  },
+  {
+    "name": "National Bank of Arizona",
+    "country": "USA",
+    "slug": "national-bank-of-arizona"
+  },
+  {
+    "name": "National Bank of Blacksburg",
+    "country": "USA",
+    "slug": "national-bank-of-blacksburg"
+  },
+  {
+    "name": "National Bank of Texas",
+    "country": "USA",
+    "slug": "national-bank-of-texas"
+  },
+  {
+    "name": "Neighborhood National Bank",
+    "country": "USA",
+    "slug": "neighborhood-national-bank"
+  },
+  {
+    "name": "New Peoples Bank",
+    "country": "USA",
+    "slug": "new-peoples-bank"
+  },
+  {
+    "name": "New York Community Bank",
+    "country": "USA",
+    "slug": "new-york-community-bank"
+  },
+  {
+    "name": "North American Banking Company",
+    "country": "USA",
+    "slug": "north-american-banking-company"
+  },
+  {
+    "name": "North State Bank",
+    "country": "USA",
+    "slug": "north-state-bank"
+  },
+  {
+    "name": "Northfield Bank",
+    "country": "USA",
+    "slug": "northfield-bank"
+  },
+  {
+    "name": "OakStar Bank",
+    "country": "USA",
+    "slug": "oakstar-bank"
+  },
+  {
+    "name": "Ohnward Bank",
+    "country": "USA",
+    "slug": "ohnward-bank"
+  },
+  {
+    "name": "OptimumBank",
+    "country": "USA",
+    "slug": "optimumbank"
+  },
+  {
+    "name": "Ozark Bank",
+    "country": "USA",
+    "slug": "ozark-bank"
+  },
+  {
+    "name": "Pacific Mercantile Bank",
+    "country": "USA",
+    "slug": "pacific-mercantile-bank"
+  },
+  {
+    "name": "Parke Bank",
+    "country": "USA",
+    "slug": "parke-bank"
+  },
+  {
+    "name": "Patriot Bank",
+    "country": "USA",
+    "slug": "patriot-bank"
+  },
+  {
+    "name": "Peoples Bank Midwest",
+    "country": "USA",
+    "slug": "peoples-bank-midwest"
+  },
+  {
+    "name": "Peoples Bank of Alabama",
+    "country": "USA",
+    "slug": "peoples-bank-of-alabama"
+  },
+  {
+    "name": "Peoples Bank of Commerce",
+    "country": "USA",
+    "slug": "peoples-bank-of-commerce"
+  },
+  {
+    "name": "Peoples State Bank",
+    "country": "USA",
+    "slug": "peoples-state-bank"
+  },
+  {
+    "name": "Pioneer Bank",
+    "country": "USA",
+    "slug": "pioneer-bank"
+  },
+  {
+    "name": "Platte Valley Bank",
+    "country": "USA",
+    "slug": "platte-valley-bank"
+  },
+  {
+    "name": "Prairie Hills Bank",
+    "country": "USA",
+    "slug": "prairie-hills-bank"
+  },
+  {
+    "name": "Premier Bank",
+    "country": "USA",
+    "slug": "premier-bank"
+  },
+  {
+    "name": "Premier Community Bank",
+    "country": "USA",
+    "slug": "premier-community-bank"
+  },
+  {
+    "name": "Prime Meridian Bank",
+    "country": "USA",
+    "slug": "prime-meridian-bank"
+  },
+  {
+    "name": "Quaint Oak Bank",
+    "country": "USA",
+    "slug": "quaint-oak-bank"
+  },
+  {
+    "name": "Quarry Bank",
+    "country": "USA",
+    "slug": "quarry-bank"
+  },
+  {
+    "name": "Republic Bank & Trust",
+    "country": "USA",
+    "slug": "republic-bank-and-trust"
+  },
+  {
+    "name": "RiverHills Bank",
+    "country": "USA",
+    "slug": "riverhills-bank"
+  },
+  {
+    "name": "Sabadell United Bank",
+    "country": "USA",
+    "slug": "sabadell-united-bank"
+  },
+  {
+    "name": "Saco & Biddeford Savings Institution",
+    "country": "USA",
+    "slug": "saco-and-biddeford-savings-institution"
+  },
+  {
+    "name": "Santander Bank",
+    "country": "USA",
+    "slug": "santander-bank"
+  },
+  {
+    "name": "Seacoast National Bank",
+    "country": "USA",
+    "slug": "seacoast-national-bank"
+  },
+  {
+    "name": "Security Bank",
+    "country": "USA",
+    "slug": "security-bank"
+  },
+  {
+    "name": "Security Federal Savings Bank",
+    "country": "USA",
+    "slug": "security-federal-savings-bank"
+  },
+  {
+    "name": "Security National Bank",
+    "country": "USA",
+    "slug": "security-national-bank"
+  },
+  {
+    "name": "Shore United Bank",
+    "country": "USA",
+    "slug": "shore-united-bank"
+  },
+  {
+    "name": "Skagit Bank",
+    "country": "USA",
+    "slug": "skagit-bank"
+  },
+  {
+    "name": "SouthTrust Bank",
+    "country": "USA",
+    "slug": "southtrust-bank"
+  },
+  {
+    "name": "Spring Bank",
+    "country": "USA",
+    "slug": "spring-bank"
+  },
+  {
+    "name": "St. Mary's Bank",
+    "country": "USA",
+    "slug": "st-mary-s-bank"
+  },
+  {
+    "name": "Star Bank",
+    "country": "USA",
+    "slug": "star-bank"
+  },
+  {
+    "name": "Starion Bank",
+    "country": "USA",
+    "slug": "starion-bank"
+  },
+  {
+    "name": "State Bank of India California",
+    "country": "USA",
+    "slug": "state-bank-of-india-california"
+  },
+  {
+    "name": "State Bank of the Lakes",
+    "country": "USA",
+    "slug": "state-bank-of-the-lakes"
+  },
+  {
+    "name": "State Street Bank and Trust Company",
+    "country": "USA",
+    "slug": "state-street-bank-and-trust-company"
+  },
+  {
+    "name": "StonehamBank",
+    "country": "USA",
+    "slug": "stonehambank"
+  },
+  {
+    "name": "Sunflower Bank",
+    "country": "USA",
+    "slug": "sunflower-bank"
+  },
+  {
+    "name": "Sunflower Bank N.A.",
+    "country": "USA",
+    "slug": "sunflower-bank-n-a"
+  },
+  {
+    "name": "T Bank",
+    "country": "USA",
+    "slug": "t-bank"
+  },
+  {
+    "name": "TBK Bank",
+    "country": "USA",
+    "slug": "tbk-bank"
+  },
+  {
+    "name": "Texas Bank and Trust",
+    "country": "USA",
+    "slug": "texas-bank-and-trust"
+  },
+  {
+    "name": "The Bancorp Bank",
+    "country": "USA",
+    "slug": "the-bancorp-bank"
+  },
+  {
+    "name": "The Citizens Bank",
+    "country": "USA",
+    "slug": "the-citizens-bank"
+  },
+  {
+    "name": "The First National Bank",
+    "country": "USA",
+    "slug": "the-first-national-bank"
+  },
+  {
+    "name": "The First National Bank of Long Island",
+    "country": "USA",
+    "slug": "the-first-national-bank-of-long-island"
+  },
+  {
+    "name": "The Huntington National Bank",
+    "country": "USA",
+    "slug": "the-huntington-national-bank"
+  },
+  {
+    "name": "The National Bank of Indianapolis",
+    "country": "USA",
+    "slug": "the-national-bank-of-indianapolis"
+  },
+  {
+    "name": "The PrivateBank",
+    "country": "USA",
+    "slug": "the-privatebank"
+  },
+  {
+    "name": "The Savings Bank",
+    "country": "USA",
+    "slug": "the-savings-bank"
+  },
+  {
+    "name": "Third Coast Bank",
+    "country": "USA",
+    "slug": "third-coast-bank"
+  },
+  {
+    "name": "Triad Bank",
+    "country": "USA",
+    "slug": "triad-bank"
+  },
+  {
+    "name": "TrustCo Bank",
+    "country": "USA",
+    "slug": "trustco-bank"
+  },
+  {
+    "name": "United Fidelity Bank",
+    "country": "USA",
+    "slug": "united-fidelity-bank"
+  },
+  {
+    "name": "United Midwest Savings Bank",
+    "country": "USA",
+    "slug": "united-midwest-savings-bank"
+  },
+  {
+    "name": "United National Bank",
+    "country": "USA",
+    "slug": "united-national-bank"
+  },
+  {
+    "name": "United Prairie Bank",
+    "country": "USA",
+    "slug": "united-prairie-bank"
+  },
+  {
+    "name": "United Security Bank",
+    "country": "USA",
+    "slug": "united-security-bank"
+  },
+  {
+    "name": "United Southern Bank",
+    "country": "USA",
+    "slug": "united-southern-bank"
+  },
+  {
+    "name": "United Texas Bank",
+    "country": "USA",
+    "slug": "united-texas-bank"
+  },
+  {
+    "name": "Unity National Bank",
+    "country": "USA",
+    "slug": "unity-national-bank"
+  },
+  {
+    "name": "WesBanco Bank",
+    "country": "USA",
+    "slug": "wesbanco-bank"
+  },
+  {
+    "name": "West Bank",
+    "country": "USA",
+    "slug": "west-bank"
+  },
+  {
+    "name": "Westamerica Bank",
+    "country": "USA",
+    "slug": "westamerica-bank"
+  },
+  {
+    "name": "Western National Bank",
+    "country": "USA",
+    "slug": "western-national-bank"
+  },
+  {
+    "name": "Western Security Bank",
+    "country": "USA",
+    "slug": "western-security-bank"
+  },
+  {
+    "name": "Whittier Pacific Bank",
+    "country": "USA",
+    "slug": "whittier-pacific-bank"
+  },
+  {
+    "name": "Yadkin Bank",
+    "country": "USA",
+    "slug": "yadkin-bank"
   }
 ]
