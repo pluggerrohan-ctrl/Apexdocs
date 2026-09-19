@@ -10,13 +10,22 @@ export async function generateMetadata({ params }) {
   try {
     const { slug } = await params
     const bank = getBank(slug)
-    if (!bank) return { title: 'ApexDoc | Bank Statement Converter' }
+    if (!bank) {
+      return {
+        title: 'Bank Statement Converter',
+        description: 'Convert bank statement PDFs into clean Excel spreadsheets in your browser.',
+      }
+    }
     return {
-      title: `${bank.name} Bank Statement to Excel Converter | ApexDoc`,
-      description: `Convert a ${bank.name} bank statement PDF into an audit-ready Excel spreadsheet with ApexDoc's private, browser-first converter.`,
+      title: `Convert ${bank.name} Statement PDF to Excel Online`,
+      description: `Convert your ${bank.name} statement PDF to an Excel spreadsheet online with ApexDoc. Private, browser-first processing with no document uploads.`,
+      robots: { index: true, follow: true },
     }
   } catch {
-    return { title: 'ApexDoc | Bank Statement Converter' }
+    return {
+      title: 'Bank Statement Converter',
+      description: 'Convert bank statement PDFs into clean Excel spreadsheets in your browser.',
+    }
   }
 }
 
