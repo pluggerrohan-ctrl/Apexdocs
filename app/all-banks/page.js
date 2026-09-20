@@ -72,9 +72,12 @@ export default function AllBanksPage() {
                 <li key={bank.slug}>
                   <a
                     href={`/banks/${bank.slug}`}
-                    style={{ fontSize: 14, color: '#374151', textDecoration: 'none', lineHeight: 1.5 }}
+                    style={{ display: 'block', fontSize: 14, color: '#374151', textDecoration: 'none', lineHeight: 1.5 }}
                   >
-                    {bank.name} Statement PDF to Excel
+                    <span style={{ display: 'block' }}>{bank.name} Statement PDF to Excel</span>
+                    <span style={{ display: 'block', marginTop: 2, fontSize: 12, color: '#6b7280' }}>
+                      /banks/{bank.slug}
+                    </span>
                   </a>
                 </li>
               ))}
