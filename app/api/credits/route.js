@@ -37,17 +37,24 @@ export async function POST(request) {
   } catch {
     return jsonError('Credit registry URL is invalid.', 503)
   }
-
   try {
-    const upstream = await fetch(target, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', accept: 'application/json' },
-      body: JSON.stringify({ action, ...(action === 'restore' ? { licenseKey } : {}), ip: getClientIp(request) }),
-      cache: 'no-store',
-      signal: AbortSignal.timeout(8000),
-    })
-    const result = await upstream.json().catch(() => null)
-    if (!upstream.ok || !result?.ok) return NextResponse.json({ ok: false, error: result?.error || 'License recovery is unavailable right now.' }, { status: upstream.status >= 400 ? upstream.status : 502 })
+    const paths = action === 'restore' ? ['', '/api/credits', '/credits', '/license/restore'] : ['']
+    let upstream
+    let result
+    for (const path of paths) {
+      const endpoint = new URL(path || target.pathname || '/', target)
+      upstream = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', accept: 'application/json' },
+        body: JSON.stringify({ action, ...(action === 'restore' ? { licenseKey, license_key: licenseKey } : {}), ip: getClientIp(request) }),
+        cache: 'no-store',
+        signal: AbortSignal.timeout(8000),
+      })
+      result = await upstream.json().catch(() => null)
+      if (upstream.ok && result?.ok) break
+      if (upstream.status !== 404 && upstream.status !== 405) break
+    }
+    if (!upstream?.ok || !result?.ok) return NextResponse.json({ ok: false, error: result?.error || 'License recovery is unavailable right now.' }, { status: upstream?.status >= 400 ? upstream.status : 502 })
     if (action === 'quota' || action === 'consume') {
       const remaining = Number(result.remaining)
       if (!Number.isSafeInteger(remaining) || remaining < 0 || remaining > 3) return jsonError('Invalid quota response.', 502)
