@@ -5,13 +5,19 @@ export async function GET(_request, { params }) {
 
   const requestedName = decodeURIComponent(indexnowKey ?? '')
   const isConfiguredKeyFile = requestedName === `${configuredKey}.txt`
+  const publicKey = '22fc07ee50984fb0ae2dd990452ee74b'
+  const isPublicKeyFile = requestedName === `${publicKey}.txt`
   const isLegacyPlaceholderFile = requestedName === 'process.env.keytxt'
 
-  if (!configuredKey || (!isConfiguredKeyFile && !isLegacyPlaceholderFile)) {
+  if (!configuredKey && !isPublicKeyFile) {
     return new Response('Not found', { status: 404 })
   }
 
-  return new Response(configuredKey, {
+  if (!isConfiguredKeyFile && !isPublicKeyFile && !isLegacyPlaceholderFile) {
+    return new Response('Not found', { status: 404 })
+  }
+
+  return new Response(isPublicKeyFile ? publicKey : configuredKey, {
     headers: { 'Content-Type': 'text/plain; charset=utf-8' },
   })
 }
