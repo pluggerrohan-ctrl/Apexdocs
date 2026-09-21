@@ -1,83 +1,99 @@
 import { NextResponse } from 'next/server'
 
 const PDFCO_API = 'https://api.pdf.co/v1'
-const HEADERS = ['Date', 'Description', 'Debit', 'Credit', 'Balance']
-
-function clean(value) {
-  return String(value ?? '').replace(/^['\"]|['\"]$/g, '').trim()
-}
 
 function parseCsv(csv) {
-  const lines = String(csv).split(/\r?\n/).filter((line) => line.trim())
+  const lines = String(csv || '').split(/\r?\n/).filter((line) => line.trim())
   if (lines.length < 2) return []
-  const cells = (line) => {
-    const output = []
-    let value = ''
+  const parseLine = (line) => {
+    const cells = []
+    let cell = ''
     let quoted = false
-    for (const char of line) {
-      if (char === '"') quoted = !quoted
-      else if (char === ',' && !quoted) { output.push(value); value = '' }
-      else value += char
+    for (let index = 0; index < line.length; index += 1) {
+      const char = line[index]
+      if (char === '"' && line[index + 1] === '"') { cell += '"'; index += 1; continue }
+      if (char === '"') { quoted = !quoted; continue }
+      if (char === ',' && !quoted) { cells.push(cell.trim()); cell = ''; continue }
+      cell += char
     }
-    output.push(value)
-    return output.map(clean)
+    cells.push(cell.trim())
+    return cells
   }
-  const headerLineIndex = lines.findIndex((line) => {
-    const candidate = cells(line).map((cell) => cell.toLowerCase())
-    return candidate.some((cell) => cell === 'date' || cell.includes('transaction')) && candidate.some((cell) => cell.includes('description') || cell.includes('details'))
+  const headerRowIndex = lines.findIndex((line) => {
+    const values = parseLine(line).map((value) => value.toLowerCase())
+    return values.some((value) => value.includes('date')) && values.some((value) => value.includes('description') || value.includes('details'))
   })
-  if (headerLineIndex < 0) return []
-  const header = cells(lines[headerLineIndex]).map((cell) => cell.toLowerCase())
-  const find = (names) => header.findIndex((cell) => names.some((name) => cell.includes(name)))
-  const dateIndex = find(['date', 'posted', 'transaction'])
-  const descriptionIndex = find(['description', 'memo', 'details', 'narration'])
-  const debitIndex = find(['debit', 'withdrawal', 'charge'])
-  const creditIndex = find(['credit', 'deposit'])
-  const balanceIndex = find(['balance', 'running'])
-  return lines.slice(headerLineIndex + 1).map((line) => {
-    const row = cells(line)
-    return { Date: row[dateIndex] || '', Description: row[descriptionIndex] || '', Debit: row[debitIndex] || '', Credit: row[creditIndex] || '', Balance: row[balanceIndex] || '' }
-  }).filter((row) => row.Date || row.Description || row.Balance)
+  const header = parseLine(lines[headerRowIndex >= 0 ? headerRowIndex : 0]).map((value) => value.toLowerCase())
+  const indexOf = (...names) => header.findIndex((value) => names.some((name) => value.includes(name)))
+  const dateIndex = indexOf('date')
+  const descriptionIndex = indexOf('description', 'memo', 'details', 'transaction')
+  const debitIndex = indexOf('debit', 'withdrawal', 'outgoing')
+  const creditIndex = indexOf('credit', 'deposit', 'incoming')
+  const balanceIndex = indexOf('balance', 'running')
+  return lines.slice(headerRowIndex >= 0 ? headerRowIndex + 1 : 1).map((line) => {
+    const cells = parseLine(line).map((cell) => cell.replace(/^"+|"+$/g, '').trim())
+    return {
+      Date: cells[dateIndex] || cells[0] || '',
+      Description: cells[descriptionIndex] || cells[1] || 'Bank transaction',
+      Debit: cells[debitIndex] || '',
+      Credit: cells[creditIndex] || '',
+      Balance: cells[balanceIndex] || cells.at(-1) || '',
+    }
+  }).filter((row) => {
+    const hasDate = /\d{1,4}[\/-]\d{1,2}[\/-]\d{1,4}|\d{1,2}\s+[A-Za-z]{3,9}\s+\d{2,4}/.test(row.Date)
+    const hasAmount = [row.Debit, row.Credit, row.Balance].some((value) => /\d/.test(String(value)))
+    return hasDate && hasAmount && row.Description !== '"'
+  })
+}
+
+async function readJson(response) {
+  const payload = await response.json().catch(() => ({}))
+  if (!response.ok || payload.error) throw new Error(payload.message || payload.error || `PDF.co request failed (${response.status})`)
+  return payload
 }
 
 async function convertWithKey(file, key) {
-  const upload = new FormData()
-  upload.append('file', new Blob([await file.arrayBuffer()], { type: 'application/pdf' }), file.name || 'statement.pdf')
-  const uploadResponse = await fetch(`${PDFCO_API}/file/upload`, { method: 'POST', headers: { 'x-api-key': key }, body: upload })
-  if (!uploadResponse.ok) throw new Error(`PDF.co upload failed (${uploadResponse.status})`)
-  const uploadResult = await uploadResponse.json()
-  if (!uploadResult.url) throw new Error('PDF.co did not return an upload URL.')
+  const uploadForm = new FormData()
+  uploadForm.append('file', file, file.name || 'statement.pdf')
+  const upload = await readJson(await fetch(`${PDFCO_API}/file/upload`, {
+    method: 'POST',
+    headers: { 'x-api-key': key },
+    body: uploadForm,
+  }))
+  if (!upload.url) throw new Error('PDF.co did not return an uploaded file URL.')
 
-  const conversionResponse = await fetch(`${PDFCO_API}/pdf/convert/to/csv`, {
+  const conversion = await readJson(await fetch(`${PDFCO_API}/pdf/convert/to/csv`, {
     method: 'POST',
     headers: { 'x-api-key': key, 'content-type': 'application/json' },
-    body: JSON.stringify({ url: uploadResult.url, async: false, csvDelimiter: ',', inline: true, unwrap: true }),
-  })
-  if (!conversionResponse.ok) throw new Error(`PDF.co conversion failed (${conversionResponse.status})`)
-  const conversionResult = await conversionResponse.json()
-  let csv = conversionResult.body
-  if (!csv && conversionResult.url) {
-    const csvResponse = await fetch(conversionResult.url)
-    if (!csvResponse.ok) throw new Error(`PDF.co CSV download failed (${csvResponse.status})`)
-    csv = await csvResponse.text()
-  }
-  if (!csv) throw new Error(conversionResult.message || 'PDF.co returned no CSV data.')
+    body: JSON.stringify({ url: upload.url, async: false, csvDelimiter: ',' }),
+  }))
+  let csv = conversion.body
+  if (!csv && conversion.url) csv = await (await fetch(conversion.url)).text()
   const rows = parseCsv(csv)
-  if (!rows.length) throw new Error('PDF.co found no transaction rows.')
+  if (!rows.length) throw new Error('PDF.co returned no readable transaction rows.')
   return rows
 }
 
 export async function POST(request) {
   const form = await request.formData()
   const file = form.get('file')
-  if (!(file instanceof File) || file.type !== 'application/pdf') return NextResponse.json({ ok: false, error: 'A PDF file is required.' }, { status: 400 })
+  const isPdf = file instanceof File && (file.type === 'application/pdf' || file.name?.toLowerCase().endsWith('.pdf'))
+  if (!isPdf) return NextResponse.json({ ok: false, error: 'A PDF file is required.' }, { status: 400 })
+
   const keys = [process.env.PDFCO_API_KEY_PRIMARY, process.env.PDFCO_API_KEY_BACKUP].filter(Boolean)
-  if (!keys.length) return NextResponse.json({ ok: false, error: 'PDF fallback is not configured.' }, { status: 503 })
-  let lastError = 'PDF fallback failed.'
+  if (!keys.length) return NextResponse.json({ ok: false, error: 'PDF.co fallback is not configured.' }, { status: 503 })
+
+  const errors = []
   for (const key of keys) {
-    try { return NextResponse.json({ ok: true, rows: await convertWithKey(file, key) }) } catch (error) { lastError = error instanceof Error ? error.message : lastError }
+    try {
+      const rows = await convertWithKey(file, key)
+      return NextResponse.json({ ok: true, rows, source: 'pdfco' })
+    } catch (error) {
+      errors.push(error instanceof Error ? error.message : 'PDF.co conversion failed')
+    }
   }
-  return NextResponse.json({ ok: false, error: lastError }, { status: 502 })
+  return NextResponse.json({ ok: false, error: errors.at(-1) || 'PDF.co conversion failed.' }, { status: 502 })
 }
 
-export const maxDuration = 120
+export const runtime = 'nodejs'
+export const maxDuration = 60

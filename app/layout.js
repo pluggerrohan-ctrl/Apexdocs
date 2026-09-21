@@ -4,7 +4,7 @@ import '../index.css'
 export const metadata = {
   metadataBase: new URL('https://apexwebdesign.online'),
   title: {
-    default: 'ApexDoc | Bank Statement Converter',
+    default: 'Bank Statement to Excel Converter | ApexDoc',
     template: '%s | ApexDoc',
   },
   description: 'Convert bank statement PDFs into clean Excel spreadsheets in your browser.',
