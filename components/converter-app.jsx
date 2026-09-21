@@ -118,7 +118,7 @@ async function extractPdf(file, onProgress) {
   try {
     const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs')
     const buffer = await file.arrayBuffer()
-    const pdf = await pdfjs.getDocument({ data: new Uint8Array(buffer), useSystemFonts: true, isEvalSupported: false, disableWorker: true }).promise
+    const pdf = await pdfjs.getDocument({ data: new Uint8Array(buffer), useSystemFonts: false, useWorkerFetch: false, isEvalSupported: false, disableWorker: true, disableFontFace: true }).promise
     let raw = ''
     let hasText = false
     for (let index = 1; index <= pdf.numPages; index += 1) {
@@ -209,7 +209,8 @@ export default function ConverterApp({ bank }) {
   }
 
   const convert = async (file) => {
-    if (!file || file.type !== 'application/pdf') return setStatus('Please choose a PDF statement.')
+    const isPdf = file && (file.type === 'application/pdf' || file.name?.toLowerCase().endsWith('.pdf'))
+    if (!isPdf) return setStatus('Please choose a PDF statement.')
     if (convertingRef.current) return
     if (quotaLocked || credits < 1) return setShowExhausted(true)
 
@@ -237,8 +238,8 @@ export default function ConverterApp({ bank }) {
       let serverRemaining = null
       try {
         const quotaResponse = await fetch('/api/credits', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'consume' }) })
-        const quotaResult = await quotaResponse.json()
-        if (quotaResponse.status === 429 || (quotaResponse.ok && quotaResult.ok && quotaResult.allowed === false)) {
+        const quotaResult = quotaResponse.ok ? await quotaResponse.json().catch(() => null) : null
+        if (quotaResponse.status === 429 || (quotaResponse.ok && quotaResult?.ok && quotaResult.allowed === false)) {
           saveCredits(0)
           setQuotaLocked(true)
           setShowExhausted(true)
