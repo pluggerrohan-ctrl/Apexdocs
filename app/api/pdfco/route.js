@@ -71,7 +71,11 @@ export async function POST(request) {
   const form = await request.formData()
   const file = form.get('file')
   if (!(file instanceof File) || file.type !== 'application/pdf') return NextResponse.json({ ok: false, error: 'A PDF file is required.' }, { status: 400 })
-  const keys = [process.env.PDFCO_API_KEY_PRIMARY, process.env.PDFCO_API_KEY_BACKUP].filter(Boolean)
+  const keys = [
+    process.env.PDFCO_API_KEY_PRIMARY,
+    process.env.PDFCO_API_KEY_BACKUP,
+    process.env.PDFCO_API_KEY,
+  ].filter(Boolean)
   if (!keys.length) return NextResponse.json({ ok: false, error: 'PDF fallback is not configured.' }, { status: 503 })
   let lastError = 'PDF fallback failed.'
   for (const key of keys) {
