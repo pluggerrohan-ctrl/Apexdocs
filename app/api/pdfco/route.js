@@ -7,6 +7,29 @@ function clean(value) {
   return String(value ?? '').replace(/^['\"]|['\"]$/g, '').trim()
 }
 
+function parseText(text) {
+  const rows = []
+  const dateAtStart = /^(\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4}|\d{4}[\/-]\d{1,2}[\/-]\d{1,2}|\d{1,2}\s+[A-Za-z]{3,9}\s+\d{2,4})\b/i
+  const amountPattern = /(?:[-+]?\(?\s*(?:[$€£₹]\s*)?\d[\d,]*(?:\.\d{2})?\)?)/g
+  let previousBalance = null
+  for (const rawLine of String(text).split(/\r?\n/)) {
+    const line = rawLine.replace(/\s+/g, ' ').trim()
+    const date = line.match(dateAtStart)?.[1]
+    if (!date) continue
+    const body = line.slice(date.length).replace(/^[-|:]\s*/, '').trim()
+    const matches = [...body.matchAll(amountPattern)]
+    if (matches.length < 2) continue
+    const values = matches.slice(-3).map((match) => Number(match[0].replace(/[^\d.-]/g, ''))).filter(Number.isFinite)
+    const balance = values.at(-1)
+    const amount = values.at(-2)
+    if (!Number.isFinite(balance)) continue
+    const description = body.slice(0, matches[0].index ?? body.length).replace(/\s+/g, ' ').trim() || 'Bank transaction'
+    rows.push({ Date: date, Description: description, Debit: values.length >= 3 ? values[0] : previousBalance !== null && balance < previousBalance ? amount : '', Credit: values.length >= 3 ? values[1] : previousBalance !== null && balance > previousBalance ? amount : '', Balance: balance })
+    previousBalance = balance
+  }
+  return rows
+}
+
 function parseCsv(csv) {
   const lines = String(csv).split(/\r?\n/).filter((line) => line.trim())
   if (lines.length < 2) return []
@@ -61,9 +84,26 @@ async function convertWithKey(file, key) {
     if (!csvResponse.ok) throw new Error(`PDF.co CSV download failed (${csvResponse.status})`)
     csv = await csvResponse.text()
   }
-  if (!csv) throw new Error(conversionResult.message || 'PDF.co returned no CSV data.')
-  const rows = parseCsv(csv)
-  if (!rows.length) throw new Error('PDF.co found no transaction rows.')
+  if (csv) {
+    const rows = parseCsv(csv)
+    if (rows.length) return rows
+  }
+
+  const textResponse = await fetch(`${PDFCO_API}/pdf/convert/to/text`, {
+    method: 'POST',
+    headers: { 'x-api-key': key, 'content-type': 'application/json' },
+    body: JSON.stringify({ url: uploadResult.url, async: false }),
+  })
+  if (!textResponse.ok) throw new Error(`PDF.co text extraction failed (${textResponse.status})`)
+  const textResult = await textResponse.json()
+  let text = textResult.body
+  if (!text && textResult.url) {
+    const textDownload = await fetch(textResult.url)
+    if (!textDownload.ok) throw new Error(`PDF.co text download failed (${textDownload.status})`)
+    text = await textDownload.text()
+  }
+  const rows = parseText(text)
+  if (!rows.length) throw new Error(textResult.message || conversionResult.message || 'PDF.co found no transaction rows.')
   return rows
 }
 
