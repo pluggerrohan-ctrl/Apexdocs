@@ -10,11 +10,12 @@ export default function sitemap() {
     { path: '/payment/success', priority: 0.3, changeFrequency: 'monthly' },
   ]
 
+  const liveDate = new Date()
   const bankRoutes = bankSlugs.map((slug) => ({
     url: `${siteUrl}/banks/${slug}`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly',
-    priority: 0.8,
+    lastModified: liveDate,
+    changeFrequency: 'daily',
+    priority: 1.0,
   }))
 
   return [
