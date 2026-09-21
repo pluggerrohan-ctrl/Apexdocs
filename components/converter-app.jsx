@@ -217,19 +217,15 @@ export default function ConverterApp({ bank }) {
     setFileName(file.name)
     setStatus('Extracting text locally…')
     try {
-      const localRows = parseRows(await extractPdf(file, setStatus))
-      let rows = localRows
+      const extractedText = await extractPdf(file, setStatus)
+      const rows = parseRows(extractedText)
       if (!rows.length) {
-        setStatus('Local extraction found no rows. Trying secure PDF backup…')
-        const form = new FormData()
-        form.append('file', file)
-        const fallbackResponse = await fetch('/api/pdfco', { method: 'POST', body: form })
-        const fallbackResult = await fallbackResponse.json()
-        if (fallbackResponse.ok && fallbackResult.ok && Array.isArray(fallbackResult.rows)) rows = fallbackResult.rows
-        else if (fallbackResult.error) setStatus(`Backup converter: ${fallbackResult.error}`)
+        setStatus('No transaction rows detected. Downloading the extracted PDF text instead…')
+        const textRows = extractedText.split(/\r?\n/).map((line) => line.trim()).filter(Boolean).map((line) => ({ Date: '', Description: line, Debit: '', Credit: '', Balance: '' }))
+        if (textRows.length) rows.push(...textRows)
       }
       if (!rows.length) {
-        setStatus('No readable transactions found. Your credit was not used.')
+        setStatus('This PDF has no readable text layer. Please use a text-based PDF.')
         return
       }
 
