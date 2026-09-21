@@ -1,8 +1,8 @@
 import ConverterApp from '../components/converter-app'
 
 export const metadata = {
-  title: 'ApexDoc PDF Converter | Convert Bank Statements to Excel',
-  description: 'Convert text-based PDF bank statements to clean Excel spreadsheets privately in your browser.',
+  title: 'Bank Statement to Excel Converter | ApexDoc',
+  description: 'Convert a bank statement PDF to Excel with ApexDoc. Extract transactions into a clean spreadsheet privately, with browser-first processing and secure fallback support.',
 }
 
 export default function HomePage() {
