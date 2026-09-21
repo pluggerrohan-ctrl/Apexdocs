@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs'
 
 const PDFCO_API = 'https://api.pdf.co/v1'
 const HEADERS = ['Date', 'Description', 'Debit', 'Credit', 'Balance']
@@ -9,10 +10,11 @@ function clean(value) {
 
 function parseText(text) {
   const rows = []
+  const normalizedText = String(text).replace(/(?<!^)(?=\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4}\b|\d{4}[\/-]\d{1,2}[\/-]\d{1,2}\b)/g, '\n')
   const dateAtStart = /^(\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4}|\d{4}[\/-]\d{1,2}[\/-]\d{1,2}|\d{1,2}\s+[A-Za-z]{3,9}\s+\d{2,4})\b/i
   const amountPattern = /(?:[-+]?\(?\s*(?:[$€£₹]\s*)?\d[\d,]*(?:\.\d{2})?\)?)/g
   let previousBalance = null
-  for (const rawLine of String(text).split(/\r?\n/)) {
+  for (const rawLine of normalizedText.split(/\r?\n/)) {
     const line = rawLine.replace(/\s+/g, ' ').trim()
     const date = line.match(dateAtStart)?.[1]
     if (!date) continue
@@ -112,6 +114,19 @@ export async function POST(request) {
   const file = form.get('file')
   const isPdf = file instanceof File && (file.type === 'application/pdf' || file.name?.toLowerCase().endsWith('.pdf'))
   if (!isPdf) return NextResponse.json({ ok: false, error: 'A PDF file is required.' }, { status: 400 })
+  const localData = new Uint8Array(await file.arrayBuffer())
+  try {
+    const document = await pdfjs.getDocument({ data: localData, disableWorker: true, useWorkerFetch: false, isEvalSupported: false, disableFontFace: true, useSystemFonts: false }).promise
+    let text = ''
+    for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber += 1) {
+      const page = await document.getPage(pageNumber)
+      const content = await page.getTextContent()
+      text += content.items.filter((item) => 'str' in item).map((item) => item.str).join(' ') + '\n'
+    }
+    const localRows = parseText(text)
+    if (localRows.length) return NextResponse.json({ ok: true, rows: localRows, source: 'browser-safe-local-parser' })
+  } catch {}
+
   const keys = [
     process.env.PDFCO_API_KEY_PRIMARY,
     process.env.PDFCO_API_KEY_BACKUP,
