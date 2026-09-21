@@ -112,6 +112,14 @@ function parseRows(raw) {
   return rows
 }
 
+function hasUsableRows(rows) {
+  if (!Array.isArray(rows) || rows.length === 0) return false
+  const validDates = rows.filter((row) => /\d{1,4}[\/-]\d{1,2}[\/-]\d{1,4}|\d{1,2}\s+[A-Za-z]{3,9}\s+\d{2,4}/.test(String(row.Date))).length
+  const numericBalances = rows.filter((row) => row.Balance !== '' && Number.isFinite(Number(row.Balance))).length
+  const meaningfulDescriptions = rows.filter((row) => String(row.Description || '').trim().length >= 3).length
+  return validDates >= Math.max(1, Math.ceil(rows.length * 0.7)) && meaningfulDescriptions >= Math.max(1, Math.ceil(rows.length * 0.7)) && (numericBalances >= 1 || rows.some((row) => row.Debit !== '' || row.Credit !== ''))
+}
+
 async function extractPdf(file, onProgress) {
   try {
     const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs')
@@ -135,7 +143,7 @@ async function extractPdf(file, onProgress) {
       raw += `${pageText}\n`
     }
 
-    if (hasText && parseRows(raw).length) return raw
+    if (hasText && hasUsableRows(parseRows(raw))) return raw
 
     // A PDF can contain decorative text without usable transaction rows. Run local OCR
     // instead of stopping early so scanned and flattened bank statements still convert.
@@ -217,17 +225,27 @@ export default function ConverterApp({ bank }) {
     setFileName(file.name)
     setStatus('Extracting text locally…')
     try {
-      const extractedText = await extractPdf(file, setStatus)
+      const localExtraction = extractPdf(file, setStatus)
+      let extractedText = ''
+      try {
+        extractedText = await Promise.race([
+          localExtraction,
+          new Promise((resolve) => setTimeout(() => resolve(''), 8000)),
+        ])
+      } catch {
+        extractedText = ''
+      }
       let rows = parseRows(extractedText)
-      if (!rows.length) {
-        setStatus('Local parser found no transaction rows. Trying secure PDF backup…')
+      if (!hasUsableRows(rows)) {
+        rows = []
+        setStatus('Local conversion needs help. Trying secure PDF backup…')
         const form = new FormData()
         form.append('file', file)
         const fallbackResponse = await fetch('/api/pdfco', { method: 'POST', body: form })
         const fallbackResult = await fallbackResponse.json().catch(() => null)
-        if (fallbackResponse.ok && fallbackResult?.ok && Array.isArray(fallbackResult.rows)) rows = fallbackResult.rows
+        if (fallbackResponse.ok && fallbackResult?.ok && hasUsableRows(fallbackResult.rows)) rows = fallbackResult.rows
       }
-      if (!rows.length) {
+      if (!hasUsableRows(rows)) {
         setStatus('No readable transactions found. Your credit was not used.')
         return
       }
