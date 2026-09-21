@@ -3,7 +3,11 @@ export async function GET(_request, { params }) {
   const indexnowKey = keyParts.at(-1)
   const configuredKey = (process.env.INDEXNOW_API_KEY ?? process.env.key)?.trim()
 
-  if (!configuredKey || !indexnowKey?.endsWith('.txt') || indexnowKey.slice(0, -4) !== configuredKey) {
+  const requestedName = decodeURIComponent(indexnowKey ?? '')
+  const isConfiguredKeyFile = requestedName === `${configuredKey}.txt`
+  const isLegacyPlaceholderFile = requestedName === 'process.env.keytxt'
+
+  if (!configuredKey || (!isConfiguredKeyFile && !isLegacyPlaceholderFile)) {
     return new Response('Not found', { status: 404 })
   }
 
