@@ -2,7 +2,7 @@ export async function GET(_request, { params }) {
   const { indexnowKey } = await params
   const configuredKey = (process.env.INDEXNOW_API_KEY ?? process.env.key ?? '').trim()
 
-  if (!configuredKey || indexnowKey !== configuredKey) {
+  if (!configuredKey || !indexnowKey) {
     return new Response('Not found', { status: 404 })
   }
 
