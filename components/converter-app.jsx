@@ -9,20 +9,20 @@ const FREE_CREDIT_LIMIT = 3
 
 function parseRows(raw) {
   const rows = []
-  const dateAtStart = /^(\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4}|\d{1,2}\s+[A-Za-z]{3,9}\s+\d{2,4}|\d{4}[\/-]\d{1,2}[\/-]\d{1,2})\s+/i
+  const dateAtStart = /^(\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4}|\d{1,2}\s+[A-Za-z]{3,9}\s+\d{2,4}|\d{4}[\/-]\d{1,2}[\/-]\d{1,2})(?:\s+|(?=[A-Za-z]))/i
   const columnPattern = /(?:—|–|(?<![A-Za-z])[-+]?\(?\s*(?:[$€£₹]\s*)?\d[\d,]*(?:\.\d{2})?\)?)/g
   const lines = raw.replace(/\r/g, '').split(/\n+/).map((line) => line.replace(/\s+/g, ' ').trim()).filter(Boolean)
+  let previousBalance = null
 
   for (const line of lines) {
     const dateMatch = line.match(dateAtStart)
     if (!dateMatch) continue
     const date = dateMatch[1]
-    const body = line.slice(dateMatch[0].length).trim()
+    const body = line.slice(dateMatch[0].length).replace(/^[-|:]\s*/, '').trim()
     const columns = [...body.matchAll(columnPattern)]
-    if (columns.length < 3) continue
+    if (columns.length < 2) continue
 
-    // The final three columns are always Debit, Credit, and Balance. This
-    // deliberately ignores digits in transaction references such as UPI0609.
+    // Statements commonly expose either amount + balance, or debit + credit + balance.
     const transactionColumns = columns.slice(-3)
     const firstColumnIndex = transactionColumns[0].index ?? 0
     const leftSide = body.slice(0, firstColumnIndex).trim()
@@ -32,14 +32,13 @@ function parseRows(raw) {
       const number = Number(text.replace(/[^\d.-]/g, ''))
       return Number.isFinite(number) ? Math.abs(number) : ''
     }
+    const balance = value(transactionColumns.at(-1)?.[0])
+    const amount = value(transactionColumns.at(-2)?.[0])
+    const debit = transactionColumns.length >= 3 ? value(transactionColumns[0][0]) : (previousBalance !== null && balance < previousBalance ? amount : '')
+    const credit = transactionColumns.length >= 3 ? value(transactionColumns[1][0]) : (previousBalance !== null && balance > previousBalance ? amount : '')
 
-    rows.push({
-      Date: date,
-      Description: description || 'Bank transaction',
-      Debit: value(transactionColumns[0][0]),
-      Credit: value(transactionColumns[1][0]),
-      Balance: value(transactionColumns[2][0]),
-    })
+    rows.push({ Date: date, Description: description || 'Bank transaction', Debit: debit, Credit: credit, Balance: balance })
+    previousBalance = balance
   }
   if (rows.length) return rows
 
@@ -48,7 +47,6 @@ function parseRows(raw) {
   const datePattern = /\b(?:\d{4}[\/-]\d{1,2}[\/-]\d{1,2}|\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4}|\d{1,2}\s+[A-Za-z]{3,9}\s+\d{2,4})\b/g
   const matches = [...raw.matchAll(datePattern)]
   const numberPattern = /(?:[$€£₹]\s*)?\(?\d[\d,]*(?:\.\d{2})?\)?/g
-  let previousBalance = null
   for (let index = 0; index < matches.length; index += 1) {
     const start = matches[index].index ?? 0
     const end = matches[index + 1]?.index ?? raw.length
