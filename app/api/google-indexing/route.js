@@ -68,6 +68,24 @@ function getCredentialSets() {
 // Google Indexing API requests are capped at 200 per service account per run.
 const BATCH_SIZE_PER_ACCOUNT = 200
 
+export async function GET() {
+  const allUrls = getUrls()
+  let credInfo = { sets: 0, skipped: [] }
+  try {
+    const { sets, skipped } = getCredentialSets()
+    credInfo = { sets: sets.length, skipped }
+  } catch (error) {
+    credInfo = { sets: 0, skipped: [{ error: error.message }] }
+  }
+  return Response.json({
+    totalUrls: allUrls.length,
+    credentialsAvailable: credInfo.sets,
+    skippedCredentials: credInfo.skipped,
+    batchSizePerAccount: BATCH_SIZE_PER_ACCOUNT,
+    dailyCapacity: credInfo.sets * BATCH_SIZE_PER_ACCOUNT,
+  })
+}
+
 export async function POST(request) {
   try {
     const expectedToken = process.env.GOOGLE_INDEXING_TOKEN
@@ -75,13 +93,21 @@ export async function POST(request) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    let startIndex = 0
+    try {
+      const body = await request.json()
+      if (typeof body?.startIndex === 'number' && body.startIndex >= 0) startIndex = Math.floor(body.startIndex)
+    } catch { /* no body or not JSON — start from 0 */ }
+
     const { sets: credentialSets, skipped } = getCredentialSets()
     const allUrls = getUrls()
+    const offset = Math.min(startIndex, allUrls.length)
+    const urlsToSubmit = allUrls.slice(offset)
     const results = []
 
     for (let i = 0; i < credentialSets.length; i++) {
       const start = i * BATCH_SIZE_PER_ACCOUNT
-      const batch = allUrls.slice(start, start + BATCH_SIZE_PER_ACCOUNT)
+      const batch = urlsToSubmit.slice(start, start + BATCH_SIZE_PER_ACCOUNT)
       if (batch.length === 0) break
 
       const { name, credentials } = credentialSets[i]
@@ -110,12 +136,17 @@ export async function POST(request) {
     }
 
     const failed = results.filter((result) => !result.ok)
-    const remaining = Math.max(0, allUrls.length - results.length)
+    const submittedCount = results.length - failed.length
+    const nextStart = offset + results.length
+    const remaining = Math.max(0, allUrls.length - nextStart)
     return Response.json({
-      submitted: results.length - failed.length,
+      submitted: submittedCount,
       failed: failed.length,
       total: results.length,
+      startIndex: offset,
+      nextStartIndex: nextStart,
       remainingUrls: remaining,
+      totalUrls: allUrls.length,
       skippedCredentials: skipped,
       results,
     }, { status: failed.length ? 207 : 200 })
