@@ -56,7 +56,9 @@ export default function AllBanksPage() {
                 marginBottom: 16,
               }}
             >
-              {country} <span style={{ fontWeight: 400, fontSize: 14, color: '#9ca3af' }}>({countryBanks.length} banks)</span>
+              <Link href={`/banks/country/${country.toLowerCase()}`} style={{ color: '#111827', textDecoration: 'none' }}>
+                {country} <span style={{ fontWeight: 400, fontSize: 14, color: '#9ca3af' }}>({countryBanks.length} banks)</span>
+              </Link>
             </h2>
             <ul
               style={{
