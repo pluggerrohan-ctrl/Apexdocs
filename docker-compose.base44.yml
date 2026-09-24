@@ -6,6 +6,8 @@ services:
       - "3000:3000"
     environment:
       - BASE44_PUBLIC_HOST_SUFFIX=${BASE44_PUBLIC_HOST_SUFFIX}
+    env_file:
+      - /run/base44/app.env
     volumes:
       - ./:/app
       - /app/node_modules
