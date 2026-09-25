@@ -1,5 +1,6 @@
 const nextConfig = {
   poweredByHeader: false,
+  allowedDevOrigins: ['3000-' + process.env.BASE44_PUBLIC_HOST_SUFFIX],
   async headers() {
     return [{ source: '/(.*)', headers: [
       { key: 'X-Content-Type-Options', value: 'nosniff' },

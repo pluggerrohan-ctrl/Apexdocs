@@ -39,9 +39,8 @@ function parseCredentials(raw) {
 
 function getCredentialSets() {
   const candidates = [
-    { name: 'GOOGLE_SERVICE_ACCOUNT_JSON', raw: process.env.GOOGLE_SERVICE_ACCOUNT_JSON },
-    { name: 'GOOGLE_SERVICE_ACCOUNT_JSON_2', raw: process.env.GOOGLE_SERVICE_ACCOUNT_JSON_2 },
-    { name: 'GOOGLE_SERVICE_ACCOUNT_JSON_3', raw: process.env.GOOGLE_SERVICE_ACCOUNT_JSON_3 },
+    { name: 'GOOGLE_SERVICE_ACCOUNT', raw: process.env.GOOGLE_SERVICE_ACCOUNT },
+    { name: 'GOOGLE_SERVICE_ACCOUNT_2', raw: process.env.GOOGLE_SERVICE_ACCOUNT_2 },
   ]
 
   const sets = []
@@ -89,7 +88,7 @@ export async function GET() {
 export async function POST(request) {
   try {
     const expectedToken = process.env.GOOGLE_INDEXING_TOKEN
-    if (expectedToken && request.headers.get('authorization') !== `Bearer ${expectedToken}`) {
+    if (!expectedToken || request.headers.get('authorization') !== `Bearer ${expectedToken}`) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
