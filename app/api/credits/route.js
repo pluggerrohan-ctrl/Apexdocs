@@ -1,6 +1,15 @@
 import { NextResponse } from 'next/server'
+import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
+import { cookies } from 'next/headers'
 
-export const runtime = 'nodejs'
+const APPSUMO_COOKIE = 'apexdoc_appsumo_activated'
+const APPSUMO_CODE_PATTERN = /^APX-[A-Z0-9]{5}-[A-Z0-9]{5}$/
+
+async function isValidAppSumoCode(code) {
+  const csv = await readFile(join(process.cwd(), 'data', 'appsumo-codes.csv'), 'utf8')
+  return new Set(csv.split(/\r?\n/).map((line) => line.trim().toUpperCase()).filter(Boolean)).has(code)
+}
 
 function jsonError(message, status = 400) {
   return NextResponse.json({ ok: false, error: message }, { status })
@@ -23,6 +32,18 @@ export async function POST(request) {
 
   const action = body?.action
   const licenseKey = typeof body?.licenseKey === 'string' ? body.licenseKey.trim() : ''
+  const appSumoCode = typeof body?.code === 'string' ? body.code.trim().toUpperCase() : ''
+  if (action === 'activate_appsumo') {
+    if (!APPSUMO_CODE_PATTERN.test(appSumoCode)) return jsonError('Enter a valid AppSumo code.')
+    try {
+      if (!(await isValidAppSumoCode(appSumoCode))) return jsonError('That AppSumo code is not valid.', 422)
+      const cookieStore = await cookies()
+      cookieStore.set(APPSUMO_COOKIE, '1', { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', maxAge: 60 * 60 * 24 * 365, path: '/' })
+      return NextResponse.json({ ok: true, activated: true, credits: 3 })
+    } catch {
+      return jsonError('AppSumo activation is temporarily unavailable.', 503)
+    }
+  }
   if (!['restore', 'quota', 'consume'].includes(action)) return jsonError('Unsupported action.')
   if (action === 'restore' && (!licenseKey || licenseKey.length > MAX_LICENSE_KEY_LENGTH)) return jsonError('A valid license key is required.')
 

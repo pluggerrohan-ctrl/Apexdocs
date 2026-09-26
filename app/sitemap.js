@@ -7,7 +7,6 @@ export default function sitemap() {
   const routes = [
     { path: '/', priority: 1, changeFrequency: 'weekly' },
     { path: '/pdfconverter', priority: 0.9, changeFrequency: 'weekly' },
-    { path: '/all-banks', priority: 0.8, changeFrequency: 'weekly' },
     { path: '/allbanks', priority: 0.9, changeFrequency: 'weekly' },
     { path: '/banks/country/usa', priority: 0.8, changeFrequency: 'weekly' },
     { path: '/banks/country/uk', priority: 0.8, changeFrequency: 'weekly' },

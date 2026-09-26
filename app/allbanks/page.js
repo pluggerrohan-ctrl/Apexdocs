@@ -127,7 +127,7 @@ export default function AllBanksDirectoryPage() {
         <nav style={{ display: 'flex', gap: 28, alignItems: 'center' }}>
           <a href="/" style={{ fontSize: 13, color: '#69727d', textDecoration: 'none' }}>Home</a>
           <a href="/pdfconverter" style={{ fontSize: 13, color: '#69727d', textDecoration: 'none' }}>Converter</a>
-          <a href="/all-banks" style={{ fontSize: 13, color: '#69727d', textDecoration: 'none' }}>All Banks</a>
+
           <a
             href="/"
             style={{
@@ -310,7 +310,7 @@ export default function AllBanksDirectoryPage() {
                 {countryBanks.map((bank) => (
                   <a
                     key={bank.slug}
-                    href={`${SITE_URL}/banks/${bank.slug}`}
+                    href={`/banks/${bank.slug}`}
                     className="bank-link"
                   >
                     Convert {bank.name} Statement PDF to Excel
@@ -385,7 +385,7 @@ export default function AllBanksDirectoryPage() {
               <a href="/" style={{ color: '#a3b8d4', fontSize: 13, textDecoration: 'none' }}>Home</a>
               <a href="/pdfconverter" style={{ color: '#a3b8d4', fontSize: 13, textDecoration: 'none' }}>Converter</a>
               <a href="/allbanks" style={{ color: '#a3b8d4', fontSize: 13, textDecoration: 'none' }}>All Supported Banks ({totalBanks}+)</a>
-              <a href="/all-banks" style={{ color: '#a3b8d4', fontSize: 13, textDecoration: 'none' }}>Browse Banks</a>
+
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <p style={{ fontSize: 12, fontWeight: 700, color: '#5b9bf5', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>

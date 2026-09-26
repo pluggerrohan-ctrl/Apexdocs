@@ -10,7 +10,6 @@ function getUrls() {
   return [
     `${siteUrl}/`,
     `${siteUrl}/pdfconverter`,
-    `${siteUrl}/all-banks`,
     `${siteUrl}/allbanks`,
     `${siteUrl}/banks/country/usa`,
     `${siteUrl}/banks/country/uk`,
