@@ -1,0 +1,6 @@
+{
+  "/[...indexnowKey]/route": "app/[...indexnowKey]/route.js",
+  "/api/redeem/route": "app/api/redeem/route.js",
+  "/page": "app/page.js",
+  "/redeem/page": "app/redeem/page.js"
+}
