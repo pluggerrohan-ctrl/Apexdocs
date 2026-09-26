@@ -310,7 +310,7 @@ export default function AllBanksDirectoryPage() {
                 {countryBanks.map((bank) => (
                   <a
                     key={bank.slug}
-                    href={`${SITE_URL}/banks/${bank.slug}`}
+                    href={`/banks/${bank.slug}`}
                     className="bank-link"
                   >
                     Convert {bank.name} Statement PDF to Excel
