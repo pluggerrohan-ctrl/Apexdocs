@@ -34,7 +34,7 @@ export default async function CountryHubPage({ params }) {
       <nav aria-label="Breadcrumb" style={{ fontSize: 13, color: '#6b7280', marginBottom: 20 }}>
         <Link href="/" style={{ color: '#2563eb', textDecoration: 'none' }}>Home</Link>
         {' / '}
-        <Link href="/all-banks" style={{ color: '#2563eb', textDecoration: 'none' }}>All Banks</Link>
+        <Link href="/allbanks" style={{ color: '#2563eb', textDecoration: 'none' }}>All Banks</Link>
         {' / '}
         <span style={{ color: '#374151' }}>{countryUpper}</span>
       </nav>
