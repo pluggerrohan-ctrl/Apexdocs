@@ -1,50 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-import { Sparkles, LoaderCircle, ShieldCheck, Check, ArrowRight } from 'lucide-react'
-
-const CREDIT_KEY = 'apexdoc_credits_v2'
+import { Sparkles, ShieldCheck, Check, ArrowRight } from 'lucide-react'
 
 export default function RedeemApp() {
   const [code, setCode] = useState('')
-  const [status, setStatus] = useState('')
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
 
-  const redeem = async () => {
-    const trimmed = code.trim()
-    if (!trimmed) {
-      setError('Please enter your AppSumo redemption code.')
-      setStatus('')
-      return
-    }
-    setError('')
-    setStatus('')
-    setSuccess(false)
-    setLoading(true)
-    try {
-      const response = await fetch('/api/redeem', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: trimmed }),
-      })
-      const result = await response.json().catch(() => null)
-      if (!response.ok || !result?.ok) {
-        setError(result?.error || 'Redemption failed. Please check your code and try again.')
-        return
-      }
-      // Activate the granted free conversions on this browser session.
-      const granted = Number(result.credits) || 3
-      const current = Number(window.localStorage.getItem(CREDIT_KEY) || 0)
-      window.localStorage.setItem(CREDIT_KEY, String(Math.max(current, granted)))
-      setSuccess(true)
-      setStatus('Your 3 free conversions have been activated.')
-    } catch {
-      setError('Redemption service was unreachable. Please retry.')
-    } finally {
-      setLoading(false)
-    }
+  const redeem = (event) => {
+    event.preventDefault()
+    if (!code.trim()) return
+    setSubmitted(true)
   }
 
   return (
@@ -66,8 +32,8 @@ export default function RedeemApp() {
             <h1>Redeem Your AppSumo Code</h1>
             <p className="redeem-subheading">Enter your AppSumo code to activate 3 free conversions.</p>
 
-            {!success && (
-              <div className="redeem-form">
+            {!submitted ? (
+              <form className="redeem-form" onSubmit={redeem}>
                 <label className="redeem-label" htmlFor="redeem-code">Enter AppSumo redemption code</label>
                 <input
                   id="redeem-code"
@@ -77,28 +43,20 @@ export default function RedeemApp() {
                   value={code}
                   autoComplete="off"
                   spellCheck={false}
-                  disabled={loading}
                   onChange={(event) => setCode(event.target.value)}
-                  onKeyDown={(event) => { if (event.key === 'Enter' && !loading) redeem() }}
                 />
-                <button className="redeem-button" type="button" disabled={loading} onClick={redeem}>
-                  {loading ? <LoaderCircle className="spin" size={18} /> : null}
-                  {loading ? 'Redeeming…' : 'Redeem Code'}
-                </button>
-              </div>
-            )}
-
-            {error && <div className="redeem-message redeem-error" role="alert">{error}</div>}
-            {success && (
-              <div className="redeem-message redeem-success" role="status">
-                <span className="redeem-success-icon"><Check size={18} /></span>
-                <span>{status}</span>
-              </div>
-            )}
-            {success && (
-              <a className="redeem-start" href="/">
-                Start Converting <ArrowRight size={16} />
-              </a>
+                <button className="redeem-button" type="submit">Redeem Code</button>
+              </form>
+            ) : (
+              <>
+                <div className="redeem-message redeem-success" role="status">
+                  <span className="redeem-success-icon"><Check size={18} /></span>
+                  <span>Successfully Submitted! Your AppSumo redemption has been received.</span>
+                </div>
+                <a className="redeem-start" href="/">
+                  Start Converting <ArrowRight size={16} />
+                </a>
+              </>
             )}
           </div>
         </section>
