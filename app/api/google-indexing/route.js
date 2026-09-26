@@ -11,6 +11,10 @@ function getUrls() {
     `${siteUrl}/`,
     `${siteUrl}/pdfconverter`,
     `${siteUrl}/all-banks`,
+    `${siteUrl}/allbanks`,
+    `${siteUrl}/banks/country/usa`,
+    `${siteUrl}/banks/country/uk`,
+    `${siteUrl}/banks/country/uae`,
     `${siteUrl}/payment/success`,
     ...bankSlugs.map((slug) => `${siteUrl}/banks/${slug}`),
   ]
