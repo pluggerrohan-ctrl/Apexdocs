@@ -3,8 +3,6 @@ import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { cookies } from 'next/headers'
 
-export const runtime = 'nodejs'
-
 const APPSUMO_COOKIE = 'apexdoc_appsumo_activated'
 const APPSUMO_CODE_PATTERN = /^APX-[A-Z0-9]{5}-[A-Z0-9]{5}$/
 
