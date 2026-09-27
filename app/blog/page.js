@@ -4,6 +4,12 @@ import { blogPosts, getBlogIndexSchema } from '../../lib/blog-content'
 export const metadata = {
   title: 'Bank Statement PDF to Excel Guides',
   description: 'Practical ApexDoc guides for converting bank statement PDFs to Excel and checking extracted transaction data.',
+  keywords: [
+    'bank statement PDF to Excel guide',
+    'how to convert bank statement PDF to Excel',
+    'bank statement data extraction tips',
+  ],
+  robots: { index: true, follow: true },
   alternates: { canonical: 'https://apexwebdesign.online/blog' },
 }
 

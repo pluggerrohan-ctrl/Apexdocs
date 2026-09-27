@@ -10,7 +10,13 @@ export async function generateMetadata({ params }) {
   const { slug } = await params
   const post = getBlogPost(slug)
   if (!post) return { title: 'Guide not found' }
-  return { title: post.title, description: post.description, keywords: post.keywords, alternates: { canonical: `https://apexwebdesign.online/blog/${post.slug}` } }
+  return {
+    title: post.title,
+    description: post.description,
+    keywords: post.keywords,
+    robots: { index: true, follow: true },
+    alternates: { canonical: `https://apexwebdesign.online/blog/${post.slug}` },
+  }
 }
 
 export default async function BlogPostPage({ params }) {
