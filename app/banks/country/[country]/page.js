@@ -18,6 +18,12 @@ export async function generateMetadata({ params }) {
   return {
     title: `${countryUpper} Bank Statement PDF to Excel Converters | ApexDoc`,
     description: `Convert ${content.bankCount} ${countryUpper} bank statement PDFs to Excel with ApexDoc. Private, browser-first processing. Browse all ${countryUpper} bank converters.`,
+    keywords: [
+      `${countryUpper} bank statement converter`,
+      `convert ${countryUpper} bank statement PDF to Excel`,
+      `${countryUpper} PDF to Excel converter`,
+      `bank statement converter ${countryUpper}`,
+    ],
     robots: { index: true, follow: true },
     alternates: { canonical: `https://apexwebdesign.online/banks/country/${country}` },
   }

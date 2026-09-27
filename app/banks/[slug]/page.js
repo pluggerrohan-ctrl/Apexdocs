@@ -23,6 +23,12 @@ export async function generateMetadata({ params }) {
     return {
       title: `Convert ${bank.name} Statement PDF to Excel Online`,
       description: content.intro.slice(0, 155),
+      keywords: [
+        `${bank.name} bank statement converter`,
+        `convert ${bank.name} PDF to Excel`,
+        `${bank.name} PDF statement to Excel`,
+        'bank statement PDF converter',
+      ],
       robots: { index: true, follow: true },
       alternates: { canonical: `https://apexwebdesign.online/banks/${bank.slug}` },
     }

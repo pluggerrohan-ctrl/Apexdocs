@@ -6,6 +6,12 @@ export const metadata = {
   title: 'All Supported Banks Worldwide for PDF to Excel Conversion | ApexDoc',
   description:
     'ApexDoc supports 800+ financial institutions across the USA, UK, and UAE. Convert your bank statement PDF to Excel privately in your browser. Browse all supported banks by country.',
+  keywords: [
+    'supported banks PDF to Excel',
+    'bank statement converter list',
+    'USA UK UAE bank statement converter',
+    'convert bank statement PDF to Excel',
+  ],
   robots: { index: true, follow: true },
   alternates: { canonical: `${SITE_URL}/allbanks` },
 }
