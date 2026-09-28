@@ -45,6 +45,16 @@ export default async function BlogPostPage({ params }) {
             </section>
           ))}
         </div>
+        {post.relatedBanks?.length ? (
+          <section aria-labelledby="related-bank-pages" style={{ marginTop: 40 }}>
+            <h2 id="related-bank-pages" style={{ color: '#111827', fontSize: 25, margin: '0 0 14px' }}>Top bank statement converter pages</h2>
+            <ul style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 10, padding: 0, margin: 0, listStyle: 'none' }}>
+              {post.relatedBanks.map((bank) => (
+                <li key={bank.slug}><Link href={`/banks/${bank.slug}`} style={{ color: '#2563eb', textDecoration: 'none' }}>{bank.name} statement to Excel</Link></li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
         <div style={{ background: '#eff6ff', borderRadius: 12, padding: 22, marginTop: 40 }}>
           <h2 style={{ color: '#1e3a8a', fontSize: 20, margin: '0 0 8px' }}>Ready to convert a statement?</h2>
           <p style={{ color: '#1e40af', lineHeight: 1.6, margin: '0 0 14px' }}>Use ApexDoc to turn a bank statement PDF into a downloadable Excel workbook.</p>

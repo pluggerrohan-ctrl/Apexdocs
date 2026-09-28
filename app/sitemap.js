@@ -1,5 +1,6 @@
 import { bankSlugs } from '../lib/banks'
 import banks from '../data/banks.json'
+import { blogPosts } from '../lib/blog-content'
 
 const siteUrl = 'https://apexwebdesign.online'
 
@@ -28,6 +29,12 @@ export default function sitemap() {
       lastModified: new Date(),
       changeFrequency,
       priority,
+    })),
+    ...blogPosts.map((post) => ({
+      url: `${siteUrl}/blog/${post.slug}`,
+      lastModified: new Date(post.date),
+      changeFrequency: 'monthly',
+      priority: 0.7,
     })),
     ...bankRoutes,
   ]
