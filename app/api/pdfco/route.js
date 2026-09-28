@@ -4,12 +4,30 @@ import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs'
 const PDFCO_API = 'https://api.pdf.co/v1'
 
 async function getPdfPageCount(file) {
-  const data = new Uint8Array(await file.arrayBuffer())
-  const document = await pdfjsLib.getDocument({ data, disableWorker: true }).promise
+  let document = null
   try {
+    // Ensure the file is fully loaded into memory before handing it to pdfjs.
+    const arrayBuffer = await file.arrayBuffer()
+    if (!arrayBuffer || arrayBuffer.byteLength === 0) return 0
+    const data = new Uint8Array(arrayBuffer)
+    // password: '' lets pdfjs open owner-encrypted PDFs that have no user password.
+    document = await pdfjsLib.getDocument({
+      data,
+      disableWorker: true,
+      password: '',
+      isEvalSupported: false,
+      useSystemFonts: false,
+    }).promise
     return document.numPages
+  } catch {
+    // Encrypted (password-protected) or corrupted PDFs may still be convertible
+    // by the PDF.co backend, so fall back to a single-page charge instead of
+    // blocking the conversion with a hard error.
+    return 0
   } finally {
-    await document.destroy()
+    if (document) {
+      try { await document.destroy() } catch { /* already torn down */ }
+    }
   }
 }
 
@@ -91,15 +109,10 @@ export async function POST(request) {
   const isPdf = file instanceof File && (file.type === 'application/pdf' || file.name?.toLowerCase().endsWith('.pdf'))
   if (!isPdf) return NextResponse.json({ ok: false, error: 'A PDF file is required.' }, { status: 400 })
 
-  let totalPages
-  try {
-    totalPages = await getPdfPageCount(file)
-  } catch {
-    return NextResponse.json({ ok: false, error: 'Unable to read the PDF page count.' }, { status: 422 })
-  }
-  if (!Number.isSafeInteger(totalPages) || totalPages < 1) {
-    return NextResponse.json({ ok: false, error: 'The PDF does not contain a valid page count.' }, { status: 422 })
-  }
+  // Page count is used only for credit billing. If the PDF is encrypted or
+  // corrupted and pdfjs cannot read the count, default to 1 so the conversion
+  // still proceeds instead of surfacing a hard error to the user.
+  const totalPages = Math.max(1, await getPdfPageCount(file))
 
   const creditResponse = await fetch(new URL('/api/credits', request.url), {
     method: 'POST',
