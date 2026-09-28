@@ -30,7 +30,7 @@ export async function generateMetadata({ params }) {
         'bank statement PDF converter',
       ],
       robots: { index: true, follow: true },
-      alternates: { canonical: `https://apexwebdesign.online/banks/${bank.slug}` },
+      alternates: { canonical: `https://apexwebdesign.online/banks/${slug}` },
     }
   } catch {
     return {
