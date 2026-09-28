@@ -230,10 +230,9 @@ export default function ConverterApp({ bank }) {
       const localExtraction = extractPdf(file, setStatus)
       let extractedText = ''
       try {
-        extractedText = await Promise.race([
-          localExtraction,
-          new Promise((resolve) => setTimeout(() => resolve(''), 8000)),
-        ])
+        // OCR can legitimately take longer than eight seconds for multi-page statements.
+        // Let the local path finish before falling back so valid PDFs are not reported as unreadable.
+        extractedText = await localExtraction
       } catch {
         extractedText = ''
       }

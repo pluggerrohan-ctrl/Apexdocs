@@ -9,7 +9,8 @@ async function getPdfPageCount(file) {
   try {
     return document.numPages
   } finally {
-    await document.destroy()
+    // pdfjs-dist 6 may expose the document without a destroy method in Node.
+    await document.destroy?.()
   }
 }
 
