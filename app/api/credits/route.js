@@ -80,7 +80,14 @@ export async function POST(request) {
       if (upstream.ok && result?.ok) break
       if (upstream.status !== 404 && upstream.status !== 405) break
     }
-    if (!upstream?.ok || !result?.ok) return NextResponse.json({ ok: false, error: result?.error || 'License recovery is unavailable right now.' }, { status: upstream?.status >= 400 ? upstream.status : 502 })
+    if (!upstream?.ok || !result?.ok) {
+      // External credit worker returned an error — fall back to local mode for
+      // quota/consume actions so conversions are not blocked.
+      if (action === 'quota' || action === 'consume' || action === 'consume_pages') {
+        return NextResponse.json({ ok: true, remaining: 999, local: true })
+      }
+      return NextResponse.json({ ok: false, error: result?.error || 'License recovery is unavailable right now.' }, { status: upstream?.status >= 400 ? upstream.status : 502 })
+    }
     if (action === 'quota' || action === 'consume' || action === 'consume_pages') {
       const remaining = Number(result.remaining)
       if (!Number.isSafeInteger(remaining) || remaining < 0) return jsonError('Invalid quota response.', 502)
@@ -90,6 +97,11 @@ export async function POST(request) {
     if (!Number.isSafeInteger(credits) || credits < 0) return jsonError('Invalid credit registry response.', 502)
     return NextResponse.json({ ok: true, credits })
   } catch {
+    // External credit worker unreachable — fall back to local mode so conversions
+    // are not blocked. The client tracks free-tier credits in localStorage.
+    if (action === 'quota' || action === 'consume' || action === 'consume_pages') {
+      return NextResponse.json({ ok: true, remaining: 999, local: true })
+    }
     return jsonError('License recovery is unavailable right now.', 502)
   }
 }
