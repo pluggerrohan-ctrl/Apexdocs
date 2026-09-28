@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { FileUp, ShieldCheck, Sparkles, LoaderCircle, Download, RotateCcw, MoreVertical, X } from 'lucide-react'
 import * as XLSX from 'xlsx'
+import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs'
 
 const CREDIT_KEY = 'apexdoc_credits_v2'
 const FREE_CREDIT_LIMIT = 3
@@ -122,9 +123,8 @@ function hasUsableRows(rows) {
 
 async function extractPdf(file, onProgress) {
   try {
-    const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs')
-    const buffer = await file.arrayBuffer()
-    const pdf = await pdfjs.getDocument({ data: new Uint8Array(buffer), useSystemFonts: false, useWorkerFetch: false, isEvalSupported: false, disableWorker: true, disableFontFace: true }).promise
+  const buffer = await file.arrayBuffer()
+  const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buffer), useSystemFonts: false, useWorkerFetch: false, isEvalSupported: false, disableWorker: true, disableFontFace: true }).promise
     let raw = ''
     let hasText = false
     for (let index = 1; index <= pdf.numPages; index += 1) {

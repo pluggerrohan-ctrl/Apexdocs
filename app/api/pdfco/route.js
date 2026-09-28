@@ -5,12 +5,22 @@ const PDFCO_API = 'https://api.pdf.co/v1'
 
 async function getPdfPageCount(file) {
   const data = new Uint8Array(await file.arrayBuffer())
-  const document = await pdfjsLib.getDocument({ data, disableWorker: true }).promise
   try {
-    return document.numPages
-  } finally {
-    // pdfjs-dist 6 may expose the document without a destroy method in Node.
-    await document.destroy?.()
+    const document = await pdfjsLib.getDocument({ data, disableWorker: true }).promise
+    const pageCount = document.numPages
+    try {
+      await document.destroy?.()
+    } catch {
+      // Cleanup failure does not make an otherwise valid PDF unreadable.
+    }
+    return pageCount
+  } catch {
+    // Next's server bundler cannot always resolve PDF.js's fake-worker module.
+    // A PDF page tree still exposes one /Type /Page marker per rendered page.
+    const text = new TextDecoder('latin1').decode(data)
+    const pageMarkers = text.match(/\/Type\s*\/Page(?:\s|\/|>)/g)?.length || 0
+    if (pageMarkers > 0) return pageMarkers
+    throw new Error('Unable to determine the PDF page count.')
   }
 }
 
@@ -95,7 +105,8 @@ export async function POST(request) {
   let totalPages
   try {
     totalPages = await getPdfPageCount(file)
-  } catch {
+  } catch (error) {
+    console.error('[v0] PDF page count failed:', error)
     return NextResponse.json({ ok: false, error: 'Unable to read the PDF page count.' }, { status: 422 })
   }
   if (!Number.isSafeInteger(totalPages) || totalPages < 1) {
