@@ -24,6 +24,9 @@ async function getPdfPageCount(file) {
     // Object streams can hide the page tree from a plain-text scan. The PDF.co
     // conversion still processes the complete document, so a valid PDF must not
     // be rejected before the backup converter gets a chance to read it.
+    // Valid PDFs may use compressed object streams, so neither PDF.js nor a
+    // plain-text page marker is guaranteed to work. Let PDF.co validate and
+    // extract the document instead of rejecting it at the page-count gate.
     if (text.startsWith('%PDF-')) return 1
     throw new Error('Unable to determine the PDF page count.')
   }
@@ -32,6 +35,10 @@ async function getPdfPageCount(file) {
 function parseCsv(csv) {
   const lines = String(csv || '').split(/\r?\n/).filter((line) => line.trim())
   if (lines.length < 2) return []
+  const delimiter = [',', '\\t', ';', '|'].sort((a, b) => {
+    const score = (value) => String(csv).split(/\r?\n/).slice(0, 5).reduce((total, line) => total + (line.split(value).length - 1), 0)
+    return score(b) - score(a)
+  })[0]
   const parseLine = (line) => {
     const cells = []
     let cell = ''
@@ -40,7 +47,7 @@ function parseCsv(csv) {
       const char = line[index]
       if (char === '"' && line[index + 1] === '"') { cell += '"'; index += 1; continue }
       if (char === '"') { quoted = !quoted; continue }
-      if (char === ',' && !quoted) { cells.push(cell.trim()); cell = ''; continue }
+      if (char === delimiter && !quoted) { cells.push(cell.trim()); cell = ''; continue }
       cell += char
     }
     cells.push(cell.trim())
@@ -48,7 +55,7 @@ function parseCsv(csv) {
   }
   const headerRowIndex = lines.findIndex((line) => {
     const values = parseLine(line).map((value) => value.toLowerCase())
-    return values.some((value) => value.includes('date')) && values.some((value) => value.includes('description') || value.includes('details'))
+    return values.some((value) => value.includes('date') || value.includes('posted')) && values.some((value) => value.includes('description') || value.includes('details') || value.includes('memo') || value.includes('transaction'))
   })
   const header = parseLine(lines[headerRowIndex >= 0 ? headerRowIndex : 0]).map((value) => value.toLowerCase())
   const indexOf = (...names) => header.findIndex((value) => names.some((name) => value.includes(name)))
