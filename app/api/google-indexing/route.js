@@ -1,4 +1,6 @@
 import { google } from 'googleapis'
+import { promises as fs } from 'node:fs'
+import path from 'node:path'
 import { bankSlugs } from '../../../lib/banks'
 
 export const runtime = 'nodejs'
@@ -70,6 +72,37 @@ function getCredentialSets() {
 
 // Google Indexing API requests are capped at 200 per service account per run.
 const BATCH_SIZE_PER_ACCOUNT = 200
+const MAX_ACCOUNTS = 3
+const STATUS_FILE = path.join(process.cwd(), 'indexing_status.json')
+
+async function readStatus() {
+  try {
+    const raw = await fs.readFile(STATUS_FILE, 'utf8')
+    const parsed = JSON.parse(raw)
+    return parsed && typeof parsed === 'object' ? parsed : { days: {} }
+  } catch {
+    return { days: {} }
+  }
+}
+
+async function writeStatus(status) {
+  const temporaryFile = `${STATUS_FILE}.tmp`
+  await fs.writeFile(temporaryFile, JSON.stringify(status, null, 2), 'utf8')
+  await fs.rename(temporaryFile, STATUS_FILE)
+}
+
+function todayKey() {
+  return new Date().toISOString().slice(0, 10)
+}
+
+function getConfiguredIndexedUrls() {
+  try {
+    const urls = JSON.parse(process.env.GOOGLE_INDEXED_URLS_JSON || '[]')
+    return new Set(Array.isArray(urls) ? urls.filter((url) => typeof url === 'string') : [])
+  } catch {
+    return new Set()
+  }
+}
 
 export async function GET() {
   const allUrls = getUrls()
@@ -104,16 +137,27 @@ export async function POST(request) {
 
     const { sets: credentialSets, skipped } = getCredentialSets()
     const allUrls = getUrls()
+    const status = await readStatus()
+    const day = todayKey()
+    const today = status.days?.[day] || { successfulUrls: [], attempts: 0 }
+    const successfulUrls = new Set(today.successfulUrls)
+    const configuredIndexedUrls = getConfiguredIndexedUrls()
+    const indexedUrls = new Set([...successfulUrls, ...configuredIndexedUrls])
     const offset = Math.min(startIndex, allUrls.length)
-    const urlsToSubmit = allUrls.slice(offset)
+    const urlsToSubmit = allUrls
+      .slice(offset)
+      .filter((url) => !indexedUrls.has(url))
     const results = []
+    const accounts = credentialSets.slice(0, MAX_ACCOUNTS)
+    const dailyRemaining = Math.max(0, MAX_ACCOUNTS * BATCH_SIZE_PER_ACCOUNT - today.attempts)
+    const submitLimit = Math.min(dailyRemaining, accounts.length * BATCH_SIZE_PER_ACCOUNT)
 
-    for (let i = 0; i < credentialSets.length; i++) {
+    for (let i = 0; i < accounts.length; i++) {
       const start = i * BATCH_SIZE_PER_ACCOUNT
-      const batch = urlsToSubmit.slice(start, start + BATCH_SIZE_PER_ACCOUNT)
+      const batch = urlsToSubmit.slice(start, start + Math.min(BATCH_SIZE_PER_ACCOUNT, submitLimit - start))
       if (batch.length === 0) break
 
-      const { name, credentials } = credentialSets[i]
+      const { name, credentials } = accounts[i]
       const auth = new google.auth.GoogleAuth({
         credentials,
         scopes: ['https://www.googleapis.com/auth/indexing'],
@@ -139,17 +183,31 @@ export async function POST(request) {
     }
 
     const failed = results.filter((result) => !result.ok)
-    const submittedCount = results.length - failed.length
-    const nextStart = offset + results.length
-    const remaining = Math.max(0, allUrls.length - nextStart)
+    const successful = results.filter((result) => result.ok)
+    successful.forEach((result) => successfulUrls.add(result.url))
+    const updatedToday = {
+      successfulUrls: [...successfulUrls],
+      attempts: today.attempts + results.length,
+      updatedAt: new Date().toISOString(),
+    }
+    await writeStatus({
+      ...status,
+      days: { ...(status.days || {}), [day]: updatedToday },
+    })
+
+    const submittedCount = successful.length
+    const remaining = allUrls.filter((url) => !successfulUrls.has(url) && !configuredIndexedUrls.has(url)).length
     return Response.json({
       submitted: submittedCount,
       failed: failed.length,
+      skippedAlreadyIndexed: allUrls.length - urlsToSubmit.length,
       total: results.length,
       startIndex: offset,
-      nextStartIndex: nextStart,
+      nextStartIndex: offset + results.length,
       remainingUrls: remaining,
       totalUrls: allUrls.length,
+      dailyAttempts: updatedToday.attempts,
+      dailyLimit: MAX_ACCOUNTS * BATCH_SIZE_PER_ACCOUNT,
       skippedCredentials: skipped,
       results,
     }, { status: failed.length ? 207 : 200 })

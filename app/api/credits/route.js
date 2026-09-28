@@ -44,7 +44,7 @@ export async function POST(request) {
       return jsonError('AppSumo activation is temporarily unavailable.', 503)
     }
   }
-  if (!['restore', 'quota', 'consume'].includes(action)) return jsonError('Unsupported action.')
+  if (!['restore', 'quota', 'consume', 'consume_pages'].includes(action)) return jsonError('Unsupported action.')
   if (action === 'restore' && (!licenseKey || licenseKey.length > MAX_LICENSE_KEY_LENGTH)) return jsonError('A valid license key is required.')
 
   // The Worker URL is the only app-facing integration point. Secrets stay in Vercel Vars.
@@ -67,7 +67,12 @@ export async function POST(request) {
       upstream = await fetch(endpoint, {
         method: 'POST',
         headers: { 'content-type': 'application/json', accept: 'application/json' },
-        body: JSON.stringify({ action, ...(action === 'restore' ? { licenseKey, license_key: licenseKey } : {}), ip: getClientIp(request) }),
+        body: JSON.stringify({
+          action,
+          ...(action === 'restore' ? { licenseKey, license_key: licenseKey } : {}),
+          ...(action === 'consume_pages' ? { pages: Number(body?.pages) } : {}),
+          ip: getClientIp(request),
+        }),
         cache: 'no-store',
         signal: AbortSignal.timeout(8000),
       })
@@ -76,10 +81,10 @@ export async function POST(request) {
       if (upstream.status !== 404 && upstream.status !== 405) break
     }
     if (!upstream?.ok || !result?.ok) return NextResponse.json({ ok: false, error: result?.error || 'License recovery is unavailable right now.' }, { status: upstream?.status >= 400 ? upstream.status : 502 })
-    if (action === 'quota' || action === 'consume') {
+    if (action === 'quota' || action === 'consume' || action === 'consume_pages') {
       const remaining = Number(result.remaining)
-      if (!Number.isSafeInteger(remaining) || remaining < 0 || remaining > 3) return jsonError('Invalid quota response.', 502)
-      return NextResponse.json({ ok: true, remaining })
+      if (!Number.isSafeInteger(remaining) || remaining < 0) return jsonError('Invalid quota response.', 502)
+      return NextResponse.json({ ok: true, remaining, ...(result.pages ? { pages: Number(result.pages) } : {}) })
     }
     const credits = Number(result.credits)
     if (!Number.isSafeInteger(credits) || credits < 0) return jsonError('Invalid credit registry response.', 502)

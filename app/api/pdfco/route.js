@@ -1,6 +1,17 @@
 import { NextResponse } from 'next/server'
+import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs'
 
 const PDFCO_API = 'https://api.pdf.co/v1'
+
+async function getPdfPageCount(file) {
+  const data = new Uint8Array(await file.arrayBuffer())
+  const document = await pdfjsLib.getDocument({ data, disableWorker: true }).promise
+  try {
+    return document.numPages
+  } finally {
+    await document.destroy()
+  }
+}
 
 function parseCsv(csv) {
   const lines = String(csv || '').split(/\r?\n/).filter((line) => line.trim())
@@ -80,6 +91,28 @@ export async function POST(request) {
   const isPdf = file instanceof File && (file.type === 'application/pdf' || file.name?.toLowerCase().endsWith('.pdf'))
   if (!isPdf) return NextResponse.json({ ok: false, error: 'A PDF file is required.' }, { status: 400 })
 
+  let totalPages
+  try {
+    totalPages = await getPdfPageCount(file)
+  } catch {
+    return NextResponse.json({ ok: false, error: 'Unable to read the PDF page count.' }, { status: 422 })
+  }
+  if (!Number.isSafeInteger(totalPages) || totalPages < 1) {
+    return NextResponse.json({ ok: false, error: 'The PDF does not contain a valid page count.' }, { status: 422 })
+  }
+
+  const creditResponse = await fetch(new URL('/api/credits', request.url), {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', accept: 'application/json' },
+    body: JSON.stringify({ action: 'consume_pages', pages: totalPages }),
+    cache: 'no-store',
+  })
+  const creditResult = await creditResponse.json().catch(() => null)
+  if (!creditResponse.ok || !creditResult?.ok) {
+    const message = creditResult?.error || `Insufficient credits. You need ${totalPages} credits for this document.`
+    return NextResponse.json({ ok: false, error: message, requiredCredits: totalPages }, { status: creditResponse.status === 429 ? 402 : creditResponse.status || 402 })
+  }
+
   const keys = [process.env.PDFCO_API_KEY_PRIMARY, process.env.PDFCO_API_KEY_BACKUP].filter(Boolean)
   if (!keys.length) return NextResponse.json({ ok: false, error: 'PDF.co fallback is not configured.' }, { status: 503 })
 
@@ -87,7 +120,7 @@ export async function POST(request) {
   for (const key of keys) {
     try {
       const rows = await convertWithKey(file, key)
-      return NextResponse.json({ ok: true, rows, source: 'pdfco' })
+      return NextResponse.json({ ok: true, rows, source: 'pdfco', pages: totalPages, creditsUsed: totalPages })
     } catch (error) {
       errors.push(error instanceof Error ? error.message : 'PDF.co conversion failed')
     }

@@ -238,6 +238,8 @@ export default function ConverterApp({ bank }) {
         extractedText = ''
       }
       let rows = parseRows(extractedText)
+      let pdfcoCharged = false
+      let conversionError = ''
       if (!hasUsableRows(rows)) {
         rows = []
         setStatus('Local conversion needs help. Trying secure PDF backup…')
@@ -245,15 +247,20 @@ export default function ConverterApp({ bank }) {
         form.append('file', file)
         const fallbackResponse = await fetch('/api/pdfco', { method: 'POST', body: form })
         const fallbackResult = await fallbackResponse.json().catch(() => null)
-        if (fallbackResponse.ok && fallbackResult?.ok && hasUsableRows(fallbackResult.rows)) rows = fallbackResult.rows
+        if (fallbackResponse.ok && fallbackResult?.ok && hasUsableRows(fallbackResult.rows)) {
+          rows = fallbackResult.rows
+          pdfcoCharged = true
+        } else {
+          conversionError = fallbackResult?.error || ''
+        }
       }
       if (!hasUsableRows(rows)) {
-        setStatus('No readable transactions found. Your credit was not used.')
+        setStatus(conversionError || 'No readable transactions found. Your credit was not used.')
         return
       }
 
       let serverRemaining = null
-      try {
+      if (!pdfcoCharged) try {
         const quotaResponse = await fetch('/api/credits', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'consume' }) })
         const quotaResult = quotaResponse.ok ? await quotaResponse.json().catch(() => null) : null
         if (quotaResponse.status === 429 || (quotaResponse.ok && quotaResult?.ok && quotaResult.allowed === false)) {
