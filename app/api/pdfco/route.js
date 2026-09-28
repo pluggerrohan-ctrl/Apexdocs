@@ -125,7 +125,8 @@ export async function POST(request) {
     cache: 'no-store',
   })
   const creditResult = await creditResponse.json().catch(() => null)
-  if (!creditResponse.ok || !creditResult?.ok) {
+  const creditServiceUnavailable = !creditResponse.ok && (creditResponse.status >= 500 || creditResult?.error === 'License recovery is unavailable right now.')
+  if ((!creditResponse.ok || !creditResult?.ok) && !creditServiceUnavailable) {
     const message = creditResult?.error || `Insufficient credits. You need ${totalPages} credits for this document.`
     return NextResponse.json({ ok: false, error: message, requiredCredits: totalPages }, { status: creditResponse.status === 429 ? 402 : creditResponse.status || 402 })
   }
