@@ -21,7 +21,7 @@ export async function generateMetadata({ params }) {
     }
     const content = getBankContent(bank)
     return {
-      title: `Convert ${bank.name} Statement PDF to Excel Online`,
+      title: { absolute: `Convert ${bank.name} PDF to Excel Online | ApexDoc` },
       description: content.intro.slice(0, 155),
       keywords: [
         `${bank.name} bank statement converter`,
