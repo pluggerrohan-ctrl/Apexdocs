@@ -20,6 +20,11 @@ async function getPdfPageCount(file) {
     const text = new TextDecoder('latin1').decode(data)
     const pageMarkers = text.match(/\/Type\s*\/Page(?:\s|\/|>)/g)?.length || 0
     if (pageMarkers > 0) return pageMarkers
+
+    // Object streams can hide the page tree from a plain-text scan. The PDF.co
+    // conversion still processes the complete document, so a valid PDF must not
+    // be rejected before the backup converter gets a chance to read it.
+    if (text.startsWith('%PDF-')) return 1
     throw new Error('Unable to determine the PDF page count.')
   }
 }
