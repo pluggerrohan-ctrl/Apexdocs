@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import ConverterApp from '../../../components/converter-app'
 import banks from '../../../data/banks.json'
 import { getBank, bankSlugs } from '../../../lib/banks'
@@ -126,7 +126,7 @@ export default async function BankPage({ params }) {
   try {
     const { slug } = await params
     const bank = getBank(slug)
-    if (!bank) redirect('/')
+    if (!bank) notFound()
 
     const relatedBanks = banks
       .filter((candidate) => candidate.country === bank.country && candidate.slug !== bank.slug)
@@ -174,6 +174,6 @@ export default async function BankPage({ params }) {
       </>
     )
   } catch {
-    redirect('/')
+    notFound()
   }
 }
