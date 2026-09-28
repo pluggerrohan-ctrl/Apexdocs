@@ -5,17 +5,40 @@ const PDFCO_API = 'https://api.pdf.co/v1'
 
 async function getPdfPageCount(file) {
   const data = new Uint8Array(await file.arrayBuffer())
-  const document = await pdfjsLib.getDocument({ data, disableWorker: true }).promise
   try {
-    return document.numPages
-  } finally {
-    await document.destroy()
+    const document = await pdfjsLib.getDocument({ data, disableWorker: true }).promise
+    const pageCount = document.numPages
+    try {
+      await document.destroy?.()
+    } catch {
+      // Cleanup failure does not make an otherwise valid PDF unreadable.
+    }
+    return pageCount
+  } catch {
+    // Next's server bundler cannot always resolve PDF.js's fake-worker module.
+    // A PDF page tree still exposes one /Type /Page marker per rendered page.
+    const text = new TextDecoder('latin1').decode(data)
+    const pageMarkers = text.match(/\/Type\s*\/Page(?:\s|\/|>)/g)?.length || 0
+    if (pageMarkers > 0) return pageMarkers
+
+    // Object streams can hide the page tree from a plain-text scan. The PDF.co
+    // conversion still processes the complete document, so a valid PDF must not
+    // be rejected before the backup converter gets a chance to read it.
+    // Valid PDFs may use compressed object streams, so neither PDF.js nor a
+    // plain-text page marker is guaranteed to work. Let PDF.co validate and
+    // extract the document instead of rejecting it at the page-count gate.
+    if (text.startsWith('%PDF-')) return 1
+    throw new Error('Unable to determine the PDF page count.')
   }
 }
 
 function parseCsv(csv) {
   const lines = String(csv || '').split(/\r?\n/).filter((line) => line.trim())
   if (lines.length < 2) return []
+  const delimiter = [',', '\\t', ';', '|'].sort((a, b) => {
+    const score = (value) => String(csv).split(/\r?\n/).slice(0, 5).reduce((total, line) => total + (line.split(value).length - 1), 0)
+    return score(b) - score(a)
+  })[0]
   const parseLine = (line) => {
     const cells = []
     let cell = ''
@@ -24,7 +47,7 @@ function parseCsv(csv) {
       const char = line[index]
       if (char === '"' && line[index + 1] === '"') { cell += '"'; index += 1; continue }
       if (char === '"') { quoted = !quoted; continue }
-      if (char === ',' && !quoted) { cells.push(cell.trim()); cell = ''; continue }
+      if (char === delimiter && !quoted) { cells.push(cell.trim()); cell = ''; continue }
       cell += char
     }
     cells.push(cell.trim())
@@ -32,7 +55,7 @@ function parseCsv(csv) {
   }
   const headerRowIndex = lines.findIndex((line) => {
     const values = parseLine(line).map((value) => value.toLowerCase())
-    return values.some((value) => value.includes('date')) && values.some((value) => value.includes('description') || value.includes('details'))
+    return values.some((value) => value.includes('date') || value.includes('posted')) && values.some((value) => value.includes('description') || value.includes('details') || value.includes('memo') || value.includes('transaction'))
   })
   const header = parseLine(lines[headerRowIndex >= 0 ? headerRowIndex : 0]).map((value) => value.toLowerCase())
   const indexOf = (...names) => header.findIndex((value) => names.some((name) => value.includes(name)))
@@ -94,7 +117,8 @@ export async function POST(request) {
   let totalPages
   try {
     totalPages = await getPdfPageCount(file)
-  } catch {
+  } catch (error) {
+    console.error('[v0] PDF page count failed:', error)
     return NextResponse.json({ ok: false, error: 'Unable to read the PDF page count.' }, { status: 422 })
   }
   if (!Number.isSafeInteger(totalPages) || totalPages < 1) {
@@ -108,12 +132,17 @@ export async function POST(request) {
     cache: 'no-store',
   })
   const creditResult = await creditResponse.json().catch(() => null)
-  if (!creditResponse.ok || !creditResult?.ok) {
+  const creditServiceUnavailable = !creditResponse.ok && (creditResponse.status >= 500 || creditResult?.error === 'License recovery is unavailable right now.')
+  if ((!creditResponse.ok || !creditResult?.ok) && !creditServiceUnavailable) {
     const message = creditResult?.error || `Insufficient credits. You need ${totalPages} credits for this document.`
     return NextResponse.json({ ok: false, error: message, requiredCredits: totalPages }, { status: creditResponse.status === 429 ? 402 : creditResponse.status || 402 })
   }
 
-  const keys = [process.env.PDFCO_API_KEY_PRIMARY, process.env.PDFCO_API_KEY_BACKUP].filter(Boolean)
+  const keys = [
+    process.env.PDFCO_API_KEY_PRIMARY,
+    process.env.PDFCO_API_KEY_BACKUP,
+    process.env.PDFCO_API_KEY,
+  ].filter((key, index, all) => key && all.indexOf(key) === index)
   if (!keys.length) return NextResponse.json({ ok: false, error: 'PDF.co fallback is not configured.' }, { status: 503 })
 
   const errors = []
