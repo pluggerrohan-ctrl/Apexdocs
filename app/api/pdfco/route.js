@@ -1,16 +1,17 @@
 import { NextResponse } from 'next/server'
-import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs'
 
 const PDFCO_API = 'https://api.pdf.co/v1'
 
 async function getPdfPageCount(file) {
-  const data = new Uint8Array(await file.arrayBuffer())
-  const document = await pdfjsLib.getDocument({ data, disableWorker: true }).promise
-  try {
-    return document.numPages
-  } finally {
-    await document.destroy()
-  }
+  const buffer = Buffer.from(await file.arrayBuffer())
+  const content = buffer.toString('latin1')
+  // Try the /Count entry in the /Type /Pages root dictionary first — most reliable.
+  const countMatch = content.match(/\/Type\s*\/Pages[^>]*?\/Count\s+(\d+)/)
+  if (countMatch) return parseInt(countMatch[1], 10)
+  // Fallback: count /Type /Page entries that are not /Pages.
+  const pageMatches = content.match(/\/Type\s*\/Page(?!s)[\s\/>]/g)
+  if (pageMatches && pageMatches.length > 0) return pageMatches.length
+  return 1
 }
 
 function parseCsv(csv) {
@@ -94,7 +95,8 @@ export async function POST(request) {
   let totalPages
   try {
     totalPages = await getPdfPageCount(file)
-  } catch {
+  } catch (pageCountError) {
+    console.error('[pdfco] getPdfPageCount failed:', pageCountError?.message, pageCountError?.stack)
     return NextResponse.json({ ok: false, error: 'Unable to read the PDF page count.' }, { status: 422 })
   }
   if (!Number.isSafeInteger(totalPages) || totalPages < 1) {
