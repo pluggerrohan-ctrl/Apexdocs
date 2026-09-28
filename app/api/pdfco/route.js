@@ -131,7 +131,11 @@ export async function POST(request) {
     return NextResponse.json({ ok: false, error: message, requiredCredits: totalPages }, { status: creditResponse.status === 429 ? 402 : creditResponse.status || 402 })
   }
 
-  const keys = [process.env.PDFCO_API_KEY_PRIMARY, process.env.PDFCO_API_KEY_BACKUP].filter(Boolean)
+  const keys = [
+    process.env.PDFCO_API_KEY_PRIMARY,
+    process.env.PDFCO_API_KEY_BACKUP,
+    process.env.PDFCO_API_KEY,
+  ].filter((key, index, all) => key && all.indexOf(key) === index)
   if (!keys.length) return NextResponse.json({ ok: false, error: 'PDF.co fallback is not configured.' }, { status: 503 })
 
   const errors = []
