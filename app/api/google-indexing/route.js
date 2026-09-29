@@ -2,6 +2,7 @@ import { google } from 'googleapis'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { bankSlugs } from '../../../lib/banks'
+import { blogSlugs } from '../../../lib/blog-posts'
 
 export const runtime = 'nodejs'
 export const maxDuration = 300
@@ -13,6 +14,8 @@ function getUrls() {
     `${siteUrl}/`,
     `${siteUrl}/pdfconverter`,
     `${siteUrl}/allbanks`,
+    `${siteUrl}/blog`,
+    ...blogSlugs.map((slug) => `${siteUrl}/blog/${slug}`),
     `${siteUrl}/banks/country/usa`,
     `${siteUrl}/banks/country/uk`,
     `${siteUrl}/banks/country/uae`,
@@ -44,9 +47,9 @@ function parseCredentials(raw) {
 
 function getCredentialSets() {
   const candidates = [
-    { name: 'GOOGLE_SERVICE_ACCOUNT_JSON', raw: process.env.GOOGLE_SERVICE_ACCOUNT_JSON },
-    { name: 'GOOGLE_SERVICE_ACCOUNT_JSON_2', raw: process.env.GOOGLE_SERVICE_ACCOUNT_JSON_2 },
-    { name: 'GOOGLE_SERVICE_ACCOUNT_JSON_3', raw: process.env.GOOGLE_SERVICE_ACCOUNT_JSON_3 },
+    { name: 'GOOGLE_SERVICE_ACCOUNT', raw: process.env.GOOGLE_SERVICE_ACCOUNT },
+    { name: 'GOOGLE_SERVICE_ACCOUNT_2', raw: process.env.GOOGLE_SERVICE_ACCOUNT_2 },
+    { name: 'GOOGLE_SERVICE_ACCOUNT_3', raw: process.env.GOOGLE_SERVICE_ACCOUNT_3 },
   ]
 
   const sets = []
@@ -79,9 +82,14 @@ async function readStatus() {
   try {
     const raw = await fs.readFile(STATUS_FILE, 'utf8')
     const parsed = JSON.parse(raw)
-    return parsed && typeof parsed === 'object' ? parsed : { days: {} }
+    if (parsed && typeof parsed === 'object') {
+      if (!Array.isArray(parsed.pushedUrls)) parsed.pushedUrls = []
+      if (!parsed.days) parsed.days = {}
+      return parsed
+    }
+    return { pushedUrls: [], days: {} }
   } catch {
-    return { days: {} }
+    return { pushedUrls: [], days: {} }
   }
 }
 
@@ -140,13 +148,13 @@ export async function POST(request) {
     const status = await readStatus()
     const day = todayKey()
     const today = status.days?.[day] || { successfulUrls: [], attempts: 0 }
-    const successfulUrls = new Set(today.successfulUrls)
     const configuredIndexedUrls = getConfiguredIndexedUrls()
-    const indexedUrls = new Set([...successfulUrls, ...configuredIndexedUrls])
+    // Global set of ALL URLs ever pushed (any day) + configured indexed URLs
+    const pushedUrls = new Set([...(status.pushedUrls || []), ...configuredIndexedUrls])
     const offset = Math.min(startIndex, allUrls.length)
     const urlsToSubmit = allUrls
       .slice(offset)
-      .filter((url) => !indexedUrls.has(url))
+      .filter((url) => !pushedUrls.has(url))
     const results = []
     const accounts = credentialSets.slice(0, MAX_ACCOUNTS)
     const dailyRemaining = Math.max(0, MAX_ACCOUNTS * BATCH_SIZE_PER_ACCOUNT - today.attempts)
@@ -184,19 +192,20 @@ export async function POST(request) {
 
     const failed = results.filter((result) => !result.ok)
     const successful = results.filter((result) => result.ok)
-    successful.forEach((result) => successfulUrls.add(result.url))
+    successful.forEach((result) => pushedUrls.add(result.url))
     const updatedToday = {
-      successfulUrls: [...successfulUrls],
+      successfulUrls: [...new Set([...(today.successfulUrls || []), ...successful.map((r) => r.url)])],
       attempts: today.attempts + results.length,
       updatedAt: new Date().toISOString(),
     }
     await writeStatus({
       ...status,
+      pushedUrls: [...pushedUrls],
       days: { ...(status.days || {}), [day]: updatedToday },
     })
 
     const submittedCount = successful.length
-    const remaining = allUrls.filter((url) => !successfulUrls.has(url) && !configuredIndexedUrls.has(url)).length
+    const remaining = allUrls.filter((url) => !pushedUrls.has(url)).length
     return Response.json({
       submitted: submittedCount,
       failed: failed.length,
