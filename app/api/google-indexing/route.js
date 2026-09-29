@@ -4,7 +4,7 @@ import path from 'node:path'
 import { bankSlugs } from '../../../lib/banks'
 
 export const runtime = 'nodejs'
-export const maxDuration = 300
+export const maxDuration = 900
 
 const siteUrl = 'https://apexwebdesign.online'
 
@@ -70,10 +70,13 @@ function getCredentialSets() {
   return { sets, skipped }
 }
 
-// Google Indexing API requests are capped at 200 per service account per run.
-const BATCH_SIZE_PER_ACCOUNT = 200
+// Keep each service account well below Google's daily quota and rotate predictably.
+const BATCH_SIZE_PER_ACCOUNT = 100
 const MAX_ACCOUNTS = 3
+const REQUEST_DELAY_MS = 1500
 const STATUS_FILE = path.join(process.cwd(), 'indexing_status.json')
+
+const wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds))
 
 async function readStatus() {
   try {
@@ -164,12 +167,15 @@ export async function POST(request) {
       })
       const indexing = google.indexing({ version: 'v3', auth })
 
-      for (const url of batch) {
+      console.log(`[google-indexing] account ${name} started: ${batch.length} URLs`)
+
+      for (const [batchIndex, url] of batch.entries()) {
         try {
           const response = await indexing.urlNotifications.publish({
             requestBody: { url, type: 'URL_UPDATED' },
           })
           results.push({ url, ok: true, status: response.status, account: name })
+          console.log(`[google-indexing] ${results.length}/${urlsToSubmit.length} successfully pushed: ${url} via ${name}`)
         } catch (error) {
           results.push({
             url,
@@ -178,7 +184,15 @@ export async function POST(request) {
             error: error?.response?.data?.error?.message ?? error.message,
             account: name,
           })
+          console.error(`[google-indexing] failed: ${url} via ${name}`, error?.message ?? error)
         }
+
+        if (batchIndex < batch.length - 1) await wait(REQUEST_DELAY_MS)
+      }
+
+      console.log(`[google-indexing] account ${name} finished: ${batch.length} URLs`)
+      if (i < accounts.length - 1 && urlsToSubmit.length > (i + 1) * BATCH_SIZE_PER_ACCOUNT) {
+        console.log(`[google-indexing] rotating from ${name} to ${accounts[i + 1].name}`)
       }
     }
 
