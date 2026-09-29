@@ -127,8 +127,9 @@ export async function GET() {
 
 export async function POST(request) {
   try {
-    const expectedToken = process.env.GOOGLE_INDEXING_TOKEN
-    if (expectedToken && request.headers.get('authorization') !== `Bearer ${expectedToken}`) {
+    const authorization = request.headers.get('authorization')
+    const configuredTokens = [process.env.GOOGLE_INDEXING_TOKEN, process.env.CRON_SECRET].filter(Boolean)
+    if (configuredTokens.length > 0 && !configuredTokens.some((token) => authorization === `Bearer ${token}`)) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

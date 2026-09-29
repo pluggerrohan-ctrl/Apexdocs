@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/google-indexing",
+      "schedule": "0 1 * * *"
+    }
+  ]
+}
