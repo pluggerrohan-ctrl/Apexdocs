@@ -4043,5 +4043,21 @@
     "name": "Yadkin Bank",
     "country": "USA",
     "slug": "yadkin-bank"
+  },
+  {
+    "name": "Central Bank of India Bareli",
+    "country": "India",
+    "slug": "india/mp/central-bank-of-india-bareli"
+  },
+  {
+    "name": "Central Madhya Pradesh Gramin Bank Bareli",
+    "country": "India",
+    "slug": "india/mp/central-madhya-pradesh-gramin-bank-bareli"
+  },
+  {
+    "name": "Jila Sahkari Kendriya Bank Maryadit Bareli",
+    "country": "India",
+    "slug": "india/mp/jila-sahkari-kendriya-bank-bareli"
   }
 ]
+
