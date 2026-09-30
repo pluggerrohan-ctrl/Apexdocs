@@ -44,9 +44,9 @@ function parseCredentials(raw) {
 
 function getCredentialSets() {
   const candidates = [
-    { name: 'GOOGLE_SERVICE_ACCOUNT_JSON', raw: process.env.GOOGLE_SERVICE_ACCOUNT_JSON },
-    { name: 'GOOGLE_SERVICE_ACCOUNT_JSON_2', raw: process.env.GOOGLE_SERVICE_ACCOUNT_JSON_2 },
-    { name: 'GOOGLE_SERVICE_ACCOUNT_JSON_3', raw: process.env.GOOGLE_SERVICE_ACCOUNT_JSON_3 },
+    { name: 'GOOGLE_SERVICE_ACCOUNT', raw: process.env.GOOGLE_SERVICE_ACCOUNT },
+    { name: 'GOOGLE_SERVICE_ACCOUNT_2', raw: process.env.GOOGLE_SERVICE_ACCOUNT_2 },
+    { name: 'GOOGLE_SERVICE_ACCOUNT_3', raw: process.env.GOOGLE_SERVICE_ACCOUNT_3 },
   ]
 
   const sets = []
@@ -130,13 +130,17 @@ export async function POST(request) {
     }
 
     let startIndex = 0
+    let customUrls = null
     try {
       const body = await request.json()
       if (typeof body?.startIndex === 'number' && body.startIndex >= 0) startIndex = Math.floor(body.startIndex)
+      if (Array.isArray(body?.urls) && body.urls.every((u) => typeof u === 'string')) {
+        customUrls = body.urls
+      }
     } catch { /* no body or not JSON — start from 0 */ }
 
     const { sets: credentialSets, skipped } = getCredentialSets()
-    const allUrls = getUrls()
+    const allUrls = customUrls && customUrls.length > 0 ? customUrls : getUrls()
     const status = await readStatus()
     const day = todayKey()
     const today = status.days?.[day] || { successfulUrls: [], attempts: 0 }
