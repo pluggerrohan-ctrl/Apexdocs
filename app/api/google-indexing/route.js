@@ -4,7 +4,7 @@ import path from 'node:path'
 import { bankSlugs } from '../../../lib/banks'
 
 export const runtime = 'nodejs'
-export const maxDuration = 300
+export const maxDuration = 10
 
 const siteUrl = 'https://apexwebdesign.online'
 
