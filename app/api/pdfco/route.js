@@ -73,6 +73,7 @@ function parseCsv(csv) {
       Debit: cells[debitIndex] || (amountIndex >= 0 && /^[-(]/.test(cells[amountIndex] || '') ? cells[amountIndex] : ''),
       Credit: cells[creditIndex] || (amountIndex >= 0 && !/^[-(]/.test(cells[amountIndex] || '') ? cells[amountIndex] : ''),
       Balance: cells[balanceIndex] || cells.at(-1) || '',
+      Amount: cells[amountIndex] || '',
     }
   }).filter((row) => {
     const hasDate = /\d{1,4}[\/-]\d{1,2}[\/-]\d{1,4}|\d{1,2}\s+[A-Za-z]{3,9}\s+\d{2,4}/.test(row.Date)
