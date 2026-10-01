@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { FileUp, ShieldCheck, Sparkles, LoaderCircle, Download, RotateCcw, MoreVertical, X } from 'lucide-react'
 import * as XLSX from 'xlsx'
-import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs'
 
 const CREDIT_KEY = 'apexdoc_credits_v2'
 const FREE_CREDIT_LIMIT = 3
@@ -121,57 +120,6 @@ function hasUsableRows(rows) {
   return validDates >= Math.max(1, Math.ceil(rows.length * 0.7)) && meaningfulDescriptions >= Math.max(1, Math.ceil(rows.length * 0.7)) && (numericBalances >= 1 || rows.some((row) => row.Debit !== '' || row.Credit !== ''))
 }
 
-async function extractPdf(file, onProgress) {
-  try {
-  const buffer = await file.arrayBuffer()
-  const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buffer), useSystemFonts: false, useWorkerFetch: false, isEvalSupported: false, disableWorker: true, disableFontFace: true }).promise
-    let raw = ''
-    let hasText = false
-    for (let index = 1; index <= pdf.numPages; index += 1) {
-      const page = await pdf.getPage(index)
-      const content = await page.getTextContent()
-      const items = content.items.filter((item) => 'str' in item && item.str.trim())
-      const lines = []
-      for (const item of items) {
-        const y = Math.round(item.transform[5])
-        const line = lines.find((entry) => Math.abs(entry.y - y) <= 2)
-        if (line) line.parts.push(item.str)
-        else lines.push({ y, parts: [item.str] })
-      }
-      const pageText = lines.sort((a, b) => b.y - a.y).map((line) => line.parts.join(' ')).join('\n')
-      if (pageText.trim()) hasText = true
-      raw += `${pageText}\n`
-    }
-
-    if (hasText && hasUsableRows(parseRows(raw))) return raw
-
-    // A PDF can contain decorative text without usable transaction rows. Run local OCR
-    // instead of stopping early so scanned and flattened bank statements still convert.
-    raw = hasText ? '' : raw
-    onProgress?.('Scanning pages locally…')
-    const { createWorker } = await import('tesseract.js')
-    const worker = await createWorker('eng')
-    try {
-      for (let index = 1; index <= pdf.numPages; index += 1) {
-        const page = await pdf.getPage(index)
-        const viewport = page.getViewport({ scale: 2 })
-        const canvas = document.createElement('canvas')
-        canvas.width = viewport.width
-        canvas.height = viewport.height
-        await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise
-        const result = await worker.recognize(canvas)
-        raw += `${result.data.text}\n`
-        onProgress?.(`Scanning page ${index} of ${pdf.numPages}…`)
-      }
-    } finally {
-      await worker.terminate()
-    }
-    return raw
-  } catch {
-    return await file.text().catch(() => '')
-  }
-}
-
 export default function ConverterApp({ bank, statementTitle = false }) {
   const inputRef = useRef(null)
   const [credits, setCredits] = useState(0)
@@ -239,31 +187,19 @@ export default function ConverterApp({ bank, statementTitle = false }) {
     }, 100)
     setStatus(progressMessages[0][1])
     try {
-      const localExtraction = extractPdf(file, setStatus)
-      let extractedText = ''
-      try {
-        // OCR can legitimately take longer than eight seconds for multi-page statements.
-        // Let the local path finish before falling back so valid PDFs are not reported as unreadable.
-        extractedText = await localExtraction
-      } catch {
-        extractedText = ''
-      }
-      let rows = parseRows(extractedText)
+      let rows = []
       let pdfcoCharged = false
       let conversionError = ''
-      if (!hasUsableRows(rows)) {
-        rows = []
-        setStatus('Local conversion needs help. Trying secure PDF backup…')
-        const form = new FormData()
-        form.append('file', file)
-        const fallbackResponse = await fetch('/api/pdfco', { method: 'POST', body: form })
-        const fallbackResult = await fallbackResponse.json().catch(() => null)
-        if (fallbackResponse.ok && fallbackResult?.ok && hasUsableRows(fallbackResult.rows)) {
-          rows = fallbackResult.rows
-          pdfcoCharged = true
-        } else {
-          conversionError = fallbackResult?.error || ''
-        }
+      setStatus('Sending PDF to secure conversion service…')
+      const form = new FormData()
+      form.append('file', file)
+      const fallbackResponse = await fetch('/api/pdfco', { method: 'POST', body: form })
+      const fallbackResult = await fallbackResponse.json().catch(() => null)
+      if (fallbackResponse.ok && fallbackResult?.ok && hasUsableRows(fallbackResult.rows)) {
+        rows = fallbackResult.rows
+        pdfcoCharged = true
+      } else {
+        conversionError = fallbackResult?.error || ''
       }
       if (!hasUsableRows(rows)) {
         setStatus(conversionError || 'No readable transactions found. Your credit was not used.')
