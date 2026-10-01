@@ -26,7 +26,7 @@ function parseRows(raw) {
     const transactionColumns = columns.slice(-3)
     const firstColumnIndex = transactionColumns[0].index ?? 0
     const leftSide = body.slice(0, firstColumnIndex).trim()
-    const description = leftSide.replace(/\s+(?:[A-Z]{2,}[A-Z0-9-]*|[A-Z0-9]{4,})$/, '').trim()
+    const description = leftSide.trim()
     const value = (text) => {
       if (!text || /^[—–-]$/.test(text.trim())) return ''
       const number = Number(text.replace(/[^\d.-]/g, ''))
