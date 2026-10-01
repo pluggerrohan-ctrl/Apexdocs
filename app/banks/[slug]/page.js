@@ -4,6 +4,9 @@ import ConverterApp from '../../../components/converter-app'
 import banks from '../../../data/banks.json'
 import { getBank, bankSlugs } from '../../../lib/banks'
 import { getBankContent } from '../../../lib/bank-content'
+import { getUniqueBankSEO } from '../../../data/bank-seo-content'
+
+const SITE_URL = 'https://apexwebdesign.online'
 
 export function generateStaticParams() {
   return bankSlugs.map((slug) => ({ slug }))
@@ -20,8 +23,9 @@ export async function generateMetadata({ params }) {
       }
     }
     const content = getBankContent(bank)
+    const seo = getUniqueBankSEO(bank.name, bank.country, content.infoBox.currency)
     return {
-      title: { absolute: `Convert ${bank.name} PDF to Excel Online | ApexDoc` },
+      title: { absolute: seo.metaTitle },
       description: content.intro.slice(0, 155),
       keywords: [
         `${bank.name} bank statement converter`,
@@ -30,7 +34,7 @@ export async function generateMetadata({ params }) {
         'bank statement PDF converter',
       ],
       robots: { index: true, follow: true },
-      alternates: { canonical: `https://apexwebdesign.online/banks/${slug}` },
+      alternates: { canonical: `${SITE_URL}/banks/${slug}` },
     }
   } catch {
     return {
@@ -40,9 +44,38 @@ export async function generateMetadata({ params }) {
   }
 }
 
-function BankContent({ bank }) {
+function BankContent({ bank, seo }) {
   const content = getBankContent(bank)
   const info = content.infoBox
+
+  const webAppSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: `ApexDoc ${bank.name} PDF to Excel Converter`,
+    url: `${SITE_URL}/banks/${bank.slug}`,
+    description: seo.introText,
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'All',
+    browserRequirements: 'Requires HTML5, JavaScript, Web Browser Sandbox',
+    permissions: 'Local browser parsing, 100% private with no file uploads',
+    featureList: [
+      `Convert ${bank.name} PDF Bank Statements to Excel`,
+      'Local parsing inside the browser sandbox',
+      'Audit-ready spreadsheet generation',
+    ],
+    offers: {
+      '@type': 'AggregateOffer',
+      priceCurrency: 'USD',
+      lowPrice: '0',
+      highPrice: '39',
+      offerCount: '3',
+      offers: [
+        { '@type': 'Offer', name: 'Free Tier', price: '0', priceCurrency: 'USD' },
+        { '@type': 'Offer', name: 'Starter Plan', price: '10', priceCurrency: 'USD' },
+        { '@type': 'Offer', name: 'Pro Plan', price: '39', priceCurrency: 'USD' },
+      ],
+    },
+  }
 
   return (
     <section style={{ maxWidth: 800, margin: '0 auto', padding: '24px 20px 48px' }}>
@@ -56,10 +89,19 @@ function BankContent({ bank }) {
         <span style={{ color: '#374151' }}>{bank.name}</span>
       </nav>
 
-      <div style={{ background: '#f9fafb', borderRadius: 12, padding: '20px 24px', marginBottom: 32 }}>
-        <p style={{ fontSize: 15, lineHeight: 1.7, color: '#374151', margin: 0 }}>
-          {content.intro}
-        </p>
+      <p style={{ fontSize: 15, lineHeight: 1.7, color: '#374151', margin: '0 0 24px' }}>
+        {seo.introText}
+      </p>
+
+      <div style={{ display: 'grid', gap: 16, marginBottom: 32 }}>
+        <div style={{ background: '#f9fafb', borderRadius: 12, padding: '20px 24px' }}>
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: '#111827', margin: '0 0 8px' }}>Layout &amp; extraction</h2>
+          <p style={{ fontSize: 14, lineHeight: 1.7, color: '#374151', margin: 0 }}>{seo.layoutSpecs}</p>
+        </div>
+        <div style={{ background: '#f9fafb', borderRadius: 12, padding: '20px 24px' }}>
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: '#111827', margin: '0 0 8px' }}>Security &amp; privacy</h2>
+          <p style={{ fontSize: 14, lineHeight: 1.7, color: '#374151', margin: 0 }}>{seo.securitySpecs}</p>
+        </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12, marginBottom: 36 }}>
@@ -96,7 +138,7 @@ function BankContent({ bank }) {
         {content.displayName} statement conversion FAQ
       </h2>
       <div style={{ marginBottom: 36 }}>
-        {content.faqs.map((faq, i) => (
+        {seo.faqs.map((faq, i) => (
           <div key={i} style={{ marginBottom: 20 }}>
             <h3 style={{ fontSize: 16, fontWeight: 600, color: '#111827', margin: '0 0 6px' }}>{faq.question}</h3>
             <p style={{ fontSize: 14, lineHeight: 1.6, color: '#4b5563', margin: 0 }}>{faq.answer}</p>
@@ -112,7 +154,7 @@ function BankContent({ bank }) {
 
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(content.structuredData) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }}
       />
       <script
         type="application/ld+json"
@@ -128,6 +170,9 @@ export default async function BankPage({ params }) {
     const bank = getBank(slug)
     if (!bank) redirect('/')
 
+    const content = getBankContent(bank)
+    const seo = getUniqueBankSEO(bank.name, bank.country, content.infoBox.currency)
+
     const relatedBanks = banks
       .filter((candidate) => candidate.country === bank.country && candidate.slug !== bank.slug)
       .sort((a, b) => a.name.localeCompare(b.name))
@@ -135,8 +180,10 @@ export default async function BankPage({ params }) {
 
     return (
       <>
-        <ConverterApp bank={bank} />
-        <BankContent bank={bank} />
+        <section aria-label={`${bank.name} PDF to Excel Converter Tool`}>
+          <ConverterApp bank={bank} h1Title={seo.h1Title} />
+        </section>
+        <BankContent bank={bank} seo={seo} />
         <section
           aria-labelledby="related-banks-heading"
           style={{ maxWidth: 960, margin: '0 auto', padding: '0 20px 56px' }}
