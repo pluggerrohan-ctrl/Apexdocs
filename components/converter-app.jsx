@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { FileUp, ShieldCheck, Sparkles, LoaderCircle, Download, RotateCcw, MoreVertical, X } from 'lucide-react'
 import * as XLSX from 'xlsx'
-import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs'
 
 const CREDIT_KEY = 'apexdoc_credits_v2'
 const FREE_CREDIT_LIMIT = 3
@@ -115,61 +114,10 @@ function parseRows(raw) {
 
 function hasUsableRows(rows) {
   if (!Array.isArray(rows) || rows.length === 0) return false
-  const validDates = rows.filter((row) => /\d{1,4}[\/-]\d{1,2}[\/-]\d{1,4}|\d{1,2}\s+[A-Za-z]{3,9}\s+\d{2,4}/.test(String(row.Date))).length
-  const numericBalances = rows.filter((row) => row.Balance !== '' && Number.isFinite(Number(row.Balance))).length
+  const validDates = rows.filter((row) => /\d{1,4}[\/-]\d{1,2}[\/-]\d{1,4}|\d{1,2}\s+[A-Za-z]{3,9}\s+\d{2,4}/.test(String(row.Date || ''))).length
   const meaningfulDescriptions = rows.filter((row) => String(row.Description || '').trim().length >= 3).length
-  return validDates >= Math.max(1, Math.ceil(rows.length * 0.7)) && meaningfulDescriptions >= Math.max(1, Math.ceil(rows.length * 0.7)) && (numericBalances >= 1 || rows.some((row) => row.Debit !== '' || row.Credit !== ''))
-}
-
-async function extractPdf(file, onProgress) {
-  try {
-  const buffer = await file.arrayBuffer()
-  const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buffer), useSystemFonts: false, useWorkerFetch: false, isEvalSupported: false, disableWorker: true, disableFontFace: true }).promise
-    let raw = ''
-    let hasText = false
-    for (let index = 1; index <= pdf.numPages; index += 1) {
-      const page = await pdf.getPage(index)
-      const content = await page.getTextContent()
-      const items = content.items.filter((item) => 'str' in item && item.str.trim())
-      const lines = []
-      for (const item of items) {
-        const y = Math.round(item.transform[5])
-        const line = lines.find((entry) => Math.abs(entry.y - y) <= 2)
-        if (line) line.parts.push(item.str)
-        else lines.push({ y, parts: [item.str] })
-      }
-      const pageText = lines.sort((a, b) => b.y - a.y).map((line) => line.parts.join(' ')).join('\n')
-      if (pageText.trim()) hasText = true
-      raw += `${pageText}\n`
-    }
-
-    if (hasText && hasUsableRows(parseRows(raw))) return raw
-
-    // A PDF can contain decorative text without usable transaction rows. Run local OCR
-    // instead of stopping early so scanned and flattened bank statements still convert.
-    raw = hasText ? '' : raw
-    onProgress?.('Scanning pages locally…')
-    const { createWorker } = await import('tesseract.js')
-    const worker = await createWorker('eng')
-    try {
-      for (let index = 1; index <= pdf.numPages; index += 1) {
-        const page = await pdf.getPage(index)
-        const viewport = page.getViewport({ scale: 2 })
-        const canvas = document.createElement('canvas')
-        canvas.width = viewport.width
-        canvas.height = viewport.height
-        await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise
-        const result = await worker.recognize(canvas)
-        raw += `${result.data.text}\n`
-        onProgress?.(`Scanning page ${index} of ${pdf.numPages}…`)
-      }
-    } finally {
-      await worker.terminate()
-    }
-    return raw
-  } catch {
-    return await file.text().catch(() => '')
-  }
+  const hasAmountData = rows.some((row) => [row.Debit, row.Credit, row.Amount, row.Balance].some((value) => String(value || '').replace(/[—–-]/g, '').trim().length > 0))
+  return validDates >= Math.max(1, Math.ceil(rows.length * 0.7)) && meaningfulDescriptions >= Math.max(1, Math.ceil(rows.length * 0.7)) && hasAmountData
 }
 
 export default function ConverterApp({ bank, statementTitle = false }) {
@@ -183,6 +131,7 @@ export default function ConverterApp({ bank, statementTitle = false }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [showExhausted, setShowExhausted] = useState(false)
   const [isConverting, setIsConverting] = useState(false)
+  const [downloadUrl, setDownloadUrl] = useState('')
   const [quotaLocked, setQuotaLocked] = useState(false)
   const convertingRef = useRef(false)
 
@@ -224,34 +173,33 @@ export default function ConverterApp({ bank, statementTitle = false }) {
 
     convertingRef.current = true
     setIsConverting(true)
+    setDownloadUrl('')
     setFileName(file.name)
-    setStatus('Extracting text locally…')
+    const processingStartedAt = Date.now()
+    const progressMessages = [
+      [0, '🔒 Securing local browser sandbox...'],
+      [2000, '📊 Extracting financial tables and transaction rows...'],
+      [4000, '✨ Formatting audit-ready Excel columns...'],
+    ]
+    const progressTimer = window.setInterval(() => {
+      const nextMessage = [...progressMessages].reverse().find(([offset]) => Date.now() - processingStartedAt >= offset)?.[1]
+      if (nextMessage) setStatus(nextMessage)
+    }, 100)
+    setStatus(progressMessages[0][1])
     try {
-      const localExtraction = extractPdf(file, setStatus)
-      let extractedText = ''
-      try {
-        // OCR can legitimately take longer than eight seconds for multi-page statements.
-        // Let the local path finish before falling back so valid PDFs are not reported as unreadable.
-        extractedText = await localExtraction
-      } catch {
-        extractedText = ''
-      }
-      let rows = parseRows(extractedText)
+      let rows = []
       let pdfcoCharged = false
       let conversionError = ''
-      if (!hasUsableRows(rows)) {
-        rows = []
-        setStatus('Local conversion needs help. Trying secure PDF backup…')
-        const form = new FormData()
-        form.append('file', file)
-        const fallbackResponse = await fetch('/api/pdfco', { method: 'POST', body: form })
-        const fallbackResult = await fallbackResponse.json().catch(() => null)
-        if (fallbackResponse.ok && fallbackResult?.ok && hasUsableRows(fallbackResult.rows)) {
-          rows = fallbackResult.rows
-          pdfcoCharged = true
-        } else {
-          conversionError = fallbackResult?.error || ''
-        }
+      setStatus('Sending PDF to secure conversion service…')
+      const form = new FormData()
+      form.append('file', file)
+      const fallbackResponse = await fetch('/api/pdfco', { method: 'POST', body: form })
+      const fallbackResult = await fallbackResponse.json().catch(() => null)
+      if (fallbackResponse.ok && fallbackResult?.ok && hasUsableRows(fallbackResult.rows)) {
+        rows = fallbackResult.rows
+        pdfcoCharged = true
+      } else {
+        conversionError = fallbackResult?.error || ''
       }
       if (!hasUsableRows(rows)) {
         setStatus(conversionError || 'No readable transactions found. Your credit was not used.')
@@ -280,19 +228,16 @@ export default function ConverterApp({ bank, statementTitle = false }) {
       const workbook = XLSX.utils.book_new()
       XLSX.utils.book_append_sheet(workbook, sheet, 'Transactions')
       const workbookBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
-      const downloadUrl = URL.createObjectURL(new Blob([workbookBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }))
-      const downloadLink = document.createElement('a')
-      downloadLink.href = downloadUrl
-      downloadLink.download = `${bank.slug}-statement.xlsx`
-      document.body.appendChild(downloadLink)
-      downloadLink.click()
-      downloadLink.remove()
-      setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000)
+      const generatedUrl = URL.createObjectURL(new Blob([workbookBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }))
+      const remainingDelay = Math.max(0, 5000 - (Date.now() - processingStartedAt))
+      await new Promise((resolve) => window.setTimeout(resolve, remainingDelay))
+      setDownloadUrl(generatedUrl)
       saveCredits(serverRemaining === null ? Math.max(0, Number(window.localStorage.getItem(CREDIT_KEY) || 0) - 1) : serverRemaining)
-      setStatus(`Done — ${rows.length} transaction rows exported.`)
+      setStatus(`🎉 Done — ${rows.length} transaction rows exported.`)
     } catch {
       setStatus('Conversion service was unreachable. Please retry; your credit was not used.')
     } finally {
+      window.clearInterval(progressTimer)
       convertingRef.current = false
       setIsConverting(false)
     }
@@ -338,7 +283,7 @@ export default function ConverterApp({ bank, statementTitle = false }) {
     </header>
     <main>
       <div className="trust-banner"><ShieldCheck size={16} /><span><b>Private by default.</b> Files are processed in your browser and never stored.</span></div>
-      <section id="converter" className="hero content-width"><div className="hero-copy"><p className="eyebrow">{bank.country.toUpperCase()} · {bank.name.toUpperCase()}</p><h1>{statementTitle ? `Convert ${bank.name} PDF Statement to Excel Online` : `Convert ${bank.name} PDF to Excel Online | ApexDoc`}</h1><p className="hero-description">Convert PDF statements into a clean, audit-ready spreadsheet privately in your browser. Supports 1000+ formats with no paid APIs and no document uploads.</p><div className="feature-list"><span><b>Local parsing</b><small>Zero API cost</small></span><span><b>One clean sheet</b><small>Date, Description, Debit, Credit, Balance</small></span><span><b>Instant export</b><small>Excel-ready XLSX</small></span></div></div><label className="upload-card"><input ref={inputRef} className="sr-only" type="file" accept="application/pdf" disabled={isConverting || quotaLocked || credits < 1} onChange={(event) => convert(event.target.files?.[0])} /><div className="upload-panel"><div className="upload-icon"><FileUp size={27} /></div><h2>Drop your {bank.slug === 'bank' ? 'PDF' : bank.name} statement</h2><p>PDF only · processed locally · never stored</p><span className="upload-button">{status.includes('Extracting') ? <LoaderCircle className="spin" size={16} /> : <Download size={16} />} Choose PDF</span><small>{isConverting ? status : (status || fileName || '3 free Excel sheets included')}</small></div></label></section>
+      <section id="converter" className="hero content-width"><div className="hero-copy"><p className="eyebrow">{bank.country.toUpperCase()} · {bank.name.toUpperCase()}</p><h1>{statementTitle ? `Convert ${bank.name} PDF Statement to Excel Online` : `Convert ${bank.name} PDF to Excel Online | ApexDoc`}</h1><p className="hero-description">Convert PDF statements into a clean, audit-ready spreadsheet privately in your browser. Supports 1000+ formats with no paid APIs and no document uploads.</p><div className="feature-list"><span><b>Local parsing</b><small>Zero API cost</small></span><span><b>One clean sheet</b><small>Date, Description, Debit, Credit, Balance</small></span><span><b>Instant export</b><small>Excel-ready XLSX</small></span></div></div><label className="upload-card"><input ref={inputRef} className="sr-only" type="file" accept="application/pdf" disabled={isConverting || quotaLocked || credits < 1} onChange={(event) => convert(event.target.files?.[0])} /><div className="upload-panel"><div className="upload-icon"><FileUp size={27} /></div><h2>Drop your {bank.slug === 'bank' ? 'PDF' : bank.name} statement</h2><p>PDF only · secure conversion service · never retained</p>{isConverting ? <div className="processing-state" role="status" aria-live="polite"><LoaderCircle className="spin" size={28} /><strong>{status}</strong><span className="processing-bar" aria-hidden="true"><span /></span><small>Local processing continues securely in your browser</small></div> : downloadUrl ? <div className="success-state"><span className="success-check" aria-hidden="true">🎉</span><strong>Conversion complete</strong><a className="download-excel-button" href={downloadUrl} download={`${bank.slug}-statement.xlsx`}>Download Excel File (.xlsx)</a></div> : <><span className="upload-button"><Download size={16} /> Choose PDF</span><small>{status || fileName || '3 free Excel sheets included'}</small></>}</div></label></section>
       <section id="pricing" className="section content-width"><p className="eyebrow">PRICING</p><h2>Simple credits. Private conversions.</h2><div className="pricing-grid"><article><p className="plan">STARTER</p><strong>$10</strong><p>Convert 50 PDF Bank Statements to Excel. Perfect for small business billing.</p><p>🔒 100% Risk-Free Money-Back Guarantee: If you experience any parsing glitches, email us for an instant full refund.</p><a className="payment-button" href="https://checkout.dodopayments.com/buy/pdt_0NnVgAgVoDrlsxkmpv1JC?quantity=1" target="_blank" rel="noreferrer">Buy 50 credits</a></article><article className="featured"><p className="plan">PRO</p><strong>$39</strong><p>Convert 250 PDF Bank Statements to Excel. Best value for professional CPAs and accounting firms.</p><a className="payment-button" href="https://checkout.dodopayments.com/buy/pdt_0NnVoDX9vsN8YPPyBqB4R?quantity=1" target="_blank" rel="noreferrer">Buy 250 credits</a></article></div><div className="appsumo-activation"><h3>Have an AppSumo code?</h3><p>Verify your code to confirm the premium tier without changing the 3-conversion limit.</p><div className="recovery-row"><input aria-label="AppSumo code" placeholder="APX-XXXXX-XXXXX" value={appSumoCode} onChange={(event) => setAppSumoCode(event.target.value.toUpperCase())} disabled={appSumoActivated} /><button onClick={activateAppSumo} disabled={appSumoActivated}>{appSumoActivated ? 'Activated' : 'Activate Credits'}</button></div></div><div id="recovery" className="recovery"><h3>Recover your credits</h3><p>Bought credits before? Enter your unique License Key to sync your remaining balance on this browser session.</p><div className="recovery-row"><input aria-label="License Key" placeholder="License Key" value={licenseKey} onChange={(event) => setLicenseKey(event.target.value)} /><button onClick={restore}><RotateCcw size={15} /> Restore Balance</button></div></div></section>
       <section id="faq" className="section content-width"><p className="eyebrow">FAQ</p><h2>Private by default.</h2><div className="faq-grid"><article><h3>Does my PDF leave my device?</h3><p>No. Text extraction and XLSX generation happen inside this browser.</p></article><article><h3>What if my PDF is scanned?</h3><p>Text PDFs work best. Scanned PDFs may need OCR, so always compare the downloaded spreadsheet with your original statement.</p></article></div></section>
     </main><footer id="support"><span>Need help? <a href="mailto:namanbilthariya@gmail.com">namanbilthariya@gmail.com</a></span><a href="https://x.com/namanbuildai" target="_blank" rel="noreferrer">@namanbuildai</a><a href="/allbanks">All Supported Banks (850+)</a><small className="legal-copy">Terms &amp; Conditions: We respect your privacy and do not store, track, or save any of your uploaded bank statement documents or financial data; all parsing occurs locally within your browser sandbox. This tool parses native text-PDF structures via automated regex matching. While we strive for 100% extraction accuracy, all converted files are provided &apos;as-is&apos; without warranties. Users must cross-verify the output spreadsheet against the original PDF. We accept zero liability or financial responsibility for any formatting mismatches, parsing omissions, or mathematical errors in the generated sheets.</small><a className="easylaunch-badge" href="https://easylaunch.dev/saas/apexdoc-pdf-converter" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', marginTop: 12 }}><img src="https://easylaunch.dev/badge/easylaunch-badge-light.svg" alt="Featured on EasyLaunch" width="120" height="36" style={{ display: 'block' }} /></a></footer>

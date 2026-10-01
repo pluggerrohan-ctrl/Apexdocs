@@ -9,6 +9,7 @@ export default function sitemap() {
     { path: '/pdfconverter', priority: 0.9, changeFrequency: 'weekly' },
     { path: '/allbanks', priority: 0.9, changeFrequency: 'weekly' },
     { path: '/blog', priority: 0.8, changeFrequency: 'weekly' },
+    { path: '/blog/nanonets-vs-apexdoc-comparison-guide', priority: 0.8, changeFrequency: 'monthly' },
     { path: '/banks/country/usa', priority: 0.8, changeFrequency: 'weekly' },
     { path: '/banks/country/uk', priority: 0.8, changeFrequency: 'weekly' },
     { path: '/banks/country/uae', priority: 0.8, changeFrequency: 'weekly' },
