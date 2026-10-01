@@ -1,10 +1,10 @@
-import { bankSlugs } from '../lib/banks'
 import banks from '../data/banks.json'
 
 const siteUrl = 'https://apexwebdesign.online'
+const now = new Date()
 
 export default function sitemap() {
-  const routes = [
+  const staticRoutes = [
     { path: '/', priority: 1, changeFrequency: 'weekly' },
     { path: '/pdfconverter', priority: 0.9, changeFrequency: 'weekly' },
     { path: '/allbanks', priority: 0.9, changeFrequency: 'weekly' },
@@ -16,20 +16,21 @@ export default function sitemap() {
     { path: '/payment/success', priority: 0.3, changeFrequency: 'monthly' },
   ]
 
-  const bankRoutes = banks.map((bank) => ({
-    url: `${siteUrl}/banks/${bank.slug}`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly',
-    priority: 0.7,
+  const staticEntries = staticRoutes.map(({ path, priority, changeFrequency }) => ({
+    url: `${siteUrl}${path}`,
+    lastModified: now,
+    changeFrequency,
+    priority,
   }))
 
-  return [
-    ...routes.map(({ path, priority, changeFrequency }) => ({
-      url: `${siteUrl}${path}`,
-      lastModified: new Date(),
-      changeFrequency,
-      priority,
-    })),
-    ...bankRoutes,
-  ]
+  const bankEntries = banks
+    .filter((bank) => bank.slug)
+    .map((bank) => ({
+      url: `${siteUrl}/banks/${bank.slug}`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    }))
+
+  return [...staticEntries, ...bankEntries]
 }
