@@ -1,0 +1,13 @@
+{
+  "previewPort": 3000,
+  "healthPath": "/",
+  "startCommand": "docker compose -f docker-compose.base44.yml up -d",
+  "secrets": [
+    { "name": "PDFCO_API_KEY_PRIMARY", "description": "Primary PDF.co API key for the /api/pdfco converter", "requiredAtBoot": false },
+    { "name": "PDFCO_API_KEY_BACKUP", "description": "Backup PDF.co API key for the /api/pdfco converter", "requiredAtBoot": false },
+    { "name": "GOOGLE_SERVICE_ACCOUNT", "description": "Google service account JSON for the /api/google-indexing route", "requiredAtBoot": false },
+    { "name": "GOOGLE_SERVICE_ACCOUNT_2", "description": "Second Google service account JSON for indexing rotation", "requiredAtBoot": false },
+    { "name": "GOOGLE_SERVICE_ACCOUNT_3", "description": "Third Google service account JSON for indexing rotation", "requiredAtBoot": false },
+    { "name": "GOOGLE_INDEXING_TOKEN", "description": "Bearer token expected by the /api/google-indexing route", "requiredAtBoot": false }
+  ]
+}
