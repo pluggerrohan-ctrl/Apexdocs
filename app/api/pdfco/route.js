@@ -35,7 +35,7 @@ async function getPdfPageCount(file) {
 function parseCsv(csv) {
   const lines = String(csv || '').split(/\r?\n/).filter((line) => line.trim())
   if (lines.length < 2) return []
-  const delimiter = [',', '\\t', ';', '|'].sort((a, b) => {
+  const delimiter = [',', '\t', ';', '|'].sort((a, b) => {
     const score = (value) => String(csv).split(/\r?\n/).slice(0, 5).reduce((total, line) => total + (line.split(value).length - 1), 0)
     return score(b) - score(a)
   })[0]
@@ -63,14 +63,15 @@ function parseCsv(csv) {
   const descriptionIndex = indexOf('description', 'memo', 'details', 'transaction')
   const debitIndex = indexOf('debit', 'withdrawal', 'outgoing')
   const creditIndex = indexOf('credit', 'deposit', 'incoming')
+  const amountIndex = indexOf('amount', 'value')
   const balanceIndex = indexOf('balance', 'running')
   return lines.slice(headerRowIndex >= 0 ? headerRowIndex + 1 : 1).map((line) => {
     const cells = parseLine(line).map((cell) => cell.replace(/^"+|"+$/g, '').trim())
     return {
       Date: cells[dateIndex] || cells[0] || '',
       Description: cells[descriptionIndex] || cells[1] || 'Bank transaction',
-      Debit: cells[debitIndex] || '',
-      Credit: cells[creditIndex] || '',
+      Debit: cells[debitIndex] || (amountIndex >= 0 && /^[-(]/.test(cells[amountIndex] || '') ? cells[amountIndex] : ''),
+      Credit: cells[creditIndex] || (amountIndex >= 0 && !/^[-(]/.test(cells[amountIndex] || '') ? cells[amountIndex] : ''),
       Balance: cells[balanceIndex] || cells.at(-1) || '',
     }
   }).filter((row) => {
