@@ -62,13 +62,8 @@ function BankContent({ bank }) {
   }
 
   return (
-    <section style={{ maxWidth: 960, margin: '0 auto', padding: '24px 20px 48px' }}>
+    <section style={{ maxWidth: 960, margin: '0 auto', padding: '16px 20px 48px' }}>
       <h1 style={{ color: '#111827', fontSize: 'clamp(30px, 5vw, 48px)', lineHeight: 1.08, margin: '0 0 24px' }}>{seo.h1Title}</h1>
-      <section aria-label="ApexDoc trust metrics" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', border: '1px solid #d1d5db', borderRadius: 14, marginBottom: 28, overflow: 'hidden' }}>
-        <div style={{ padding: '20px 18px', borderRight: '1px solid #e5e7eb' }}><strong style={{ display: 'block', color: '#00a8cc', fontSize: 28 }}>5,420+</strong><span style={{ color: '#4b5563', fontSize: 13 }}>Statements Converted</span></div>
-        <div style={{ padding: '20px 18px', borderRight: '1px solid #e5e7eb', background: '#111827' }}><strong style={{ display: 'block', color: '#fff', fontSize: 28 }}>1,250+</strong><span style={{ color: '#d1d5db', fontSize: 13 }}>Active Professional CPAs</span></div>
-        <div style={{ padding: '20px 18px' }}><strong style={{ display: 'block', color: '#16a34a', fontSize: 28 }}>99.4%</strong><span style={{ color: '#4b5563', fontSize: 13 }}>Parsing Accuracy Rate</span></div>
-      </section>
       <nav aria-label="Breadcrumb" style={{ fontSize: 13, color: '#6b7280', marginBottom: 20 }}>
         <Link href="/" style={{ color: '#2563eb', textDecoration: 'none' }}>Home</Link>
         {' / '}
@@ -168,6 +163,13 @@ export default async function BankPage({ params }) {
 
     return (
       <>
+        <section aria-label="ApexDoc trust metrics" style={{ maxWidth: 960, margin: '0 auto', padding: '16px 20px 0' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', border: '1px solid #d1d5db', borderRadius: 14, overflow: 'hidden' }}>
+            <div style={{ padding: '20px 18px', borderRight: '1px solid #e5e7eb' }}><strong style={{ display: 'block', color: '#00a8cc', fontSize: 28 }}>5,420+</strong><span style={{ color: '#4b5563', fontSize: 13 }}>Statements Converted</span></div>
+            <div style={{ padding: '20px 18px', borderRight: '1px solid #e5e7eb', background: '#111827' }}><strong style={{ display: 'block', color: '#fff', fontSize: 28 }}>1,250+</strong><span style={{ color: '#d1d5db', fontSize: 13 }}>Active Professional CPAs</span></div>
+            <div style={{ padding: '20px 18px' }}><strong style={{ display: 'block', color: '#16a34a', fontSize: 28 }}>99.4%</strong><span style={{ color: '#4b5563', fontSize: 13 }}>Parsing Accuracy Rate</span></div>
+          </div>
+        </section>
         <ConverterApp bank={bank} />
         <BankContent bank={bank} />
         <section
