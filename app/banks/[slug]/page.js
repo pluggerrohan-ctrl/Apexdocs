@@ -163,14 +163,7 @@ export default async function BankPage({ params }) {
 
     return (
       <>
-        <section aria-label="ApexDoc trust metrics" style={{ maxWidth: 960, margin: '0 auto', padding: '16px 20px 0' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', border: '1px solid #d1d5db', borderRadius: 14, overflow: 'hidden' }}>
-            <div style={{ padding: '20px 18px', borderRight: '1px solid #e5e7eb' }}><strong style={{ display: 'block', color: '#00a8cc', fontSize: 28 }}>5,420+</strong><span style={{ color: '#4b5563', fontSize: 13 }}>Statements Converted</span></div>
-            <div style={{ padding: '20px 18px', borderRight: '1px solid #e5e7eb', background: '#111827' }}><strong style={{ display: 'block', color: '#fff', fontSize: 28 }}>1,250+</strong><span style={{ color: '#d1d5db', fontSize: 13 }}>Active Professional CPAs</span></div>
-            <div style={{ padding: '20px 18px' }}><strong style={{ display: 'block', color: '#16a34a', fontSize: 28 }}>99.4%</strong><span style={{ color: '#4b5563', fontSize: 13 }}>Parsing Accuracy Rate</span></div>
-          </div>
-        </section>
-        <ConverterApp bank={bank} />
+        <ConverterApp bank={bank} showTrustMetrics />
         <BankContent bank={bank} />
         <section
           aria-labelledby="related-banks-heading"
