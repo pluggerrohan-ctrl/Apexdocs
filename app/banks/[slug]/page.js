@@ -128,11 +128,6 @@ function BankContent({ bank }) {
         </p>
       </div>
 
-      <section aria-label="Security and compliance" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14, margin: '36px 0' }}>
-        <article style={{ border: '1px solid #dbeafe', borderRadius: 12, padding: 18, background: '#f8fbff' }}><div aria-hidden="true" style={{ fontSize: 24 }}>🔒</div><h3 style={{ color: '#111827', fontSize: 16, margin: '10px 0 6px' }}>AES-256 Encryption</h3><p style={{ color: '#4b5563', fontSize: 13, lineHeight: 1.6, margin: 0 }}>Conversions run locally inside your browser sandbox. 100% device-level isolated processing loop.</p></article>
-        <article style={{ border: '1px solid #dbeafe', borderRadius: 12, padding: 18, background: '#f8fbff' }}><div aria-hidden="true" style={{ fontSize: 24 }}>🛡️</div><h3 style={{ color: '#111827', fontSize: 16, margin: '10px 0 6px' }}>SOC 2 Type II Secure</h3><p style={{ color: '#4b5563', fontSize: 13, lineHeight: 1.6, margin: 0 }}>Strict compliance standards enforced. Zero server-side data retention or cloud database logs.</p></article>
-        <article style={{ border: '1px solid #dbeafe', borderRadius: 12, padding: 18, background: '#f8fbff' }}><div aria-hidden="true" style={{ fontSize: 24 }}>⚖️</div><h3 style={{ color: '#111827', fontSize: 16, margin: '10px 0 6px' }}>GDPR &amp; HIPAA Bound</h3><p style={{ color: '#4b5563', fontSize: 13, lineHeight: 1.6, margin: 0 }}>Your confidential financial layouts are legally bound to global institutional data protection laws.</p></article>
-      </section>
       <link rel="canonical" href={pageUrl} />
       <script
         type="application/ld+json"
