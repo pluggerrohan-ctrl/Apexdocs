@@ -44,8 +44,26 @@ function BankContent({ bank }) {
   const content = getBankContent(bank)
   const info = content.infoBox
 
+  const pageUrl = `https://apexwebdesign.online/banks/${bank.slug}`
+  const seo = {
+    h1Title: `Convert ${bank.name} PDF to Excel Online | ApexDoc`,
+    description: `Convert ${bank.name} PDF statements into clean Excel spreadsheets with ApexDoc.`,
+  }
+  const webApplicationSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: seo.h1Title,
+    url: pageUrl,
+    description: seo.description,
+    operatingSystem: 'All',
+    browserRequirements: 'Requires HTML5',
+    applicationCategory: 'BusinessApplication',
+    offers: { '@type': 'Offer', price: '0.00', priceCurrency: 'USD', availability: 'https://schema.org/InStock' },
+  }
+
   return (
-    <section style={{ maxWidth: 800, margin: '0 auto', padding: '24px 20px 48px' }}>
+    <section style={{ maxWidth: 960, margin: '0 auto', padding: '16px 20px 48px' }}>
+      <h1 style={{ color: '#111827', fontSize: 'clamp(30px, 5vw, 48px)', lineHeight: 1.08, margin: '0 0 24px' }}>{seo.h1Title}</h1>
       <nav aria-label="Breadcrumb" style={{ fontSize: 13, color: '#6b7280', marginBottom: 20 }}>
         <Link href="/" style={{ color: '#2563eb', textDecoration: 'none' }}>Home</Link>
         {' / '}
@@ -110,6 +128,11 @@ function BankContent({ bank }) {
         </p>
       </div>
 
+      <link rel="canonical" href={pageUrl} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webApplicationSchema) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(content.structuredData) }}
@@ -135,7 +158,7 @@ export default async function BankPage({ params }) {
 
     return (
       <>
-        <ConverterApp bank={bank} />
+        <ConverterApp bank={bank} showTrustMetrics />
         <BankContent bank={bank} />
         <section
           aria-labelledby="related-banks-heading"

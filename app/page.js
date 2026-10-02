@@ -15,5 +15,5 @@ export const metadata = {
 }
 
 export default function HomePage() {
-  return <ConverterApp bank={{ slug: 'bank', country: 'Global', name: 'Bank statement' }} />
+  return <ConverterApp bank={{ slug: 'bank', country: 'Global', name: 'Bank statement' }} showTrustMetrics />
 }
