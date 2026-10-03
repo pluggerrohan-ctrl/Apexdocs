@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { FileUp, ShieldCheck, Sparkles, LoaderCircle, Download, RotateCcw, MoreVertical, X } from 'lucide-react'
 import * as XLSX from 'xlsx'
+import AccountMenu from './account-menu'
 
 const CREDIT_KEY = 'apexdoc_credits_v2'
 const FREE_CREDIT_LIMIT = 3
@@ -133,6 +134,7 @@ export default function ConverterApp({ bank, statementTitle = false, showTrustMe
   const [isConverting, setIsConverting] = useState(false)
   const [downloadUrl, setDownloadUrl] = useState('')
   const [quotaLocked, setQuotaLocked] = useState(false)
+  const [accountCredits, setAccountCredits] = useState(null)
   const convertingRef = useRef(false)
 
   useEffect(() => {
@@ -155,6 +157,7 @@ export default function ConverterApp({ bank, statementTitle = false, showTrustMe
       }
     }
     initializeQuota()
+    fetch('/api/credits').then((response) => response.json()).then((result) => { if (active && result.authenticated) { setAccountCredits(Number(result.credits) || 0); setCredits(Number(result.credits) || 0) } }).catch(() => {})
     window.addEventListener('storage', sync)
     return () => { active = false; window.removeEventListener('storage', sync) }
   }, [])
@@ -207,7 +210,13 @@ export default function ConverterApp({ bank, statementTitle = false, showTrustMe
       }
 
       let serverRemaining = null
-      if (!pdfcoCharged) try {
+      if (accountCredits !== null) {
+        const paidResponse = await fetch('/api/credits', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'consume_paid' }) })
+        const paidResult = paidResponse.ok ? await paidResponse.json().catch(() => null) : null
+        if (!paidResult?.allowed) { setShowExhausted(true); return }
+        serverRemaining = Number(paidResult.credits)
+        setAccountCredits(serverRemaining)
+      } else if (!pdfcoCharged) try {
         const quotaResponse = await fetch('/api/credits', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'consume' }) })
         const quotaResult = quotaResponse.ok ? await quotaResponse.json().catch(() => null) : null
         if (quotaResponse.status === 429 || (quotaResponse.ok && quotaResult?.ok && quotaResult.allowed === false)) {
@@ -279,7 +288,7 @@ export default function ConverterApp({ bank, statementTitle = false, showTrustMe
   return <div className="site-shell">
     <header className="topbar">
       <a className="brand" href="#converter"><span className="brand-mark"><Sparkles size={19} /></span><span>ApexDoc</span></a>
-      <div className="header-actions"><strong className={`credit-badge${appSumoActivated ? ' appsumo-badge' : ''}`} aria-label={`Remaining balance: ${credits} credits`}><span className="credit-badge-full">Credits: {credits} ({appSumoActivated ? 'AppSumo Premium Tier' : 'Free Tier'})</span><span className="credit-badge-short">Credits: {credits}</span></strong><div className="menu-wrap"><button className="menu-button" aria-label="Open navigation menu" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}><MoreVertical size={21} /></button>{menuOpen && <div className="menu-panel"><button onClick={() => jumpTo('converter')}>Home</button><button onClick={() => jumpTo('pricing')}>Pricing</button><button onClick={() => jumpTo('faq')}>FAQ</button><button onClick={() => jumpTo('support')}>Support</button><button className="restore-menu" onClick={() => jumpTo('recovery')}><RotateCcw size={14} /> Restore Balance</button></div>}</div></div>
+      <div className="header-actions"><AccountMenu /><strong className={`credit-badge${appSumoActivated ? ' appsumo-badge' : ''}`} aria-label={`Remaining balance: ${credits} credits`}><span className="credit-badge-full">Credits: {credits} ({appSumoActivated ? 'AppSumo Premium Tier' : 'Free Tier'})</span><span className="credit-badge-short">Credits: {credits}</span></strong><div className="menu-wrap"><button className="menu-button" aria-label="Open navigation menu" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}><MoreVertical size={21} /></button>{menuOpen && <div className="menu-panel"><button onClick={() => jumpTo('converter')}>Home</button><button onClick={() => jumpTo('pricing')}>Pricing</button><button onClick={() => jumpTo('faq')}>FAQ</button><button onClick={() => jumpTo('support')}>Support</button><button className="restore-menu" onClick={() => jumpTo('recovery')}><RotateCcw size={14} /> Restore Balance</button></div>}</div></div>
     </header>
     <main>
       <div className="trust-banner"><ShieldCheck size={16} /><span><b>Private by default.</b> Files are processed in your browser and never stored.</span></div>
