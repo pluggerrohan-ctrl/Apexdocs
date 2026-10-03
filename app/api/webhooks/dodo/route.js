@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { createAdminClient } from '../../../../lib/supabase/admin'
 
 export const runtime = 'nodejs'
 
@@ -41,6 +42,23 @@ export async function POST(request) {
     payload = JSON.parse(rawBody)
   } catch {
     return response('Invalid webhook payload.', 400)
+  }
+
+  const eventType = payload.type || payload.event_type || payload.name || ''
+  const status = payload.data?.status || payload.status || payload.data?.payment_status || ''
+  const payment = payload.data?.payment || payload.data || payload
+  if (eventType && !/paid|success|completed|payment\.succeeded/i.test(`${eventType} ${status}`)) return response('Event ignored.')
+  const metadata = payment.metadata || payment.custom_data || payload.metadata || {}
+  const userId = metadata.user_id || metadata.userId
+  const plan = String(metadata.plan || '').toLowerCase()
+  const paymentId = payment.payment_id || payment.paymentId || payment.id || payload.id
+  if (userId && paymentId) {
+    const amount = plan === 'starter' ? 50 : plan === 'pro' ? 250 : 0
+    if (amount > 0) {
+      const admin = createAdminClient()
+      const { error } = await admin.rpc('grant_apexdoc_credits', { p_user_id: userId, p_amount: amount, p_source: 'dodo', p_external_id: String(paymentId) })
+      if (error) return response('Credit grant failed.', 502)
+    }
   }
 
   const workerUrl = process.env.CREDITS_WORKER_URL || DEFAULT_WORKER_URL

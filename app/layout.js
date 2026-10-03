@@ -1,5 +1,6 @@
 import Script from 'next/script'
 import '../index.css'
+import '../auth.css'
 
 export const metadata = {
   metadataBase: new URL('https://apexwebdesign.online'),
