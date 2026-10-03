@@ -50,9 +50,10 @@ export async function POST(request) {
   if (eventType && !/paid|success|completed|payment\.succeeded/i.test(`${eventType} ${status}`)) return response('Event ignored.')
   const metadata = payment.metadata || payment.custom_data || payload.metadata || {}
   const userId = metadata.user_id || metadata.userId
+  const plan = String(metadata.plan || '').toLowerCase()
   const paymentId = payment.payment_id || payment.paymentId || payment.id || payload.id
   if (userId && paymentId) {
-    const amount = /starter/i.test(`${metadata.plan || metadata.product || payment.product_name || ''}`) ? 50 : /pro/i.test(`${metadata.plan || metadata.product || payment.product_name || ''}`) ? 250 : 0
+    const amount = plan === 'starter' ? 50 : plan === 'pro' ? 250 : 0
     if (amount > 0) {
       const admin = createAdminClient()
       const { error } = await admin.rpc('grant_apexdoc_credits', { p_user_id: userId, p_amount: amount, p_source: 'dodo', p_external_id: String(paymentId) })
