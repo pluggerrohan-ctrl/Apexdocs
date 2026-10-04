@@ -2,6 +2,7 @@ import { bankSlugs } from '../lib/banks'
 import banks from '../data/banks.json'
 
 const siteUrl = 'https://apexwebdesign.online'
+const lastModified = '2026-10-04'
 
 export default function sitemap() {
   const routes = [
@@ -18,7 +19,7 @@ export default function sitemap() {
 
   const bankRoutes = banks.map((bank) => ({
     url: `${siteUrl}/banks/${bank.slug}`,
-    lastModified: new Date(),
+    lastModified,
     changeFrequency: 'weekly',
     priority: 0.7,
   }))
@@ -26,7 +27,7 @@ export default function sitemap() {
   return [
     ...routes.map(({ path, priority, changeFrequency }) => ({
       url: `${siteUrl}${path}`,
-      lastModified: new Date(),
+      lastModified,
       changeFrequency,
       priority,
     })),
