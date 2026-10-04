@@ -26,7 +26,9 @@ function parseCredentials(raw) {
 
   let credentials
   try {
-    credentials = JSON.parse(raw)
+    // Unescape env-file escaped quotes: \" -> "
+    let unescaped = raw.replace(/\\"/g, '"')
+    credentials = JSON.parse(unescaped)
     if (typeof credentials === 'string') credentials = JSON.parse(credentials)
   } catch {
     return { credentials: null, error: 'not valid JSON (still holds a plain key string?)' }
@@ -44,10 +46,9 @@ function parseCredentials(raw) {
 
 function getCredentialSets() {
   const candidates = [
-    { name: 'GOOGLE_INDEXING_SERVICE_ACCOUNT_JSON', raw: process.env.GOOGLE_INDEXING_SERVICE_ACCOUNT_JSON },
-    { name: 'GOOGLE_SERVICE_ACCOUNT_JSON', raw: process.env.GOOGLE_SERVICE_ACCOUNT_JSON },
-    { name: 'GOOGLE_SERVICE_ACCOUNT_JSON_2', raw: process.env.GOOGLE_SERVICE_ACCOUNT_JSON_2 },
-    { name: 'GOOGLE_SERVICE_ACCOUNT_JSON_3', raw: process.env.GOOGLE_SERVICE_ACCOUNT_JSON_3 },
+    { name: 'GOOGLE_SERVICE_ACCOUNT', raw: process.env.GOOGLE_SERVICE_ACCOUNT },
+    { name: 'GOOGLE_SERVICE_ACCOUNT_2', raw: process.env.GOOGLE_SERVICE_ACCOUNT_2 },
+    { name: 'GOOGLE_SERVICE_ACCOUNT_3', raw: process.env.GOOGLE_SERVICE_ACCOUNT_3 },
   ]
 
   const sets = []
@@ -148,6 +149,7 @@ export async function POST(request) {
     const urlsToSubmit = allUrls
       .slice(offset)
       .filter((url) => !indexedUrls.has(url))
+      .reverse()
     const results = []
     const accounts = credentialSets.slice(0, MAX_ACCOUNTS)
     const dailyRemaining = Math.max(0, MAX_ACCOUNTS * BATCH_SIZE_PER_ACCOUNT - today.attempts)
@@ -171,6 +173,7 @@ export async function POST(request) {
             requestBody: { url, type: 'URL_UPDATED' },
           })
           results.push({ url, ok: true, status: response.status, account: name })
+          await new Promise((r) => setTimeout(r, 1000))
         } catch (error) {
           results.push({
             url,
