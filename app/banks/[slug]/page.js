@@ -79,10 +79,15 @@ function BankContent({ bank }) {
           <p style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#9ca3af', margin: '0 0 4px' }}>Regulator</p>
           <p style={{ fontSize: 14, fontWeight: 600, color: '#111827', margin: 0 }}>{info.regulatoryBody}</p>
         </div>
-      </div>
+  </div>
 
-      <h2 style={{ fontSize: 22, fontWeight: 700, color: '#111827', margin: '0 0 16px' }}>
-        How to convert your {content.displayName} statement to Excel
+  <section style={{ background: '#f0fdf4', borderLeft: '4px solid #16a34a', borderRadius: 10, padding: '18px 20px', marginBottom: 32 }}>
+  <h2 style={{ fontSize: 20, fontWeight: 700, color: '#14532d', margin: '0 0 8px' }}>{content.uniqueSection.heading}</h2>
+  <p style={{ fontSize: 15, lineHeight: 1.7, color: '#365314', margin: 0 }}>{content.uniqueSection.body}</p>
+  </section>
+  
+  <h2 style={{ fontSize: 22, fontWeight: 700, color: '#111827', margin: '0 0 16px' }}>
+  How to convert your {content.displayName} statement to Excel
       </h2>
       <ol style={{ paddingLeft: 20, margin: '0 0 36px' }}>
         {content.steps.map((step, i) => (
