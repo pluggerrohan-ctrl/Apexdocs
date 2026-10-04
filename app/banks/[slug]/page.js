@@ -133,10 +133,15 @@ export default async function BankPage({ params }) {
     const bank = getBank(slug)
     if (!bank) notFound()
 
-    const relatedBanks = banks
+    const sameCountryBanks = banks
       .filter((candidate) => candidate.country === bank.country && candidate.slug !== bank.slug)
       .sort((a, b) => a.name.localeCompare(b.name))
-      .slice(0, 12)
+    const relatedBanks = sameCountryBanks.slice(0, 12)
+    const contextualLinks = [
+      { href: '/pdfconverter', label: 'General PDF to Excel converter' },
+      { href: '/allbanks', label: 'Browse all bank converters' },
+      { href: `/banks/country/${bank.country.toLowerCase()}`, label: `${bank.country} bank statement converters` },
+    ]
 
     return (
       <>
@@ -149,6 +154,13 @@ export default async function BankPage({ params }) {
           <h2 id="related-banks-heading" style={{ fontSize: 20, fontWeight: 700, color: '#111827', margin: '0 0 14px' }}>
             More {bank.country} bank converters
           </h2>
+          <nav aria-label="Related converter hubs" style={{ marginBottom: 18 }}>
+            <ul style={{ display: 'flex', flexWrap: 'wrap', gap: 10, listStyle: 'none', margin: 0, padding: 0 }}>
+              {contextualLinks.map((link) => (
+                <li key={link.href}><Link href={link.href} style={{ color: '#1d4ed8', fontSize: 14, textDecoration: 'none' }}>{link.label}</Link></li>
+              ))}
+            </ul>
+          </nav>
           <nav aria-label={`More ${bank.country} bank converters`}>
             <ul
               style={{
@@ -172,9 +184,11 @@ export default async function BankPage({ params }) {
               ))}
             </ul>
           </nav>
-          <Link href={`/banks/country/${bank.country.toLowerCase()}`} style={{ display: 'inline-block', marginTop: 20, color: '#2563eb', fontSize: 14 }}>
-            Browse all {bank.country} banks
-          </Link>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginTop: 20 }}>
+            <Link href={`/banks/country/${bank.country.toLowerCase()}`} style={{ color: '#2563eb', fontSize: 14 }}>Browse all {bank.country} banks</Link>
+            <Link href="/allbanks" style={{ color: '#2563eb', fontSize: 14 }}>View the complete bank directory</Link>
+            <Link href="/blog" style={{ color: '#2563eb', fontSize: 14 }}>Read statement conversion guides</Link>
+          </div>
         </section>
       </>
     )
