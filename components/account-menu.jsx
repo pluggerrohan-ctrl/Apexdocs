@@ -24,30 +24,58 @@ export default function AccountMenu() {
       return
     }
 
-    supabase.auth.getUser().then(({ data, error }) => {
-      if (mounted) {
-        if (error) console.warn('[AccountMenu] getUser error:', error)
-        setUser(data?.user ?? null)
+    // getSession first — this reads from cookies/localStorage and is the
+    // reliable way to detect a session after an OAuth redirect.
+    // getUser makes a network call to the auth server and can fail if the
+    // access token hasn't been refreshed yet.
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (!mounted) return
+      if (error) console.warn('[AccountMenu] getSession error:', error)
+      const session = data?.session
+      if (session?.user) {
+        setUser(session.user)
         setLoading(false)
+      } else {
+        // No session from storage — try getUser as a fallback
+        supabase.auth.getUser().then(({ data: userData }) => {
+          if (!mounted) return
+          setUser(userData?.user ?? null)
+          setLoading(false)
+        })
       }
     })
 
+    // onAuthStateChange catches the INITIAL_SESSION event, TOKEN_REFRESHED,
+    // and SIGNED_IN events that fire after OAuth redirect completes.
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('[AccountMenu] onAuthStateChange event:', event, 'session?', !!session)
-      setUser(session?.user ?? null)
+      console.log('[AccountMenu] auth event:', event, 'hasSession:', !!session)
+      if (session?.user) {
+        setUser(session.user)
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null)
+        setCredits(null)
+      }
       setLoading(false)
     })
 
-    return () => { mounted = false; listener?.subscription?.unsubscribe() }
+    return () => {
+      mounted = false
+      listener?.subscription?.unsubscribe()
+    }
   }, [])
 
   useEffect(() => {
     if (!user) { setCredits(null); return }
-    fetch('/api/credits').then((r) => r.json()).then((d) => setCredits(d.credits ?? 0)).catch(() => setCredits(0))
+    fetch('/api/credits')
+      .then((r) => r.json())
+      .then((d) => setCredits(d.credits ?? 0))
+      .catch(() => setCredits(0))
   }, [user])
 
   useEffect(() => {
-    const handleClick = (e) => { if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false) }
+    const handleClick = (e) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false)
+    }
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
@@ -55,12 +83,10 @@ export default function AccountMenu() {
   const signIn = async () => {
     setAuthError(null)
     setSignInBusy(true)
-    console.log('[AccountMenu] signIn clicked — creating client')
 
     let supabase
     try {
       supabase = createClient()
-      console.log('[AccountMenu] client created, URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
     } catch (err) {
       console.error('[AccountMenu] createClient threw during signIn:', err)
       setAuthError(`Supabase init failed: ${err.message}`)
@@ -69,8 +95,8 @@ export default function AccountMenu() {
     }
 
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      const msg = 'Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY'
-      console.error('[AccountMenu]', msg, { url: process.env.NEXT_PUBLIC_SUPABASE_URL, hasKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY })
+      const msg = 'Missing Supabase env vars'
+      console.error('[AccountMenu]', msg)
       setAuthError(msg)
       setSignInBusy(false)
       return
@@ -84,7 +110,6 @@ export default function AccountMenu() {
         provider: 'google',
         options: { redirectTo },
       })
-      console.log('[AccountMenu] signInWithOAuth returned:', { data, error })
 
       if (error) {
         console.error('[AccountMenu] OAuth error:', error)
@@ -93,15 +118,12 @@ export default function AccountMenu() {
         return
       }
 
-      // signInWithOAuth with browser client navigates the browser to Google.
-      // If we get here without navigation, something is wrong.
+      // The browser client auto-navigates to Google's OAuth URL.
+      // Fallback: force navigation if the auto-redirect didn't happen.
       if (data?.url) {
-        console.log('[AccountMenu] OAuth URL received, navigating to:', data.url)
-        // The supabase-js browser client auto-navigates, but force it as fallback
         window.location.href = data.url
       } else {
-        console.warn('[AccountMenu] No URL returned from signInWithOAuth, no navigation occurred')
-        setAuthError('Login did not redirect. Check console for details.')
+        setAuthError('Login did not redirect. Check console.')
         setSignInBusy(false)
       }
     } catch (err) {
@@ -116,10 +138,10 @@ export default function AccountMenu() {
       const supabase = createClient()
       await supabase.auth.signOut()
       setUser(null)
+      setCredits(null)
       setOpen(false)
     } catch (err) {
       console.error('[AccountMenu] signOut error:', err)
-      setAuthError(`Logout error: ${err.message}`)
     }
   }
 
@@ -137,7 +159,7 @@ export default function AccountMenu() {
           </svg>
           <span>{signInBusy ? 'Redirecting…' : 'Continue with Google'}</span>
         </button>
-        {authError && <div className="account-error" style={{ color: '#dc2626', fontSize: 11, fontWeight: 600, maxWidth: 220, marginTop: 4, textAlign: 'right' }}>{authError}</div>}
+        {authError && <div style={{ color: '#dc2626', fontSize: 11, fontWeight: 600, maxWidth: 220, marginTop: 4, textAlign: 'right' }}>{authError}</div>}
       </div>
     )
   }
