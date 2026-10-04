@@ -2,6 +2,7 @@ import { google } from 'googleapis'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { bankSlugs } from '../../../lib/banks'
+import { blogPosts } from '../../../lib/blog-content'
 
 export const runtime = 'nodejs'
 export const maxDuration = 300
@@ -18,6 +19,7 @@ function getUrls() {
     `${siteUrl}/banks/country/uae`,
     `${siteUrl}/payment/success`,
     ...bankSlugs.map((slug) => `${siteUrl}/banks/${slug}`),
+    ...blogPosts.map((post) => `${siteUrl}/blog/${post.slug}`),
   ]
 }
 

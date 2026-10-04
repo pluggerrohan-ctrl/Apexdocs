@@ -6,7 +6,7 @@ import * as XLSX from 'xlsx'
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs'
 
 const CREDIT_KEY = 'apexdoc_credits_v2'
-const FREE_CREDIT_LIMIT = 3
+const FREE_CREDIT_LIMIT = 2
 
 function parseRows(raw) {
   const rows = []
