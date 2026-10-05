@@ -76,9 +76,9 @@ function parseCsv(csv) {
       Amount: cells[amountIndex] || '',
     }
   }).filter((row) => {
-    const hasDate = /\d{1,4}[\/-]\d{1,2}[\/-]\d{1,4}|\d{1,2}\s+[A-Za-z]{3,9}\s+\d{2,4}/.test(row.Date)
-    const hasAmount = [row.Debit, row.Credit, row.Balance].some((value) => /\d/.test(String(value)))
-    return hasDate && hasAmount && row.Description !== '"'
+    const hasDate = /\d{1,4}[./-]\d{1,2}[./-]\d{1,4}|\d{1,2}\s+[A-Za-z]{3,9}\s+\d{2,4}|[A-Za-z]{3,9}\s+\d{1,2},?\s+\d{2,4}/.test(row.Date)
+    const hasAmount = [row.Debit, row.Credit, row.Amount, row.Balance].some((value) => /\d/.test(String(value)))
+    return hasDate && hasAmount && row.Description.trim().length >= 2 && row.Description !== '"'
   })
 }
 
@@ -127,19 +127,6 @@ export async function POST(request) {
     return NextResponse.json({ ok: false, error: 'The PDF does not contain a valid page count.' }, { status: 422 })
   }
 
-  const creditResponse = await fetch(new URL('/api/credits', request.url), {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', accept: 'application/json' },
-    body: JSON.stringify({ action: 'consume_pages', pages: totalPages }),
-    cache: 'no-store',
-  })
-  const creditResult = await creditResponse.json().catch(() => null)
-  const creditServiceUnavailable = !creditResponse.ok && (creditResponse.status >= 500 || creditResult?.error === 'License recovery is unavailable right now.')
-  if ((!creditResponse.ok || !creditResult?.ok) && !creditServiceUnavailable) {
-    const message = creditResult?.error || `Insufficient credits. You need ${totalPages} credits for this document.`
-    return NextResponse.json({ ok: false, error: message, requiredCredits: totalPages }, { status: creditResponse.status === 429 ? 402 : creditResponse.status || 402 })
-  }
-
   const keys = [
     process.env.PDFCO_API_KEY_PRIMARY,
     process.env.PDFCO_API_KEY_BACKUP,
@@ -151,6 +138,14 @@ export async function POST(request) {
   for (const key of keys) {
     try {
       const rows = await convertWithKey(file, key)
+      const creditResults = await Promise.all(Array.from({ length: totalPages }, () => fetch(new URL('/api/credits', request.url), {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', accept: 'application/json' },
+        body: JSON.stringify({ action: 'consume_paid' }),
+        cache: 'no-store',
+      }).then(async (response) => ({ response, result: await response.json().catch(() => null) }))))
+      const failedCredit = creditResults.find(({ response, result }) => !response.ok || !result?.allowed)
+      if (failedCredit) return NextResponse.json({ ok: false, error: `Insufficient credits. You need ${totalPages} credits for this document.`, requiredCredits: totalPages }, { status: 402 })
       return NextResponse.json({ ok: true, rows, source: 'pdfco', pages: totalPages, creditsUsed: totalPages })
     } catch (error) {
       errors.push(error instanceof Error ? error.message : 'PDF.co conversion failed')

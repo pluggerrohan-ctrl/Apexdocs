@@ -18,7 +18,6 @@ export default function AccountMenu() {
     try {
       supabase = createClient()
     } catch (err) {
-      console.error('[AccountMenu] createClient threw:', err)
       setAuthError(`Supabase init failed: ${err.message}`)
       setLoading(false)
       return
@@ -26,15 +25,13 @@ export default function AccountMenu() {
 
     supabase.auth.getUser().then(({ data, error }) => {
       if (mounted) {
-        if (error) console.warn('[AccountMenu] getUser error:', error)
         setUser(data?.user ?? null)
         setLoading(false)
       }
     })
 
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('[AccountMenu] onAuthStateChange event:', event, 'session?', !!session)
-      setUser(session?.user ?? null)
+        setUser(session?.user ?? null)
       setLoading(false)
     })
 
@@ -55,39 +52,32 @@ export default function AccountMenu() {
   const signIn = async () => {
     setAuthError(null)
     setSignInBusy(true)
-    console.log('[AccountMenu] signIn clicked — creating client')
 
     let supabase
     try {
       supabase = createClient()
-      console.log('[AccountMenu] client created, URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
     } catch (err) {
-      console.error('[AccountMenu] createClient threw during signIn:', err)
       setAuthError(`Supabase init failed: ${err.message}`)
       setSignInBusy(false)
       return
     }
 
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !(process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)) {
       const msg = 'Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY'
-      console.error('[AccountMenu]', msg, { url: process.env.NEXT_PUBLIC_SUPABASE_URL, hasKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY })
       setAuthError(msg)
       setSignInBusy(false)
       return
     }
 
     const redirectTo = `${window.location.origin}/auth/callback?next=/account`
-    console.log('[AccountMenu] calling signInWithOAuth, redirectTo:', redirectTo)
 
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: { redirectTo },
       })
-      console.log('[AccountMenu] signInWithOAuth returned:', { data, error })
 
       if (error) {
-        console.error('[AccountMenu] OAuth error:', error)
         setAuthError(`Google login failed: ${error.message}`)
         setSignInBusy(false)
         return
@@ -96,7 +86,6 @@ export default function AccountMenu() {
       // signInWithOAuth with browser client navigates the browser to Google.
       // If we get here without navigation, something is wrong.
       if (data?.url) {
-        console.log('[AccountMenu] OAuth URL received, navigating to:', data.url)
         // The supabase-js browser client auto-navigates, but force it as fallback
         window.location.href = data.url
       } else {
@@ -105,7 +94,6 @@ export default function AccountMenu() {
         setSignInBusy(false)
       }
     } catch (err) {
-      console.error('[AccountMenu] signInWithOAuth threw:', err)
       setAuthError(`Login error: ${err.message}`)
       setSignInBusy(false)
     }
@@ -118,12 +106,13 @@ export default function AccountMenu() {
       setUser(null)
       setOpen(false)
     } catch (err) {
-      console.error('[AccountMenu] signOut error:', err)
       setAuthError(`Logout error: ${err.message}`)
     }
   }
 
-  if (loading) return null
+  if (loading) {
+    return <div className="account-menu-wrap"><button className="account-signin" disabled aria-label="Checking account">Sign in</button></div>
+  }
 
   if (!user) {
     return (
