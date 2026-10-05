@@ -2,6 +2,11 @@ import { NextResponse } from 'next/server'
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs'
 
 const PDFCO_API = 'https://api.pdf.co/v1'
+const PDFCO_TIMEOUT_MS = 25000
+
+function pdfcoFetch(url, options = {}) {
+  return fetch(url, { ...options, signal: AbortSignal.timeout(PDFCO_TIMEOUT_MS) })
+}
 
 async function getPdfPageCount(file) {
   const data = new Uint8Array(await file.arrayBuffer())
@@ -91,20 +96,20 @@ async function readJson(response) {
 async function convertWithKey(file, key) {
   const uploadForm = new FormData()
   uploadForm.append('file', file, file.name || 'statement.pdf')
-  const upload = await readJson(await fetch(`${PDFCO_API}/file/upload`, {
+  const upload = await readJson(await pdfcoFetch(`${PDFCO_API}/file/upload`, {
     method: 'POST',
     headers: { 'x-api-key': key },
     body: uploadForm,
   }))
   if (!upload.url) throw new Error('PDF.co did not return an uploaded file URL.')
 
-  const conversion = await readJson(await fetch(`${PDFCO_API}/pdf/convert/to/csv`, {
+  const conversion = await readJson(await pdfcoFetch(`${PDFCO_API}/pdf/convert/to/csv`, {
     method: 'POST',
     headers: { 'x-api-key': key, 'content-type': 'application/json' },
     body: JSON.stringify({ url: upload.url, async: false, csvDelimiter: ',' }),
   }))
   let csv = conversion.body
-  if (!csv && conversion.url) csv = await (await fetch(conversion.url)).text()
+  if (!csv && conversion.url) csv = await (await pdfcoFetch(conversion.url)).text()
   const rows = parseCsv(csv)
   if (!rows.length) throw new Error('PDF.co returned no readable transaction rows.')
   return rows
@@ -151,7 +156,9 @@ export async function POST(request) {
       errors.push(error instanceof Error ? error.message : 'PDF.co conversion failed')
     }
   }
-  return NextResponse.json({ ok: false, error: errors.at(-1) || 'PDF.co conversion failed.' }, { status: 502 })
+  const lastError = errors.at(-1) || 'PDF.co conversion failed.'
+  const timedOut = errors.some((message) => /timed out|abort|timeout/i.test(message))
+  return NextResponse.json({ ok: false, error: timedOut ? 'PDF conversion took too long. Please try a smaller or text-based bank PDF.' : lastError }, { status: timedOut ? 504 : 502 })
 }
 
 export const runtime = 'nodejs'
