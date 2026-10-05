@@ -1,5 +1,5 @@
 .account-menu-wrap{position:relative}
-.account-signin{display:inline-flex;align-items:center;gap:7px;border:1px solid #dbeafe;border-radius:999px;background:#fff;color:#1d4ed8;padding:8px 14px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:background .2s ease,border-color .2s ease,box-shadow .2s ease;white-space:nowrap}
+.account-icon-button{width:44px!important;min-width:44px!important;height:44px;padding:0!important;justify-content:center;border-radius:12px!important}.account-icon-button svg{display:block}.account-signin{display:inline-flex;align-items:center;gap:7px;border:1px solid #dbeafe;border-radius:999px;background:#fff;color:#1d4ed8;padding:8px 14px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:background .2s ease,border-color .2s ease,box-shadow .2s ease;white-space:nowrap}
 .account-signin:hover{background:#eff6ff;border-color:#93c5fd;box-shadow:0 2px 8px rgba(37,99,235,.15)}
 .account-signin:active{transform:scale(.97)}
 .account-button{display:flex;align-items:center;gap:8px;border:1px solid #dbeafe;border-radius:999px;background:#fff;padding:6px 12px 6px 6px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:background .2s ease,border-color .2s ease,box-shadow .2s ease;white-space:nowrap}
