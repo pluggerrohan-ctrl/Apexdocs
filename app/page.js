@@ -1,5 +1,7 @@
 import ConverterApp from '../components/converter-app'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
   title: 'Bank Statement PDF to Excel Converter | ApexDoc',
   description: 'Convert bank statement PDFs to Excel online with ApexDoc. Extract dates, descriptions, debits, credits, and balances using private browser-first processing.',

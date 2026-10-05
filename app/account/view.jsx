@@ -4,7 +4,7 @@ import { createClient } from '../../lib/supabase/client'
 
 export default function AccountView({ user, profile }) {
   const signIn = async () => {
-    const supabase = createClient()
+    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: `${window.location.origin}/auth/callback?next=/account` },

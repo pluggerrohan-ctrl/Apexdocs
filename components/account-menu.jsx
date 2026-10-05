@@ -16,7 +16,7 @@ export default function AccountMenu() {
     let mounted = true
     let supabase
     try {
-      supabase = createClient()
+      supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
     } catch (err) {
       console.error('[AccountMenu] createClient threw:', err)
       setAuthError(`Supabase init failed: ${err.message}`)
@@ -86,7 +86,7 @@ export default function AccountMenu() {
 
     let supabase
     try {
-      supabase = createClient()
+      supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
     } catch (err) {
       console.error('[AccountMenu] createClient threw during signIn:', err)
       setAuthError(`Supabase init failed: ${err.message}`)
@@ -135,7 +135,7 @@ export default function AccountMenu() {
 
   const signOut = async () => {
     try {
-      const supabase = createClient()
+      const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
       await supabase.auth.signOut()
       setUser(null)
       setCredits(null)

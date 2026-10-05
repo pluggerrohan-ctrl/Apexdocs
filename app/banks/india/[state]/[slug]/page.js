@@ -1,6 +1,8 @@
 import ConverterApp from '../../../../../components/converter-app'
 import banks from '../../../../../data/banks.json'
 
+export const dynamic = 'force-dynamic'
+
 const siteUrl = 'https://apexwebdesign.online'
 
 export function generateStaticParams() {
