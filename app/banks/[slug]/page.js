@@ -5,6 +5,8 @@ import banks from '../../../data/banks.json'
 import { getBank, bankSlugs } from '../../../lib/banks'
 import { getBankContent } from '../../../lib/bank-content'
 
+export const dynamic = 'force-dynamic'
+
 export function generateStaticParams() {
   return bankSlugs.map((slug) => ({ slug }))
 }

@@ -138,7 +138,7 @@ export default function ConverterApp({ bank, statementTitle = false, showTrustMe
   const [accountCredits, setAccountCredits] = useState(null)
   const [authUser, setAuthUser] = useState(null)
   const convertingRef = useRef(false)
-  const supabase = createClient()
+  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
 
   useEffect(() => {
     let active = true
