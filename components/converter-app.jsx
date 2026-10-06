@@ -138,14 +138,13 @@ export default function ConverterApp({ bank, statementTitle = false, showTrustMe
   const [accountCredits, setAccountCredits] = useState(null)
   const [authUser, setAuthUser] = useState(null)
   const convertingRef = useRef(false)
-  const supabase = createClient()
 
   useEffect(() => {
     let active = true
     const sync = () => setCredits(Number(window.localStorage.getItem(CREDIT_KEY) || 0))
     const initializeQuota = async () => {
       const stored = window.localStorage.getItem(CREDIT_KEY)
-      if (stored === null) window.localStorage.setItem(CREDIT_KEY, String(FREE_CREDIT_LIMIT))
+      if (stored === null || Number(stored) < 1) window.localStorage.setItem(CREDIT_KEY, String(FREE_CREDIT_LIMIT))
       sync()
       try {
         const response = await fetch('/api/credits', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'quota' }) })
@@ -160,11 +159,17 @@ export default function ConverterApp({ bank, statementTitle = false, showTrustMe
       }
     }
     initializeQuota()
-    supabase.auth.getUser().then(({ data }) => { if (active) setAuthUser(data.user ?? null) })
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => setAuthUser(session?.user ?? null))
+    let authListener
+    try {
+      const supabase = createClient()
+      supabase.auth.getUser().then(({ data }) => { if (active) setAuthUser(data.user ?? null) }).catch(() => {})
+      authListener = supabase.auth.onAuthStateChange((_event, session) => setAuthUser(session?.user ?? null)).data
+    } catch {
+      setAuthUser(null)
+    }
     fetch('/api/credits').then((response) => response.json()).then((result) => { if (active && result.authenticated) { setAccountCredits(Number(result.credits) || 0); setCredits(Number(result.credits) || 0) } }).catch(() => {})
     window.addEventListener('storage', sync)
-    return () => { active = false; window.removeEventListener('storage', sync); authListener.subscription.unsubscribe() }
+    return () => { active = false; window.removeEventListener('storage', sync); authListener?.subscription?.unsubscribe() }
   }, [])
 
   const saveCredits = (value) => {
@@ -211,6 +216,7 @@ export default function ConverterApp({ bank, statementTitle = false, showTrustMe
       }
       if (!hasUsableRows(rows)) {
         setStatus(conversionError || 'No readable transactions found. Your credit was not used.')
+        setFileName('')
         return
       }
 

@@ -24,11 +24,9 @@ export default function AccountMenu({ compact = false }) {
       return
     }
 
-    supabase.auth.getUser().then(({ data, error }) => {
-      if (mounted) {
-        setUser(data?.user ?? null)
-        setLoading(false)
-      }
+    const authCheck = supabase.auth.getUser().then(({ data }) => data?.user ?? null).catch(() => null)
+    Promise.race([authCheck, new Promise((resolve) => setTimeout(() => resolve(null), 4000))]).then((currentUser) => {
+      if (mounted) { setUser(currentUser); setLoading(false) }
     })
 
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
@@ -87,11 +85,9 @@ export default function AccountMenu({ compact = false }) {
       // signInWithOAuth with browser client navigates the browser to Google.
       // If we get here without navigation, something is wrong.
       if (data?.url) {
-        // The supabase-js browser client auto-navigates, but force it as fallback
-        window.location.href = data.url
+        window.location.assign(data.url)
       } else {
-        console.warn('[AccountMenu] No URL returned from signInWithOAuth, no navigation occurred')
-        setAuthError('Login did not redirect. Check console for details.')
+        setAuthError('Google login did not return a redirect URL.')
         setSignInBusy(false)
       }
     } catch (err) {
