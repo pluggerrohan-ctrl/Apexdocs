@@ -47,10 +47,7 @@ function BankContent({ bank }) {
   const info = content.infoBox
 
   const pageUrl = `https://apexwebdesign.online/banks/${bank.slug}`
-  const seo = {
-    h1Title: `Convert ${bank.name} PDF to Excel Online | ApexDoc`,
-    description: `Convert ${bank.name} PDF statements into clean Excel spreadsheets with ApexDoc.`,
-  }
+  const seo = getUniqueBankSEO(bank.name, bank.country, info.currency)
   const webApplicationSchema = {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',

@@ -93,6 +93,22 @@ async function readJson(response) {
   return payload
 }
 
+async function waitForPdfcoJob(jobId, key) {
+  const deadline = Date.now() + 55000
+  while (Date.now() < deadline) {
+    const response = await pdfcoFetch(`${PDFCO_API}/job/check`, {
+      method: 'POST',
+      headers: { 'x-api-key': key, 'content-type': 'application/json' },
+      body: JSON.stringify({ jobid: jobId }),
+    })
+    const result = await readJson(response)
+    if (result.status === 'success') return result
+    if (result.status === 'failed') throw new Error(result.message || 'PDF.co OCR conversion failed.')
+    await new Promise((resolve) => setTimeout(resolve, 1500))
+  }
+  throw new Error('PDF.co OCR conversion timed out.')
+}
+
 async function convertWithKey(file, key) {
   const uploadForm = new FormData()
   uploadForm.append('file', file, file.name || 'statement.pdf')
@@ -103,11 +119,12 @@ async function convertWithKey(file, key) {
   }))
   if (!upload.url) throw new Error('PDF.co did not return an uploaded file URL.')
 
-  const conversion = await readJson(await pdfcoFetch(`${PDFCO_API}/pdf/convert/to/csv`, {
+  let conversion = await readJson(await pdfcoFetch(`${PDFCO_API}/pdf/convert/to/csv`, {
     method: 'POST',
     headers: { 'x-api-key': key, 'content-type': 'application/json' },
-    body: JSON.stringify({ url: upload.url, async: false, csvDelimiter: ',' }),
+    body: JSON.stringify({ url: upload.url, async: true, pages: '0-', csvDelimiter: ',', OCRMode: 'Auto', OCRResolution: 300 }),
   }))
+  if (conversion.jobId) conversion = await waitForPdfcoJob(conversion.jobId, key)
   let csv = conversion.body
   if (!csv && conversion.url) csv = await (await pdfcoFetch(conversion.url)).text()
   const rows = parseCsv(csv)
