@@ -4,6 +4,7 @@ import ConverterApp from '../../../components/converter-app'
 import banks from '../../../data/banks.json'
 import { getBank, bankSlugs } from '../../../lib/banks'
 import { getBankContent } from '../../../lib/bank-content'
+import { getUniqueBankSEO } from '../../../data/bank-seo-content'
 
 export function generateStaticParams() {
   return bankSlugs.map((slug) => ({ slug }))
@@ -20,9 +21,10 @@ export async function generateMetadata({ params }) {
       }
     }
     const content = getBankContent(bank)
+    const seo = getUniqueBankSEO(bank.name, bank.country, content.infoBox.currency)
     return {
-      title: { absolute: `Convert ${bank.name} PDF to Excel Online | ApexDoc` },
-      description: content.intro.slice(0, 155),
+      title: { absolute: seo.metaTitle },
+      description: seo.introText.slice(0, 155),
       keywords: [
         `${bank.name} bank statement converter`,
         `convert ${bank.name} PDF to Excel`,
@@ -63,6 +65,9 @@ function BankContent({ bank }) {
 
   return (
     <section style={{ maxWidth: 960, margin: '0 auto', padding: '16px 20px 48px' }}>
+      <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 16, padding: '18px 20px', marginBottom: 18 }}>
+        <p style={{ margin: 0, color: '#1e3a8a', lineHeight: 1.6 }}>{seo.introText}</p>
+      </div>
       <h1 style={{ color: '#111827', fontSize: 'clamp(30px, 5vw, 48px)', lineHeight: 1.08, margin: '0 0 24px' }}>{seo.h1Title}</h1>
       <nav aria-label="Breadcrumb" style={{ fontSize: 13, color: '#6b7280', marginBottom: 20 }}>
         <Link href="/" style={{ color: '#2563eb', textDecoration: 'none' }}>Home</Link>
