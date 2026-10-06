@@ -62,7 +62,7 @@ export default function AccountMenu({ compact = false }) {
     }
 
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !(process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)) {
-      const msg = 'Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY'
+      const msg = 'Supabase configuration is unavailable in this deployment. Refresh and try again.'
       setAuthError(msg)
       setSignInBusy(false)
       return
