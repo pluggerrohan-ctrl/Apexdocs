@@ -160,15 +160,7 @@ export async function POST(request) {
   for (const key of keys) {
     try {
       const rows = await convertWithKey(file, key)
-      const creditResults = await Promise.all(Array.from({ length: totalPages }, () => fetch(new URL('/api/credits', request.url), {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', accept: 'application/json' },
-        body: JSON.stringify({ action: 'consume_paid' }),
-        cache: 'no-store',
-      }).then(async (response) => ({ response, result: await response.json().catch(() => null) }))))
-      const failedCredit = creditResults.find(({ response, result }) => !response.ok || !result?.allowed)
-      if (failedCredit) return NextResponse.json({ ok: false, error: `Insufficient credits. You need ${totalPages} credits for this document.`, requiredCredits: totalPages }, { status: 402 })
-      return NextResponse.json({ ok: true, rows, source: 'pdfco', pages: totalPages, creditsUsed: totalPages })
+      return NextResponse.json({ ok: true, rows, source: 'pdfco', pages: totalPages })
     } catch (error) {
       errors.push(error instanceof Error ? error.message : 'PDF.co conversion failed')
     }

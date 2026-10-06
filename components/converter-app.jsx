@@ -212,7 +212,7 @@ export default function ConverterApp({ bank, statementTitle = false, showTrustMe
         rows = fallbackResult.rows
         pdfcoCharged = true
       } else {
-        conversionError = fallbackResult?.error || ''
+        conversionError = fallbackResult?.error || `Conversion request failed (${fallbackResponse.status}).`
       }
       if (!hasUsableRows(rows)) {
         setStatus(conversionError || 'No readable transactions found. Your credit was not used.')
@@ -254,8 +254,8 @@ export default function ConverterApp({ bank, statementTitle = false, showTrustMe
       setDownloadUrl(generatedUrl)
       saveCredits(serverRemaining === null ? Math.max(0, Number(window.localStorage.getItem(CREDIT_KEY) || 0) - 1) : serverRemaining)
       setStatus(`🎉 Done — ${rows.length} transaction rows exported.`)
-    } catch {
-      setStatus('Conversion service was unreachable. Please retry; your credit was not used.')
+    } catch (error) {
+      setStatus(error instanceof Error ? `Conversion failed: ${error.message}` : 'Conversion service was unreachable. Please retry; your credit was not used.')
     } finally {
       window.clearInterval(progressTimer)
       convertingRef.current = false
