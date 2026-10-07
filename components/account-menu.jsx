@@ -68,7 +68,8 @@ export default function AccountMenu({ compact = false }) {
       return
     }
 
-    const redirectTo = `${window.location.origin}/auth/callback?next=/account`
+    const returnPath = `${window.location.pathname}${window.location.search}`
+    const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(returnPath || '/')}`
 
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
