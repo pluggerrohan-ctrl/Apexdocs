@@ -144,13 +144,13 @@ export default function ConverterApp({ bank, statementTitle = false, showTrustMe
     const sync = () => setCredits(Number(window.localStorage.getItem(CREDIT_KEY) || 0))
     const initializeQuota = async () => {
       const stored = window.localStorage.getItem(CREDIT_KEY)
-      if (stored === null || Number(stored) < 1) window.localStorage.setItem(CREDIT_KEY, String(FREE_CREDIT_LIMIT))
+      if (stored === null) window.localStorage.setItem(CREDIT_KEY, String(FREE_CREDIT_LIMIT))
       sync()
       try {
-        const response = await fetch('/api/credits', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'quota' }) })
+        const response = await fetch('/api/credits', { method: 'GET', headers: { Accept: 'application/json' }, cache: 'no-store' })
         const result = await response.json()
         if (!active || !response.ok || !result.ok) return
-        const remaining = Math.max(0, Number(result.remaining))
+        const remaining = Math.max(0, Number(result.credits))
         window.localStorage.setItem(CREDIT_KEY, String(remaining))
         setCredits(remaining)
         if (remaining === 0) { setQuotaLocked(true); setShowExhausted(true) }
