@@ -1,5 +1,6 @@
 import { bankSlugs } from '../lib/banks'
 import banks from '../data/banks.json'
+import { keywordPages } from '../data/keyword-pages'
 
 const siteUrl = 'https://apexwebdesign.online'
 const lastModified = '2026-10-04'
@@ -23,6 +24,12 @@ export default function sitemap() {
     changeFrequency: 'weekly',
     priority: 0.7,
   }))
+  const keywordRoutes = keywordPages.map((page) => ({
+    url: `${siteUrl}/convert/${page.slug}`,
+    lastModified,
+    changeFrequency: 'monthly',
+    priority: 0.7,
+  }))
 
   return [
     ...routes.map(({ path, priority, changeFrequency }) => ({
@@ -32,5 +39,6 @@ export default function sitemap() {
       priority,
     })),
     ...bankRoutes,
+    ...keywordRoutes,
   ]
 }
