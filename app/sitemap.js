@@ -3,7 +3,7 @@ import banks from '../data/banks.json'
 import { keywordPages } from '../data/keyword-pages'
 
 const siteUrl = 'https://apexwebdesign.online'
-const lastModified = '2026-10-10'
+const lastModified = '2026-10-11'
 
 export default function sitemap() {
   const routes = [
@@ -16,6 +16,9 @@ export default function sitemap() {
     { path: '/banks/country/uk', priority: 0.8, changeFrequency: 'weekly' },
     { path: '/banks/country/uae', priority: 0.8, changeFrequency: 'weekly' },
     { path: '/payment/success', priority: 0.3, changeFrequency: 'monthly' },
+    { path: '/tools/pdf-compressor', priority: 0.8, changeFrequency: 'monthly' },
+    { path: '/privacy-policy', priority: 0.4, changeFrequency: 'yearly' },
+    { path: '/terms-of-use', priority: 0.4, changeFrequency: 'yearly' },
   ]
 
   const bankRoutes = banks.map((bank) => ({

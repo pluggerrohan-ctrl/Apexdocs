@@ -18,5 +18,5 @@ const sections = [
 ]
 
 export default function TermsOfUsePage() {
-  return <main className="legal-page"><div className="legal-shell"><Link href="/" className="legal-brand">ApexDoc</Link><p className="eyebrow">LEGAL · UPDATED OCTOBER 10, 2026</p><h1>Terms of Use</h1><p className="legal-lede">The rules, responsibilities, limitations, and processing disclosures that apply when you use ApexDoc.</p>{sections.map(([heading, body]) => <section key={heading}><h2>{heading}</h2><p>{body}</p></section>)}<p className="legal-contact">Questions about these Terms? <a href="mailto:namanbilthariya@gmail.com">namanbilthariya@gmail.com</a></p></div></main>
+  return <main className="legal-page"><div className="legal-shell"><Link href="/" className="legal-brand">ApexDoc</Link><p className="eyebrow">LEGAL · UPDATED OCTOBER 11, 2026</p><h1>Terms of Use</h1><p className="legal-lede">The rules, responsibilities, limitations, and processing disclosures that apply when you use ApexDoc.</p>{sections.map(([heading, body]) => <section key={heading}><h2>{heading}</h2><p>{body}</p></section>)}<p className="legal-contact">Questions about these Terms? <a href="mailto:namanbilthariya@gmail.com">namanbilthariya@gmail.com</a></p></div></main>
 }

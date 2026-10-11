@@ -17,5 +17,5 @@ const sections = [
 ]
 
 export default function PrivacyPolicyPage() {
-  return <main className="legal-page"><div className="legal-shell"><Link href="/" className="legal-brand">ApexDoc</Link><p className="eyebrow">LEGAL · UPDATED OCTOBER 10, 2026</p><h1>Privacy Policy</h1><p className="legal-lede">A clear explanation of how ApexDoc handles account, conversion, payment, analytics, and support information.</p>{sections.map(([heading, body]) => <section key={heading}><h2>{heading}</h2><p>{body}</p></section>)}<p className="legal-contact">Questions about this policy? <a href="mailto:namanbilthariya@gmail.com">namanbilthariya@gmail.com</a></p></div></main>
+  return <main className="legal-page"><div className="legal-shell"><Link href="/" className="legal-brand">ApexDoc</Link><p className="eyebrow">LEGAL · UPDATED OCTOBER 11, 2026</p><h1>Privacy Policy</h1><p className="legal-lede">A clear explanation of how ApexDoc handles account, conversion, payment, analytics, and support information.</p>{sections.map(([heading, body]) => <section key={heading}><h2>{heading}</h2><p>{body}</p></section>)}<p className="legal-contact">Questions about this policy? <a href="mailto:namanbilthariya@gmail.com">namanbilthariya@gmail.com</a></p></div></main>
 }
