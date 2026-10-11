@@ -397,8 +397,8 @@ export default function AllBanksDirectoryPage() {
               <p style={{ fontSize: 12, fontWeight: 700, color: '#5b9bf5', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
                 Legal
               </p>
-              <a href="/" style={{ color: '#a3b8d4', fontSize: 13, textDecoration: 'none' }}>Terms &amp; Conditions</a>
-              <a href="/" style={{ color: '#a3b8d4', fontSize: 13, textDecoration: 'none' }}>Privacy Policy</a>
+              <a href="/terms-of-use" style={{ color: '#a3b8d4', fontSize: 13, textDecoration: 'none' }}>Terms of Use</a>
+              <a href="/privacy-policy" style={{ color: '#a3b8d4', fontSize: 13, textDecoration: 'none' }}>Privacy Policy</a>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <p style={{ fontSize: 12, fontWeight: 700, color: '#5b9bf5', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
