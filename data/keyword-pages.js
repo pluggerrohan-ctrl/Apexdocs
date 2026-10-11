@@ -55,7 +55,7 @@ const pageSeeds = [
 export const keywordPages = pageSeeds.slice(0, 50).map(([slug, title, intro, focus], index) => ({
   slug,
   title,
-  intro,
+  intro: `${intro} It is useful for ${['a bookkeeper closing monthly records', 'an accountant checking client transactions', 'a CA preparing working papers', 'a freelancer sorting business expenses', 'a small business owner preparing reports'][index % 5]}.`,
   focus,
   audience: ['bookkeepers', 'accountants', 'small businesses', 'finance teams', 'independent professionals'][index % 5],
   proof: [
@@ -67,7 +67,7 @@ export const keywordPages = pageSeeds.slice(0, 50).map(([slug, title, intro, foc
   ][index % 5],
   steps: [
     `Save the statement PDF from your bank portal for ${focus}.`,
-    `Choose the file and let ApexDoc inspect its transaction layout.`,
+    `Choose the file and let ApexDoc inspect its transaction layout before you decide whether the rows are ready for your work.`,
     `Check the extracted rows against the original document.`,
     `Download the workbook and continue your ${['review', 'reconciliation', 'bookkeeping', 'reporting', 'audit preparation'][index % 5]} workflow.`,
   ],
