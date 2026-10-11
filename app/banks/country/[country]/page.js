@@ -17,7 +17,7 @@ export async function generateMetadata({ params }) {
 
   return {
     title: `${countryUpper} Bank Statement PDF to Excel Converters | ApexDoc`,
-    description: `Convert ${content.bankCount} ${countryUpper} bank statement PDFs to Excel with ApexDoc. Private, browser-first processing. Browse all ${countryUpper} bank converters.`,
+    description: `Convert ${content.bankCount} ${countryUpper} bank statement PDFs to Excel with ApexDoc. HTTPS cloud processing via PDF.co. Browse all ${countryUpper} bank converters.`,
     keywords: [
       `${countryUpper} bank statement converter`,
       `convert ${countryUpper} bank statement PDF to Excel`,

@@ -42,7 +42,7 @@ const pageSeeds = [
   ['bank-statement-converter-for-quickbooks', 'Bank Statement Converter for QuickBooks Prep', 'Create a cleaner transaction file before importing or checking records.', 'accounting import prep'],
   ['bank-statement-converter-for-xero', 'Bank Statement Converter for Xero Prep', 'Organize statement rows before your accounting workflow begins.', 'Xero preparation export'],
   ['bank-statement-pdf-to-excel-tool', 'Bank Statement PDF to Excel Tool', 'Use a dedicated page for repeat statement conversions.', 'dedicated statement tool'],
-  ['bank-statement-extraction-online', 'Bank Statement Extraction Online', 'Extract financial rows through a clear, browser-first workflow.', 'online extraction tool'],
+  ['bank-statement-extraction-online', 'Bank Statement Extraction Online', 'Extract financial rows through a clear HTTPS cloud workflow.', 'online extraction tool'],
   ['bank-statement-excel-download', 'Bank Statement Excel Download', 'Generate an XLSX download ready for sorting and review.', 'Excel download workflow'],
   ['bank-statement-to-spreadsheet-free', 'Bank Statement to Spreadsheet Free', 'Start with a free path for your next bank document.', 'free spreadsheet conversion'],
   ['bank-statement-pdf-converter-online', 'Bank Statement PDF Converter Online', 'Convert supported PDF statements through a focused online tool.', 'online PDF converter'],

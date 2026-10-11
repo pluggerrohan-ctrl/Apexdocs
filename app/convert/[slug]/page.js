@@ -14,7 +14,7 @@ export async function generateMetadata({ params }) {
   if (!page) return { title: 'Bank Statement Converter' }
   return {
     title: `${page.title} | ApexDoc`,
-    description: `${page.intro} Private browser-first processing with Excel download.`,
+    description: `${page.intro} Apex document converter with HTTPS cloud processing via PDF.co and Excel download.`,
     keywords: [page.title, page.focus, 'ApexDoc'],
     alternates: { canonical: `${siteUrl}/convert/${page.slug}` },
     robots: { index: true, follow: true },

@@ -27,7 +27,7 @@ export default async function BlogPostPage({ params }) {
   const comparisonRows = [
     ['Price', '$499 / month', '$39 lifetime deal Pro Plan'],
     ['Data security', 'Uploaded through an HTTPS cloud API', 'PDF.co provider controls and user verification required'],
-    ['Speed', 'Queued server processing', 'Instant local browser engine'],
+    ['Speed', 'Queued server processing', 'HTTPS conversion workflow'],
     ['Free trial', 'Credit card required / locked', '3 free credits instantly — no signup required'],
   ]
 
@@ -45,7 +45,7 @@ export default async function BlogPostPage({ params }) {
           </header>
           <section aria-labelledby="privacy-first" style={{ background: 'linear-gradient(135deg, #172554, #0f172a 70%)', border: '1px solid #1d4ed8', borderRadius: 24, padding: '32px clamp(24px, 5vw, 56px)', marginBottom: 72 }}>
             <p style={{ color: '#93c5fd', fontSize: 13, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 14px' }}>The strategic difference</p>
-            <h2 id="privacy-first" style={{ color: '#fff', fontSize: 'clamp(28px, 4vw, 46px)', lineHeight: 1.1, margin: '0 0 16px' }}>Your client&apos;s PDF stays on their computer.</h2>
+            <h2 id="privacy-first" style={{ color: '#fff', fontSize: 'clamp(28px, 4vw, 46px)', lineHeight: 1.1, margin: '0 0 16px' }}>Your client&apos;s processing path should be clearly disclosed.</h2>
             <p style={{ color: '#bfdbfe', fontSize: 18, lineHeight: 1.7, maxWidth: 760, margin: 0 }}>Nanonets and ApexDoc both rely on cloud processing for document conversion. ApexDoc sends the statement to PDF.co through HTTPS, applies the provider&apos;s configured deletion controls, and asks users to verify every exported row.</p>
           </section>
           <section aria-labelledby="comparison-matrix" style={{ marginBottom: 72 }}>
@@ -63,7 +63,7 @@ export default async function BlogPostPage({ params }) {
           <section style={{ background: '#f8fafc', borderRadius: 22, padding: '32px clamp(24px, 5vw, 48px)', marginTop: 72, color: '#0f172a' }}>
             <p style={{ color: '#2563eb', fontSize: 13, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px' }}>Start local conversion</p>
             <h2 style={{ fontSize: 32, lineHeight: 1.1, margin: '0 0 12px' }}>Switch to a private workflow today.</h2>
-            <p style={{ color: '#475569', fontSize: 17, lineHeight: 1.6, margin: '0 0 22px' }}>Try three conversions instantly with no signup, then choose ApexDoc Pro when your firm is ready for unlimited local processing.</p>
+            <p style={{ color: '#475569', fontSize: 17, lineHeight: 1.6, margin: '0 0 22px' }}>Try the Apex document converter with no signup, then choose the plan that fits your firm&apos;s statement workflow and review requirements.</p>
             <Link href="/#converter" style={{ display: 'inline-flex', background: '#2563eb', color: '#fff', borderRadius: 999, padding: '14px 22px', fontWeight: 800, textDecoration: 'none' }}>Switch to ApexDoc Pro Now</Link>
           </section>
         </article>

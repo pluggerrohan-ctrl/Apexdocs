@@ -8,7 +8,7 @@ export const metadata = {
     default: 'Bank Statement to Excel Converter | ApexDoc',
     template: '%s | ApexDoc',
   },
-  description: 'Convert bank statement PDFs into clean Excel spreadsheets in your browser.',
+  description: 'Apex document converter for turning bank statement PDFs into structured Excel spreadsheets through secure HTTPS processing.',
   robots: {
     index: true,
     follow: true,
