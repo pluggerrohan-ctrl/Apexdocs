@@ -26,7 +26,7 @@ export default async function BlogPostPage({ params }) {
 
   const comparisonRows = [
     ['Price', '$499 / month', '$39 lifetime deal Pro Plan'],
-    ['Data security', 'Uploaded to cloud servers', '100% client-side browser sandbox — data never leaves your PC'],
+    ['Data security', 'Uploaded through an HTTPS cloud API', 'PDF.co provider controls and user verification required'],
     ['Speed', 'Queued server processing', 'Instant local browser engine'],
     ['Free trial', 'Credit card required / locked', '3 free credits instantly — no signup required'],
   ]
@@ -41,12 +41,12 @@ export default async function BlogPostPage({ params }) {
           <header style={{ maxWidth: 850, marginBottom: 64 }}>
             <p style={{ color: '#60a5fa', fontSize: 13, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase' }}>CPA privacy playbook · {post.readTime}</p>
             <h1 style={{ color: '#f8fafc', fontSize: 'clamp(38px, 7vw, 76px)', lineHeight: 1.02, letterSpacing: '-0.045em', margin: '18px 0 24px' }}>Nanonets vs ApexDoc: Ultimate PDF to Excel Converter Comparison</h1>
-            <p style={{ color: '#cbd5e1', fontSize: 21, lineHeight: 1.65, margin: 0 }}>Why accounting firms are moving sensitive statement conversion out of cloud queues and into a 100% local browser sandbox.</p>
+            <p style={{ color: '#cbd5e1', fontSize: 21, lineHeight: 1.65, margin: 0 }}>Why accounting firms are evaluating HTTPS cloud conversion, provider controls, and transparent review requirements for sensitive statements.</p>
           </header>
           <section aria-labelledby="privacy-first" style={{ background: 'linear-gradient(135deg, #172554, #0f172a 70%)', border: '1px solid #1d4ed8', borderRadius: 24, padding: '32px clamp(24px, 5vw, 56px)', marginBottom: 72 }}>
             <p style={{ color: '#93c5fd', fontSize: 13, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 14px' }}>The strategic difference</p>
             <h2 id="privacy-first" style={{ color: '#fff', fontSize: 'clamp(28px, 4vw, 46px)', lineHeight: 1.1, margin: '0 0 16px' }}>Your client&apos;s PDF stays on their computer.</h2>
-            <p style={{ color: '#bfdbfe', fontSize: 18, lineHeight: 1.7, maxWidth: 760, margin: 0 }}>Nanonets processes uploaded documents on cloud servers. ApexDoc&apos;s local conversion engine processes the statement in the browser sandbox, so the original financial document does not need to leave the PC.</p>
+            <p style={{ color: '#bfdbfe', fontSize: 18, lineHeight: 1.7, maxWidth: 760, margin: 0 }}>Nanonets and ApexDoc both rely on cloud processing for document conversion. ApexDoc sends the statement to PDF.co through HTTPS, applies the provider&apos;s configured deletion controls, and asks users to verify every exported row.</p>
           </section>
           <section aria-labelledby="comparison-matrix" style={{ marginBottom: 72 }}>
             <h2 id="comparison-matrix" style={{ color: '#f8fafc', fontSize: 32, margin: '0 0 20px' }}>At-a-glance comparison</h2>

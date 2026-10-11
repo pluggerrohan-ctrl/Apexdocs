@@ -80,7 +80,7 @@ export default function PdfCompressor() {
       setUsage(usageToday())
       setStatus('Your locally optimized PDF is ready.')
     } catch {
-      setStatus('This PDF could not be processed locally. Try another file.')
+      setStatus('This PDF could not be processed in the client-side conversion engine. Try another file.')
     } finally {
       setProcessing(false)
     }
@@ -102,7 +102,7 @@ export default function PdfCompressor() {
           {file ? <><div className="file-name">{file.name}</div><div className="muted">{readableSize(file.size)} · Ready locally</div></> : <><div className="file-name">Drop your PDF here</div><div className="muted">or choose a file from your device</div></>}
           <div className="actions"><button className="button ghost" type="button" onClick={() => inputRef.current?.click()}><Upload data-icon="inline-start" /> Choose PDF</button>{file && <button className="button primary" type="button" onClick={compress} disabled={processing || usage >= DAILY_LIMIT}>{processing ? <><TimerReset /> {status}</> : <><FileArchive /> Compress PDF</>}</button>}</div>
         </div>
-        <div className="security"><LockKeyhole /> 100% Secure: Local Device-Level Loop. Files never leave your browser sandbox.</div>
+        <div className="security"><LockKeyhole /> 100% Client-Side: Files are handled in the browser conversion engine and are not uploaded by this tool.</div>
         <div className="metrics"><span>{remaining} of {DAILY_LIMIT} free files remaining today<div className="bar"><i style={{ width: progress }} /></div></span><span>{status}</span></div>
         {downloadUrl && <div className="actions"><a className="button primary" href={downloadUrl} download={`compressed-${file.name}`}><Download /> Download compressed PDF</a></div>}
         <div className="options"><div className="option"><Sparkles color="#2962ff" /><strong>Basic Compression</strong><small>Free · Up to 40% smaller. Includes a short optimization timer.</small><button className="button primary" type="button" onClick={compress} disabled={!file || processing || usage >= DAILY_LIMIT}>Use Basic</button></div><div className="option locked"><Crown color="#c58b00" /><strong>Moderate Compression</strong><small>Up to 60% smaller. Faster, ad-free processing.</small><button className="button gold" type="button" onClick={() => setModalOpen(true)}>Unlock access</button></div><div className="option locked"><Crown color="#c58b00" /><strong>Strong Compression</strong><small>Up to 80%+ smaller. Priority processing for heavy files.</small><button className="button gold" type="button" onClick={() => setModalOpen(true)}>Unlock access</button></div></div>

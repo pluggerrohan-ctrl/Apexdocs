@@ -427,7 +427,7 @@ export default function AllBanksDirectoryPage() {
             {'\u00A9'} {new Date().getFullYear()} ApexDoc. All rights reserved.
           </p>
           <p style={{ color: '#4a5d7a', fontSize: 12 }}>
-            All processing happens locally in your browser. No data is stored or uploaded.
+            Statements are sent through HTTPS to PDF.co for automated conversion. Provider retention and deletion controls apply; review the service terms before uploading sensitive data.
           </p>
         </div>
       </footer>

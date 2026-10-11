@@ -54,7 +54,7 @@ export default async function CountryHubPage({ params }) {
         </h1>
         <p style={{ fontSize: 15, color: '#4b5563', maxWidth: 640, lineHeight: 1.6 }}>
           Convert {content.bankCount} {countryUpper} bank statement PDFs to clean Excel spreadsheets with ApexDoc.
-          All processing happens in your browser — your financial data never leaves your device.
+          Statements are sent through HTTPS to PDF.co for automated conversion. Review the provider retention and deletion controls before uploading sensitive financial data.
           Statements are in {content.currency} ({content.currencySymbol}).
         </p>
         <Link href="/" style={{ display: 'inline-block', marginTop: 16, fontSize: 14, color: '#2563eb', fontWeight: 600 }}>
