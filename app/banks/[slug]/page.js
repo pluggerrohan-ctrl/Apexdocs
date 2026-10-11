@@ -196,6 +196,19 @@ export default async function BankPage({ params }) {
             Browse all {bank.country} banks
           </Link>
         </section>
+        <footer
+          aria-label="ApexDoc legal links"
+          style={{ maxWidth: 960, margin: '0 auto', padding: '24px 20px 48px', borderTop: '1px solid #e5e7eb', color: '#6b7280', fontSize: 13 }}
+        >
+          <p style={{ margin: '0 0 10px', lineHeight: 1.6 }}>
+            ApexDoc sends uploaded statements through HTTPS to PDF.co for automated conversion. Review the extracted workbook against the original statement before relying on it for accounting, tax, audit, or financial decisions.
+          </p>
+          <nav aria-label="Legal" style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
+            <Link href="/privacy-policy" style={{ color: '#2563eb', textDecoration: 'none' }}>Privacy Policy</Link>
+            <Link href="/terms-of-use" style={{ color: '#2563eb', textDecoration: 'none' }}>Terms of Use</Link>
+            <Link href="/allbanks" style={{ color: '#2563eb', textDecoration: 'none' }}>All Banks</Link>
+          </nav>
+        </footer>
       </>
     )
   } catch {
