@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { blogPosts, getBlogBreadcrumbSchema, getBlogPost, getBlogPostingSchema } from '../../../lib/blog-content'
+import banks from '../../../data/banks.json'
 
 export function generateStaticParams() {
   return blogPosts.map((post) => ({ slug: post.slug }))
@@ -30,6 +31,23 @@ export default async function BlogPostPage({ params }) {
     ['Speed', 'Queued server processing', 'HTTPS conversion workflow'],
     ['Free trial', 'Credit card required / locked', '3 free credits instantly — no signup required'],
   ]
+
+  if (post.pillar) {
+    const featuredBanks = banks.filter((bank) => ['chase-bank', 'smbc-bank-international-plc'].includes(bank.slug)).slice(0, 2)
+    return (
+      <main style={{ minHeight: '100vh', background: '#f8fafc', color: '#172033', padding: '30px 20px 80px' }}>
+        <article style={{ maxWidth: 980, margin: '0 auto' }}>
+          <nav aria-label="Breadcrumb" style={{ color: '#64748b', fontSize: 14, marginBottom: 48 }}><Link href="/" style={{ color: '#2563eb' }}>Home</Link>{' / '}<Link href="/blog" style={{ color: '#2563eb' }}>Blog</Link>{' / '}<span>{post.title}</span></nav>
+          <header style={{ maxWidth: 860, marginBottom: 54 }}><p style={{ color: '#2563eb', fontSize: 13, fontWeight: 800, letterSpacing: '.12em', textTransform: 'uppercase' }}>Apex document converter · {post.readTime}</p><h1 style={{ fontSize: 'clamp(38px, 7vw, 72px)', lineHeight: 1.02, letterSpacing: '-.05em', margin: '16px 0 22px' }}>{post.title}</h1><p style={{ color: '#526174', fontSize: 20, lineHeight: 1.7, margin: 0 }}>{post.description}</p></header>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 34 }}>{post.sections.map((section) => <section key={section.heading} style={{ paddingTop: 30, borderTop: '1px solid #dbe3ee' }}><h2 style={{ fontSize: 'clamp(25px, 4vw, 36px)', lineHeight: 1.15, margin: '0 0 13px' }}>{section.heading}</h2><p style={{ color: '#405065', fontSize: 18, lineHeight: 1.85, margin: 0 }}>{section.body}</p></section>)}</div>
+          <section aria-labelledby="bank-converter-network" style={{ marginTop: 58, padding: '30px clamp(22px, 5vw, 44px)', borderRadius: 22, background: '#eaf2ff', border: '1px solid #c8dcff' }}><h2 id="bank-converter-network" style={{ margin: '0 0 10px', fontSize: 30 }}>Choose a bank-specific converter</h2><p style={{ color: '#405065', lineHeight: 1.7, margin: '0 0 20px' }}>Different statement layouts create different extraction challenges. Start with a bank-specific workflow when one is available, then compare the workbook with the source PDF.</p><div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>{featuredBanks.map((bank) => <Link key={bank.slug} href={`/banks/${bank.slug}`} style={{ background: '#2563eb', color: '#fff', borderRadius: 999, padding: '12px 17px', textDecoration: 'none', fontWeight: 700 }}>{bank.name} converter</Link>)}<Link href="/allbanks" style={{ background: '#fff', color: '#1d4ed8', border: '1px solid #9fc0f4', borderRadius: 999, padding: '12px 17px', textDecoration: 'none', fontWeight: 700 }}>Browse all banks</Link></div></section>
+          <footer style={{ marginTop: 58, paddingTop: 22, borderTop: '1px solid #dbe3ee', color: '#64748b', fontSize: 14 }}><p style={{ lineHeight: 1.7 }}>ApexDoc uses PDF.co for HTTPS cloud conversion. Review provider terms and the exported workbook before using financial data for tax, accounting, lending, or other important decisions.</p><nav aria-label="Legal links" style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}><Link href="/privacy-policy">Privacy Policy</Link><Link href="/terms-of-use">Terms of Use</Link><Link href="/allbanks">All Banks</Link></nav></footer>
+        </article>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(getBlogPostingSchema(post)) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(getBlogBreadcrumbSchema(post)) }} />
+      </main>
+    )
+  }
 
   if (post.comparison) {
     return (
