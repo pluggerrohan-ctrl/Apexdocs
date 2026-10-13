@@ -17,7 +17,8 @@ export async function generateMetadata({ params }) {
     if (!bank) {
       return {
         title: 'Bank Statement Converter',
-        description: 'Convert bank statement PDFs into clean Excel spreadsheets in your browser.',
+        description: 'Apex document converter for bank statement PDFs with structured Excel exports through HTTPS cloud processing.',
+        robots: { index: true, follow: true },
       }
     }
     const content = getBankContent(bank)
