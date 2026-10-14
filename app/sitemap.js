@@ -28,6 +28,14 @@ export default function sitemap() {
     changeFrequency: 'weekly',
     priority: 0.7,
   }))
+  const serviceNiches = ['dentists', 'gyms', 'real-estate', 'jewelry', 'shopify']
+  const serviceCities = ['jabalpur', 'bareilly', 'bilaspur', 'muzaffarpur', 'alpharetta', 'wilmington', 'tullahoma', 'eastleigh']
+  const serviceRoutes = serviceNiches.flatMap((niche) => serviceCities.map((city) => ({
+    url: `${siteUrl}/services/${niche}/${city}`,
+    lastModified,
+    changeFrequency: 'monthly',
+    priority: 0.8,
+  })))
   const keywordRoutes = keywordPages.map((page) => ({
     url: `${siteUrl}/convert/${page.slug}`,
     lastModified,
@@ -44,5 +52,6 @@ export default function sitemap() {
     })),
     ...bankRoutes,
     ...keywordRoutes,
+    ...serviceRoutes,
   ]
 }
