@@ -1,0 +1,22 @@
+import Link from 'next/link'
+
+export const metadata = { title: 'Terms of Use', description: 'Terms governing use of the ApexDoc bank statement conversion service.' }
+
+const sections = [
+  ['1. Agreement', 'By accessing ApexDoc or using a conversion tool, you agree to these Terms of Use and the Privacy Policy. If you do not agree, do not use the service.'],
+  ['2. The service', 'ApexDoc provides automated document conversion from supported PDF statements to editable XLSX files. The service is provided for productivity and review purposes. We do not provide banking, accounting, tax, audit, legal, investment, or financial advice.'],
+  ['3. Cloud processing disclosure', 'Uploaded files are transmitted through HTTPS to PDF.co for automated document and regex-based parsing. The processing service may use temporary infrastructure, logs, backups, and provider-managed deletion controls. ApexDoc does not promise that files are processed only on your device or that absolute zero retention is possible.'],
+  ['4. Accuracy and verification', 'Automated extraction can misread scanned pages, unusual layouts, wrapped descriptions, dates, negative values, fees, credits, debits, or balances. You must compare the downloaded workbook with the original statement before relying on it for reconciliation, bookkeeping, tax, audit, or reporting. You accept responsibility for the final data.'],
+  ['5. Eligibility and authorized use', 'You must be legally able to enter this agreement and must have permission to upload every document you submit. Do not upload another person’s financial records without authorization. Do not use ApexDoc to violate privacy, financial, export-control, or other applicable laws.'],
+  ['6. Accounts and credits', 'You are responsible for keeping account credentials secure and for activity under your account. Free allowances, paid credits, expiry rules, refunds, and plan limits are shown at purchase or within the service and may change prospectively. Credits have no cash value unless required by law.'],
+  ['7. Payments and refunds', 'Payments are processed by the displayed payment provider. A successful payment does not guarantee that every PDF will parse correctly. If a conversion fails or produces unusable output, contact support with the relevant order details; any refund is handled under the applicable offer and payment-provider rules.'],
+  ['8. Prohibited conduct', 'Do not reverse engineer the service, bypass limits, upload malware, interfere with infrastructure, scrape at abusive rates, misrepresent results, resell access without permission, or use generated files to facilitate fraud or unlawful activity.'],
+  ['9. Intellectual property', 'ApexDoc branding, software, interface, and original content belong to ApexDoc or its licensors. You retain your rights in documents you upload and outputs you create, subject to the rights needed by service providers to perform the conversion.'],
+  ['10. Availability and third parties', 'The service may be unavailable, delayed, rate-limited, changed, or discontinued. PDF.co, payment, hosting, analytics, authentication, and other providers operate under their own terms. Third-party outages may affect conversion results or delivery.'],
+  ['11. Disclaimers and limitation', 'To the maximum extent permitted by law, ApexDoc is provided on an as-is and as-available basis without a guarantee of uninterrupted operation, complete accuracy, compliance with a particular regulation, or suitability for a specific financial purpose. You should keep the original PDF and independent backups.'],
+  ['12. Contact and changes', 'For support or legal questions, contact namanbilthariya@gmail.com. We may update these Terms when the service or law changes. Continued use after an update means you accept the revised Terms. Effective date: October 10, 2026.'],
+]
+
+export default function TermsOfUsePage() {
+  return <main className="legal-page"><div className="legal-shell"><Link href="/" className="legal-brand">ApexDoc</Link><p className="eyebrow">LEGAL · UPDATED OCTOBER 11, 2026</p><h1>Terms of Use</h1><p className="legal-lede">The rules, responsibilities, limitations, and processing disclosures that apply when you use ApexDoc.</p>{sections.map(([heading, body]) => <section key={heading}><h2>{heading}</h2><p>{body}</p></section>)}<p className="legal-contact">Questions about these Terms? <a href="mailto:namanbilthariya@gmail.com">namanbilthariya@gmail.com</a></p></div></main>
+}

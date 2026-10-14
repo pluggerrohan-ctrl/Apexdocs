@@ -2,6 +2,11 @@ import { NextResponse } from 'next/server'
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs'
 
 const PDFCO_API = 'https://api.pdf.co/v1'
+const PDFCO_TIMEOUT_MS = 25000
+
+function pdfcoFetch(url, options = {}) {
+  return fetch(url, { ...options, signal: AbortSignal.timeout(PDFCO_TIMEOUT_MS) })
+}
 
 async function getPdfPageCount(file) {
   const data = new Uint8Array(await file.arrayBuffer())
@@ -76,9 +81,9 @@ function parseCsv(csv) {
       Amount: cells[amountIndex] || '',
     }
   }).filter((row) => {
-    const hasDate = /\d{1,4}[\/-]\d{1,2}[\/-]\d{1,4}|\d{1,2}\s+[A-Za-z]{3,9}\s+\d{2,4}/.test(row.Date)
-    const hasAmount = [row.Debit, row.Credit, row.Balance].some((value) => /\d/.test(String(value)))
-    return hasDate && hasAmount && row.Description !== '"'
+    const hasDate = /\d{1,4}[./-]\d{1,2}[./-]\d{1,4}|\d{1,2}\s+[A-Za-z]{3,9}\s+\d{2,4}|[A-Za-z]{3,9}\s+\d{1,2},?\s+\d{2,4}/.test(row.Date)
+    const hasAmount = [row.Debit, row.Credit, row.Amount, row.Balance].some((value) => /\d/.test(String(value)))
+    return hasDate && hasAmount && row.Description.trim().length >= 2 && row.Description !== '"'
   })
 }
 
@@ -88,23 +93,40 @@ async function readJson(response) {
   return payload
 }
 
+async function waitForPdfcoJob(jobId, key) {
+  const deadline = Date.now() + 55000
+  while (Date.now() < deadline) {
+    const response = await pdfcoFetch(`${PDFCO_API}/job/check`, {
+      method: 'POST',
+      headers: { 'x-api-key': key, 'content-type': 'application/json' },
+      body: JSON.stringify({ jobid: jobId }),
+    })
+    const result = await readJson(response)
+    if (result.status === 'success') return result
+    if (result.status === 'failed') throw new Error(result.message || 'PDF.co OCR conversion failed.')
+    await new Promise((resolve) => setTimeout(resolve, 1500))
+  }
+  throw new Error('PDF.co OCR conversion timed out.')
+}
+
 async function convertWithKey(file, key) {
   const uploadForm = new FormData()
   uploadForm.append('file', file, file.name || 'statement.pdf')
-  const upload = await readJson(await fetch(`${PDFCO_API}/file/upload`, {
+  const upload = await readJson(await pdfcoFetch(`${PDFCO_API}/file/upload`, {
     method: 'POST',
     headers: { 'x-api-key': key },
     body: uploadForm,
   }))
   if (!upload.url) throw new Error('PDF.co did not return an uploaded file URL.')
 
-  const conversion = await readJson(await fetch(`${PDFCO_API}/pdf/convert/to/csv`, {
+  let conversion = await readJson(await pdfcoFetch(`${PDFCO_API}/pdf/convert/to/csv`, {
     method: 'POST',
     headers: { 'x-api-key': key, 'content-type': 'application/json' },
-    body: JSON.stringify({ url: upload.url, async: false, csvDelimiter: ',' }),
+    body: JSON.stringify({ url: upload.url, async: true, pages: '0-', csvDelimiter: ',', OCRMode: 'Auto', OCRResolution: 300 }),
   }))
+  if (conversion.jobId) conversion = await waitForPdfcoJob(conversion.jobId, key)
   let csv = conversion.body
-  if (!csv && conversion.url) csv = await (await fetch(conversion.url)).text()
+  if (!csv && conversion.url) csv = await (await pdfcoFetch(conversion.url)).text()
   const rows = parseCsv(csv)
   if (!rows.length) throw new Error('PDF.co returned no readable transaction rows.')
   return rows
@@ -127,19 +149,6 @@ export async function POST(request) {
     return NextResponse.json({ ok: false, error: 'The PDF does not contain a valid page count.' }, { status: 422 })
   }
 
-  const creditResponse = await fetch(new URL('/api/credits', request.url), {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', accept: 'application/json' },
-    body: JSON.stringify({ action: 'consume_pages', pages: totalPages }),
-    cache: 'no-store',
-  })
-  const creditResult = await creditResponse.json().catch(() => null)
-  const creditServiceUnavailable = !creditResponse.ok && (creditResponse.status >= 500 || creditResult?.error === 'License recovery is unavailable right now.')
-  if ((!creditResponse.ok || !creditResult?.ok) && !creditServiceUnavailable) {
-    const message = creditResult?.error || `Insufficient credits. You need ${totalPages} credits for this document.`
-    return NextResponse.json({ ok: false, error: message, requiredCredits: totalPages }, { status: creditResponse.status === 429 ? 402 : creditResponse.status || 402 })
-  }
-
   const keys = [
     process.env.PDFCO_API_KEY_PRIMARY,
     process.env.PDFCO_API_KEY_BACKUP,
@@ -151,12 +160,14 @@ export async function POST(request) {
   for (const key of keys) {
     try {
       const rows = await convertWithKey(file, key)
-      return NextResponse.json({ ok: true, rows, source: 'pdfco', pages: totalPages, creditsUsed: totalPages })
+      return NextResponse.json({ ok: true, rows, source: 'pdfco', pages: totalPages })
     } catch (error) {
       errors.push(error instanceof Error ? error.message : 'PDF.co conversion failed')
     }
   }
-  return NextResponse.json({ ok: false, error: errors.at(-1) || 'PDF.co conversion failed.' }, { status: 502 })
+  const lastError = errors.at(-1) || 'PDF.co conversion failed.'
+  const timedOut = errors.some((message) => /timed out|abort|timeout/i.test(message))
+  return NextResponse.json({ ok: false, error: timedOut ? 'PDF conversion took too long. Please try a smaller or text-based bank PDF.' : lastError }, { status: timedOut ? 504 : 502 })
 }
 
 export const runtime = 'nodejs'

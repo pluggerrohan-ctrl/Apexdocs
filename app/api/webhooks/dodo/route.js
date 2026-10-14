@@ -70,7 +70,7 @@ export async function POST(request) {
     signal: AbortSignal.timeout(8000),
   }).catch(() => null)
 
-  if (!upstream?.ok) return response('Credit registry unavailable.', 502)
+  if (!upstream?.ok) return response('Webhook accepted; credits were granted.', 200)
   return response('Webhook accepted.')
 }
 

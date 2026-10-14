@@ -17,7 +17,7 @@ export async function generateMetadata({ params }) {
 
   return {
     title: `${countryUpper} Bank Statement PDF to Excel Converters | ApexDoc`,
-    description: `Convert ${content.bankCount} ${countryUpper} bank statement PDFs to Excel with ApexDoc. Private, browser-first processing. Browse all ${countryUpper} bank converters.`,
+    description: `Convert ${content.bankCount} ${countryUpper} bank statement PDFs to Excel with ApexDoc. HTTPS cloud processing via PDF.co. Browse all ${countryUpper} bank converters.`,
     keywords: [
       `${countryUpper} bank statement converter`,
       `convert ${countryUpper} bank statement PDF to Excel`,
@@ -54,7 +54,7 @@ export default async function CountryHubPage({ params }) {
         </h1>
         <p style={{ fontSize: 15, color: '#4b5563', maxWidth: 640, lineHeight: 1.6 }}>
           Convert {content.bankCount} {countryUpper} bank statement PDFs to clean Excel spreadsheets with ApexDoc.
-          All processing happens in your browser — your financial data never leaves your device.
+          Statements are sent through HTTPS to PDF.co for automated conversion. Review the provider retention and deletion controls before uploading sensitive financial data.
           Statements are in {content.currency} ({content.currencySymbol}).
         </p>
         <Link href="/" style={{ display: 'inline-block', marginTop: 16, fontSize: 14, color: '#2563eb', fontWeight: 600 }}>

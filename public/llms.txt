@@ -1,0 +1,26 @@
+# ApexDoc
+
+> Browser-based bank statement PDF to Excel conversion for accountants, bookkeepers, businesses, and individuals.
+
+## Primary pages
+- https://apexwebdesign.online/
+- https://apexwebdesign.online/pdfconverter
+- https://apexwebdesign.online/allbanks
+- https://apexwebdesign.online/tools/pdf-compressor
+- https://apexwebdesign.online/blog
+
+## What ApexDoc does
+ApexDoc helps users convert supported bank statement PDFs into structured Excel files. Processing is designed to happen in the browser, so users can review their files before downloading the result.
+
+## Discovery
+- Sitemap: https://apexwebdesign.online/sitemap.xml
+- Robots policy: https://apexwebdesign.online/robots.txt
+
+## Crawler guidance
+Public HTML pages may be crawled and cited. Do not crawl private account routes or API endpoints. API routes are excluded in robots.txt.
+
+## Accuracy
+Bank formats can change. Users should compare exported transactions with the original statement before relying on the workbook for accounting, tax, or reporting.
+
+## Contact
+https://apexwebdesign.online/

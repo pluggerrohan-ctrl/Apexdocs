@@ -1,7 +1,9 @@
 import { bankSlugs } from '../lib/banks'
 import banks from '../data/banks.json'
+import { keywordPages } from '../data/keyword-pages'
 
 const siteUrl = 'https://apexwebdesign.online'
+const lastModified = '2026-10-11'
 
 export default function sitemap() {
   const routes = [
@@ -10,26 +12,37 @@ export default function sitemap() {
     { path: '/allbanks', priority: 0.9, changeFrequency: 'weekly' },
     { path: '/blog', priority: 0.8, changeFrequency: 'weekly' },
     { path: '/blog/nanonets-vs-apexdoc-comparison-guide', priority: 0.8, changeFrequency: 'monthly' },
+    { path: '/blog/ultimate-guide-bank-statement-to-excel', priority: 0.9, changeFrequency: 'monthly' },
     { path: '/banks/country/usa', priority: 0.8, changeFrequency: 'weekly' },
     { path: '/banks/country/uk', priority: 0.8, changeFrequency: 'weekly' },
     { path: '/banks/country/uae', priority: 0.8, changeFrequency: 'weekly' },
     { path: '/payment/success', priority: 0.3, changeFrequency: 'monthly' },
+    { path: '/tools/pdf-compressor', priority: 0.8, changeFrequency: 'monthly' },
+    { path: '/privacy-policy', priority: 0.4, changeFrequency: 'yearly' },
+    { path: '/terms-of-use', priority: 0.4, changeFrequency: 'yearly' },
   ]
 
   const bankRoutes = banks.map((bank) => ({
     url: `${siteUrl}/banks/${bank.slug}`,
-    lastModified: new Date(),
+    lastModified,
     changeFrequency: 'weekly',
+    priority: 0.7,
+  }))
+  const keywordRoutes = keywordPages.map((page) => ({
+    url: `${siteUrl}/convert/${page.slug}`,
+    lastModified,
+    changeFrequency: 'monthly',
     priority: 0.7,
   }))
 
   return [
     ...routes.map(({ path, priority, changeFrequency }) => ({
       url: `${siteUrl}${path}`,
-      lastModified: new Date(),
+      lastModified,
       changeFrequency,
       priority,
     })),
     ...bankRoutes,
+    ...keywordRoutes,
   ]
 }

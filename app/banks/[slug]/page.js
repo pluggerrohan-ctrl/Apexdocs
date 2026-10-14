@@ -4,6 +4,7 @@ import ConverterApp from '../../../components/converter-app'
 import banks from '../../../data/banks.json'
 import { getBank, bankSlugs } from '../../../lib/banks'
 import { getBankContent } from '../../../lib/bank-content'
+import { getUniqueBankSEO } from '../../../data/bank-seo-content'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,13 +19,15 @@ export async function generateMetadata({ params }) {
     if (!bank) {
       return {
         title: 'Bank Statement Converter',
-        description: 'Convert bank statement PDFs into clean Excel spreadsheets in your browser.',
+        description: 'Apex document converter for bank statement PDFs with structured Excel exports through HTTPS cloud processing.',
+        robots: { index: true, follow: true },
       }
     }
     const content = getBankContent(bank)
+    const seo = getUniqueBankSEO(bank.name, bank.country, content.infoBox.currency)
     return {
-      title: { absolute: `Convert ${bank.name} PDF to Excel Online | ApexDoc` },
-      description: content.intro.slice(0, 155),
+      title: { absolute: seo.metaTitle },
+      description: seo.introText.slice(0, 155),
       keywords: [
         `${bank.name} bank statement converter`,
         `convert ${bank.name} PDF to Excel`,
@@ -47,10 +50,7 @@ function BankContent({ bank }) {
   const info = content.infoBox
 
   const pageUrl = `https://apexwebdesign.online/banks/${bank.slug}`
-  const seo = {
-    h1Title: `Convert ${bank.name} PDF to Excel Online | ApexDoc`,
-    description: `Convert ${bank.name} PDF statements into clean Excel spreadsheets with ApexDoc.`,
-  }
+  const seo = getUniqueBankSEO(bank.name, bank.country, info.currency)
   const webApplicationSchema = {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
@@ -65,6 +65,9 @@ function BankContent({ bank }) {
 
   return (
     <section style={{ maxWidth: 960, margin: '0 auto', padding: '16px 20px 48px' }}>
+      <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 16, padding: '18px 20px', marginBottom: 18 }}>
+        <p style={{ margin: 0, color: '#1e3a8a', lineHeight: 1.6 }}>{seo.introText}</p>
+      </div>
       <h1 style={{ color: '#111827', fontSize: 'clamp(30px, 5vw, 48px)', lineHeight: 1.08, margin: '0 0 24px' }}>{seo.h1Title}</h1>
       <nav aria-label="Breadcrumb" style={{ fontSize: 13, color: '#6b7280', marginBottom: 20 }}>
         <Link href="/" style={{ color: '#2563eb', textDecoration: 'none' }}>Home</Link>
@@ -196,6 +199,19 @@ export default async function BankPage({ params }) {
             Browse all {bank.country} banks
           </Link>
         </section>
+        <footer
+          aria-label="ApexDoc legal links"
+          style={{ maxWidth: 960, margin: '0 auto', padding: '24px 20px 48px', borderTop: '1px solid #e5e7eb', color: '#6b7280', fontSize: 13 }}
+        >
+          <p style={{ margin: '0 0 10px', lineHeight: 1.6 }}>
+            ApexDoc sends uploaded statements through HTTPS to PDF.co for automated conversion. Review the extracted workbook against the original statement before relying on it for accounting, tax, audit, or financial decisions.
+          </p>
+          <nav aria-label="Legal" style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
+            <Link href="/privacy-policy" style={{ color: '#2563eb', textDecoration: 'none' }}>Privacy Policy</Link>
+            <Link href="/terms-of-use" style={{ color: '#2563eb', textDecoration: 'none' }}>Terms of Use</Link>
+            <Link href="/allbanks" style={{ color: '#2563eb', textDecoration: 'none' }}>All Banks</Link>
+          </nav>
+        </footer>
       </>
     )
   } catch {

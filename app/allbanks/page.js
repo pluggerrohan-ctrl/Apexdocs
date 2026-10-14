@@ -397,8 +397,8 @@ export default function AllBanksDirectoryPage() {
               <p style={{ fontSize: 12, fontWeight: 700, color: '#5b9bf5', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
                 Legal
               </p>
-              <a href="/" style={{ color: '#a3b8d4', fontSize: 13, textDecoration: 'none' }}>Terms &amp; Conditions</a>
-              <a href="/" style={{ color: '#a3b8d4', fontSize: 13, textDecoration: 'none' }}>Privacy Policy</a>
+              <a href="/terms-of-use" style={{ color: '#a3b8d4', fontSize: 13, textDecoration: 'none' }}>Terms of Use</a>
+              <a href="/privacy-policy" style={{ color: '#a3b8d4', fontSize: 13, textDecoration: 'none' }}>Privacy Policy</a>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <p style={{ fontSize: 12, fontWeight: 700, color: '#5b9bf5', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
@@ -427,7 +427,7 @@ export default function AllBanksDirectoryPage() {
             {'\u00A9'} {new Date().getFullYear()} ApexDoc. All rights reserved.
           </p>
           <p style={{ color: '#4a5d7a', fontSize: 12 }}>
-            All processing happens locally in your browser. No data is stored or uploaded.
+            Statements are sent through HTTPS to PDF.co for automated conversion. Provider retention and deletion controls apply; review the service terms before uploading sensitive data.
           </p>
         </div>
       </footer>

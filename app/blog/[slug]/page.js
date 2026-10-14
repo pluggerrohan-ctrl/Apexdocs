@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { blogPosts, getBlogBreadcrumbSchema, getBlogPost, getBlogPostingSchema } from '../../../lib/blog-content'
+import banks from '../../../data/banks.json'
 
 export function generateStaticParams() {
   return blogPosts.map((post) => ({ slug: post.slug }))
@@ -26,10 +27,27 @@ export default async function BlogPostPage({ params }) {
 
   const comparisonRows = [
     ['Price', '$499 / month', '$39 lifetime deal Pro Plan'],
-    ['Data security', 'Uploaded to cloud servers', '100% client-side browser sandbox — data never leaves your PC'],
-    ['Speed', 'Queued server processing', 'Instant local browser engine'],
+    ['Data security', 'Uploaded through an HTTPS cloud API', 'PDF.co provider controls and user verification required'],
+    ['Speed', 'Queued server processing', 'HTTPS conversion workflow'],
     ['Free trial', 'Credit card required / locked', '3 free credits instantly — no signup required'],
   ]
+
+  if (post.pillar) {
+    const featuredBanks = banks.filter((bank) => ['chase-bank', 'smbc-bank-international-plc'].includes(bank.slug)).slice(0, 2)
+    return (
+      <main style={{ minHeight: '100vh', background: '#f8fafc', color: '#172033', padding: '30px 20px 80px' }}>
+        <article style={{ maxWidth: 980, margin: '0 auto' }}>
+          <nav aria-label="Breadcrumb" style={{ color: '#64748b', fontSize: 14, marginBottom: 48 }}><Link href="/" style={{ color: '#2563eb' }}>Home</Link>{' / '}<Link href="/blog" style={{ color: '#2563eb' }}>Blog</Link>{' / '}<span>{post.title}</span></nav>
+          <header style={{ maxWidth: 860, marginBottom: 54 }}><p style={{ color: '#2563eb', fontSize: 13, fontWeight: 800, letterSpacing: '.12em', textTransform: 'uppercase' }}>Apex document converter · {post.readTime}</p><h1 style={{ fontSize: 'clamp(38px, 7vw, 72px)', lineHeight: 1.02, letterSpacing: '-.05em', margin: '16px 0 22px' }}>{post.title}</h1><p style={{ color: '#526174', fontSize: 20, lineHeight: 1.7, margin: 0 }}>{post.description}</p></header>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 34 }}>{post.sections.map((section) => <section key={section.heading} style={{ paddingTop: 30, borderTop: '1px solid #dbe3ee' }}><h2 style={{ fontSize: 'clamp(25px, 4vw, 36px)', lineHeight: 1.15, margin: '0 0 13px' }}>{section.heading}</h2><p style={{ color: '#405065', fontSize: 18, lineHeight: 1.85, margin: 0 }}>{section.body}</p></section>)}</div>
+          <section aria-labelledby="bank-converter-network" style={{ marginTop: 58, padding: '30px clamp(22px, 5vw, 44px)', borderRadius: 22, background: '#eaf2ff', border: '1px solid #c8dcff' }}><h2 id="bank-converter-network" style={{ margin: '0 0 10px', fontSize: 30 }}>Choose a bank-specific converter</h2><p style={{ color: '#405065', lineHeight: 1.7, margin: '0 0 20px' }}>Different statement layouts create different extraction challenges. Start with a bank-specific workflow when one is available, then compare the workbook with the source PDF.</p><div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>{featuredBanks.map((bank) => <Link key={bank.slug} href={`/banks/${bank.slug}`} style={{ background: '#2563eb', color: '#fff', borderRadius: 999, padding: '12px 17px', textDecoration: 'none', fontWeight: 700 }}>{bank.name} converter</Link>)}<Link href="/allbanks" style={{ background: '#fff', color: '#1d4ed8', border: '1px solid #9fc0f4', borderRadius: 999, padding: '12px 17px', textDecoration: 'none', fontWeight: 700 }}>Browse all banks</Link></div></section>
+          <footer style={{ marginTop: 58, paddingTop: 22, borderTop: '1px solid #dbe3ee', color: '#64748b', fontSize: 14 }}><p style={{ lineHeight: 1.7 }}>ApexDoc uses PDF.co for HTTPS cloud conversion. Review provider terms and the exported workbook before using financial data for tax, accounting, lending, or other important decisions.</p><nav aria-label="Legal links" style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}><Link href="/privacy-policy">Privacy Policy</Link><Link href="/terms-of-use">Terms of Use</Link><Link href="/allbanks">All Banks</Link></nav></footer>
+        </article>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(getBlogPostingSchema(post)) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(getBlogBreadcrumbSchema(post)) }} />
+      </main>
+    )
+  }
 
   if (post.comparison) {
     return (
@@ -41,12 +59,12 @@ export default async function BlogPostPage({ params }) {
           <header style={{ maxWidth: 850, marginBottom: 64 }}>
             <p style={{ color: '#60a5fa', fontSize: 13, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase' }}>CPA privacy playbook · {post.readTime}</p>
             <h1 style={{ color: '#f8fafc', fontSize: 'clamp(38px, 7vw, 76px)', lineHeight: 1.02, letterSpacing: '-0.045em', margin: '18px 0 24px' }}>Nanonets vs ApexDoc: Ultimate PDF to Excel Converter Comparison</h1>
-            <p style={{ color: '#cbd5e1', fontSize: 21, lineHeight: 1.65, margin: 0 }}>Why accounting firms are moving sensitive statement conversion out of cloud queues and into a 100% local browser sandbox.</p>
+            <p style={{ color: '#cbd5e1', fontSize: 21, lineHeight: 1.65, margin: 0 }}>Why accounting firms are evaluating HTTPS cloud conversion, provider controls, and transparent review requirements for sensitive statements.</p>
           </header>
           <section aria-labelledby="privacy-first" style={{ background: 'linear-gradient(135deg, #172554, #0f172a 70%)', border: '1px solid #1d4ed8', borderRadius: 24, padding: '32px clamp(24px, 5vw, 56px)', marginBottom: 72 }}>
             <p style={{ color: '#93c5fd', fontSize: 13, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 14px' }}>The strategic difference</p>
-            <h2 id="privacy-first" style={{ color: '#fff', fontSize: 'clamp(28px, 4vw, 46px)', lineHeight: 1.1, margin: '0 0 16px' }}>Your client&apos;s PDF stays on their computer.</h2>
-            <p style={{ color: '#bfdbfe', fontSize: 18, lineHeight: 1.7, maxWidth: 760, margin: 0 }}>Nanonets processes uploaded documents on cloud servers. ApexDoc&apos;s local conversion engine processes the statement in the browser sandbox, so the original financial document does not need to leave the PC.</p>
+            <h2 id="privacy-first" style={{ color: '#fff', fontSize: 'clamp(28px, 4vw, 46px)', lineHeight: 1.1, margin: '0 0 16px' }}>Your client&apos;s processing path should be clearly disclosed.</h2>
+            <p style={{ color: '#bfdbfe', fontSize: 18, lineHeight: 1.7, maxWidth: 760, margin: 0 }}>Nanonets and ApexDoc both rely on cloud processing for document conversion. ApexDoc sends the statement to PDF.co through HTTPS, applies the provider&apos;s configured deletion controls, and asks users to verify every exported row.</p>
           </section>
           <section aria-labelledby="comparison-matrix" style={{ marginBottom: 72 }}>
             <h2 id="comparison-matrix" style={{ color: '#f8fafc', fontSize: 32, margin: '0 0 20px' }}>At-a-glance comparison</h2>
@@ -63,7 +81,7 @@ export default async function BlogPostPage({ params }) {
           <section style={{ background: '#f8fafc', borderRadius: 22, padding: '32px clamp(24px, 5vw, 48px)', marginTop: 72, color: '#0f172a' }}>
             <p style={{ color: '#2563eb', fontSize: 13, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px' }}>Start local conversion</p>
             <h2 style={{ fontSize: 32, lineHeight: 1.1, margin: '0 0 12px' }}>Switch to a private workflow today.</h2>
-            <p style={{ color: '#475569', fontSize: 17, lineHeight: 1.6, margin: '0 0 22px' }}>Try three conversions instantly with no signup, then choose ApexDoc Pro when your firm is ready for unlimited local processing.</p>
+            <p style={{ color: '#475569', fontSize: 17, lineHeight: 1.6, margin: '0 0 22px' }}>Try the Apex document converter with no signup, then choose the plan that fits your firm&apos;s statement workflow and review requirements.</p>
             <Link href="/#converter" style={{ display: 'inline-flex', background: '#2563eb', color: '#fff', borderRadius: 999, padding: '14px 22px', fontWeight: 800, textDecoration: 'none' }}>Switch to ApexDoc Pro Now</Link>
           </section>
         </article>
