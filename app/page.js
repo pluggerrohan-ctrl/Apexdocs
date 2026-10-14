@@ -1,5 +1,7 @@
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
   title: 'ApexWebDesign | Digital Engineering & Web Development Agency',
   description: 'ApexWebDesign engineers fast, production-ready web applications, websites, and software products with Next.js, React, and modern API architecture.',

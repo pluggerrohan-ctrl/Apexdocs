@@ -17,33 +17,54 @@ export default function AccountMenu({ compact = false }) {
     let mounted = true
     let supabase
     try {
-      supabase = createClient()
+      supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
     } catch (err) {
       setAuthError(`Supabase init failed: ${err.message}`)
       setLoading(false)
       return
     }
 
-    const authCheck = supabase.auth.getUser().then(({ data }) => data?.user ?? null).catch(() => null)
-    Promise.race([authCheck, new Promise((resolve) => setTimeout(() => resolve(null), 4000))]).then((currentUser) => {
-      if (mounted) { setUser(currentUser); setLoading(false) }
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (!mounted) return
+      if (error) console.warn('[AccountMenu] getSession error:', error)
+      if (data?.session?.user) {
+        setUser(data.session.user)
+        setLoading(false)
+      } else {
+        supabase.auth.getUser().then(({ data: userData }) => {
+          if (!mounted) return
+          setUser(userData?.user ?? null)
+          setLoading(false)
+        })
+      }
     })
 
+    // onAuthStateChange catches the INITIAL_SESSION event, TOKEN_REFRESHED,
+    // and SIGNED_IN events that fire after OAuth redirect completes.
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-        setUser(session?.user ?? null)
+      if (session?.user) setUser(session.user)
+      else if (event === 'SIGNED_OUT') { setUser(null); setCredits(null) }
       setLoading(false)
     })
 
-    return () => { mounted = false; listener?.subscription?.unsubscribe() }
+    return () => {
+      mounted = false
+      listener?.subscription?.unsubscribe()
+    }
   }, [])
 
   useEffect(() => {
     if (!user) { setCredits(null); return }
-    fetch('/api/credits').then((r) => r.json()).then((d) => setCredits(d.credits ?? 0)).catch(() => setCredits(0))
+    fetch('/api/credits')
+      .then((r) => r.json())
+      .then((d) => setCredits(d.credits ?? 0))
+      .catch(() => setCredits(0))
   }, [user])
 
   useEffect(() => {
-    const handleClick = (e) => { if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false) }
+    const handleClick = (e) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false)
+    }
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
@@ -54,7 +75,7 @@ export default function AccountMenu({ compact = false }) {
 
     let supabase
     try {
-      supabase = createClient()
+      supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
     } catch (err) {
       setAuthError(`Supabase init failed: ${err.message}`)
       setSignInBusy(false)
@@ -83,8 +104,8 @@ export default function AccountMenu({ compact = false }) {
         return
       }
 
-      // signInWithOAuth with browser client navigates the browser to Google.
-      // If we get here without navigation, something is wrong.
+      // The browser client auto-navigates to Google's OAuth URL.
+      // Fallback: force navigation if the auto-redirect didn't happen.
       if (data?.url) {
         window.location.assign(data.url)
       } else {
@@ -99,9 +120,10 @@ export default function AccountMenu({ compact = false }) {
 
   const signOut = async () => {
     try {
-      const supabase = createClient()
+      const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
       await supabase.auth.signOut()
       setUser(null)
+      setCredits(null)
       setOpen(false)
     } catch (err) {
       setAuthError(`Logout error: ${err.message}`)
@@ -124,7 +146,7 @@ export default function AccountMenu({ compact = false }) {
           </svg>}
           {!compact && <span>{signInBusy ? 'Redirecting…' : 'Continue with Google'}</span>}
         </button>
-        {authError && <div className="account-error" style={{ color: '#dc2626', fontSize: 11, fontWeight: 600, maxWidth: 220, marginTop: 4, textAlign: 'right' }}>{authError}</div>}
+        {authError && <div style={{ color: '#dc2626', fontSize: 11, fontWeight: 600, maxWidth: 220, marginTop: 4, textAlign: 'right' }}>{authError}</div>}
       </div>
     )
   }

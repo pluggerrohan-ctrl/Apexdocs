@@ -6,6 +6,8 @@ import { getBank, bankSlugs } from '../../../lib/banks'
 import { getBankContent } from '../../../lib/bank-content'
 import { getUniqueBankSEO } from '../../../data/bank-seo-content'
 
+export const dynamic = 'force-dynamic'
+
 export function generateStaticParams() {
   return bankSlugs.map((slug) => ({ slug }))
 }
