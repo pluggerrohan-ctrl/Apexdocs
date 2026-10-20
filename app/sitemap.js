@@ -4,7 +4,7 @@ import { keywordPages } from '../data/keyword-pages'
 import { agencyKeywordPages } from '../data/agency-keywords'
 
 const siteUrl = 'https://apexwebdesign.online'
-const lastModified = '2026-10-11'
+const lastModified = '2026-10-20'
 
 export default function sitemap() {
   const routes = [
