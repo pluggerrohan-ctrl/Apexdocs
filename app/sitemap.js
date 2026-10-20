@@ -1,6 +1,7 @@
 import { bankSlugs } from '../lib/banks'
 import banks from '../data/banks.json'
 import { keywordPages } from '../data/keyword-pages'
+import { agencyKeywordPages } from '../data/agency-keywords'
 
 const siteUrl = 'https://apexwebdesign.online'
 const lastModified = '2026-10-11'
@@ -47,6 +48,12 @@ export default function sitemap() {
     changeFrequency: 'monthly',
     priority: 0.7,
   }))
+  const agencyKeywordRoutes = agencyKeywordPages.map((page) => ({
+    url: `${siteUrl}/services/keyword/${page.slug}`,
+    lastModified,
+    changeFrequency: 'monthly',
+    priority: 0.8,
+  }))
 
   return [
     ...routes.map(({ path, priority, changeFrequency }) => ({
@@ -57,6 +64,7 @@ export default function sitemap() {
     })),
     ...bankRoutes,
     ...keywordRoutes,
+    ...agencyKeywordRoutes,
     ...serviceRoutes,
   ]
 }
