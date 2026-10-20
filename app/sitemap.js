@@ -12,6 +12,7 @@ export default function sitemap() {
     { path: '/pdfconverter', priority: 0.9, changeFrequency: 'weekly' },
     { path: '/allbanks', priority: 0.9, changeFrequency: 'weekly' },
     { path: '/services', priority: 0.9, changeFrequency: 'weekly' },
+    { path: '/portfolio', priority: 0.8, changeFrequency: 'monthly' },
     { path: '/sectors/law-firm', priority: 0.8, changeFrequency: 'monthly' },
     { path: '/sectors/healthcare', priority: 0.8, changeFrequency: 'monthly' },
     { path: '/sectors/hotels', priority: 0.8, changeFrequency: 'monthly' },

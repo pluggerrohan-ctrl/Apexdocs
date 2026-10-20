@@ -1,6 +1,7 @@
 import Script from 'next/script'
 import '../index.css'
 import '../auth.css'
+import SiteFooter from '../components/site-footer'
 
 export const metadata = {
   metadataBase: new URL('https://apexwebdesign.online'),
@@ -48,6 +49,7 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         {children}
+        <SiteFooter />
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-476R2P8M27"
           strategy="afterInteractive"
