@@ -1,14 +1,15 @@
 import Script from 'next/script'
 import '../index.css'
 import '../auth.css'
+import SiteFooter from '../components/site-footer'
 
 export const metadata = {
   metadataBase: new URL('https://apexwebdesign.online'),
   title: {
-    default: 'Bank Statement to Excel Converter | ApexDoc',
-    template: '%s | ApexDoc',
+    default: 'Next.js Custom Software Engineering & Premium Web Design | ApexWebDesign',
+    template: '%s | ApexWebDesign',
   },
-  description: 'Apex document converter for turning bank statement PDFs into structured Excel spreadsheets through secure HTTPS processing.',
+  description: 'ApexWebDesign is a global custom software engineering and premium web design studio building fast, secure digital systems.',
   robots: {
     index: true,
     follow: true,
@@ -26,7 +27,7 @@ export default function RootLayout({ children }) {
       {
         '@type': 'Organization',
         '@id': 'https://apexwebdesign.online/#organization',
-        name: 'ApexDoc',
+        name: 'ApexWebDesign',
         url: 'https://apexwebdesign.online',
       },
       {
@@ -48,6 +49,7 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         {children}
+        <SiteFooter />
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-476R2P8M27"
           strategy="afterInteractive"

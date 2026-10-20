@@ -1,15 +1,22 @@
 import { bankSlugs } from '../lib/banks'
 import banks from '../data/banks.json'
 import { keywordPages } from '../data/keyword-pages'
+import { agencyKeywordPages } from '../data/agency-keywords'
 
 const siteUrl = 'https://apexwebdesign.online'
-const lastModified = '2026-10-11'
+const lastModified = '2026-10-20'
 
 export default function sitemap() {
   const routes = [
     { path: '/', priority: 1, changeFrequency: 'weekly' },
     { path: '/pdfconverter', priority: 0.9, changeFrequency: 'weekly' },
     { path: '/allbanks', priority: 0.9, changeFrequency: 'weekly' },
+    { path: '/services', priority: 0.9, changeFrequency: 'weekly' },
+    { path: '/portfolio', priority: 0.8, changeFrequency: 'monthly' },
+    { path: '/sectors/law-firm', priority: 0.8, changeFrequency: 'monthly' },
+    { path: '/sectors/healthcare', priority: 0.8, changeFrequency: 'monthly' },
+    { path: '/sectors/hotels', priority: 0.8, changeFrequency: 'monthly' },
+    { path: '/services/shopify', priority: 0.8, changeFrequency: 'monthly' },
     { path: '/blog', priority: 0.8, changeFrequency: 'weekly' },
     { path: '/blog/nanonets-vs-apexdoc-comparison-guide', priority: 0.8, changeFrequency: 'monthly' },
     { path: '/blog/ultimate-guide-bank-statement-to-excel', priority: 0.9, changeFrequency: 'monthly' },
@@ -42,6 +49,12 @@ export default function sitemap() {
     changeFrequency: 'monthly',
     priority: 0.7,
   }))
+  const agencyKeywordRoutes = agencyKeywordPages.map((page) => ({
+    url: `${siteUrl}/services/keyword/${page.slug}`,
+    lastModified,
+    changeFrequency: 'monthly',
+    priority: 0.8,
+  }))
 
   return [
     ...routes.map(({ path, priority, changeFrequency }) => ({
@@ -52,6 +65,7 @@ export default function sitemap() {
     })),
     ...bankRoutes,
     ...keywordRoutes,
+    ...agencyKeywordRoutes,
     ...serviceRoutes,
   ]
 }
