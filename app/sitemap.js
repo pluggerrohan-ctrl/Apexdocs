@@ -3,7 +3,7 @@ import banks from '../data/banks.json'
 import { keywordPages } from '../data/keyword-pages'
 
 const siteUrl = 'https://apexwebdesign.online'
-const lastModified = '2026-10-11'
+const lastModified = '2026-10-21'
 
 export default function sitemap() {
   const routes = [
